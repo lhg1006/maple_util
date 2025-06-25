@@ -9,6 +9,40 @@ export interface MapleItem {
   price?: number;
 }
 
+// API Response 타입
+export interface MapleItemResponse {
+  id: number;
+  description: {
+    id: number;
+    name: string;
+    description: string;
+  };
+  metaInfo: {
+    only: boolean;
+    cash: boolean;
+    mob: number;
+    icon: string;
+    iconRaw: string;
+    iconOrigin?: {
+      hasValue: boolean;
+      value: {
+        x: number;
+        y: number;
+        isEmpty: boolean;
+      };
+    };
+    slotMax: number;
+    price: number;
+  };
+  typeInfo: {
+    overallCategory: string;
+    category: string;
+    subCategory: string;
+    lowItemId: number;
+    highItemId: number;
+  };
+}
+
 export interface MapleNPC {
   id: number;
   name: string;

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Layout, Menu, Typography, Space } from 'antd';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
   HomeOutlined, 
   ShoppingOutlined, 
@@ -58,6 +59,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme: currentTheme } = useTheme();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', width: '100%', overflow: 'hidden' }}>
@@ -94,9 +97,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
         <Menu
           mode="inline"
-          defaultSelectedKeys={['/']}
+          selectedKeys={[pathname]}
           items={menuItems}
           style={{ border: 'none', flex: 1 }}
+          onClick={({ key }) => router.push(key)}
         />
       </Sider>
       

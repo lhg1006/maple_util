@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { 
   MapleItem, 
+  MapleItemResponse,
   MapleNPC, 
   MapleMob, 
   MapleJob, 
@@ -55,8 +56,25 @@ export class MapleStoryAPI {
 
   // Item API
   async getItem(id: number): Promise<MapleItem> {
-    const response = await apiClient.get(this.getEndpoint(`/item/${id}`));
-    return response.data;
+    try {
+      const response = await apiClient.get(this.getEndpoint(`/item/${id}`));
+      const data = response.data as MapleItemResponse;
+      
+      // API 응답을 MapleItem 형식으로 변환
+      return {
+        id: data.id,
+        name: data.description?.name || `Item ${data.id}`,
+        description: data.description?.description,
+        icon: data.metaInfo?.icon,
+        category: data.typeInfo?.overallCategory,
+        subcategory: data.typeInfo?.subCategory,
+        cash: data.metaInfo?.cash || false,
+        price: data.metaInfo?.price,
+      };
+    } catch (error) {
+      console.error(`Failed to fetch item ${id}:`, error);
+      throw error;
+    }
   }
 
   async getItemIcon(id: number): Promise<string> {
