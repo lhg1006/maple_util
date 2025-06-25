@@ -13,55 +13,30 @@ const { Title, Paragraph } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
-// 실제 API에서 아이템 데이터를 가져오는 함수
-const fetchItemsFromAPI = async (): Promise<MapleItem[]> => {
-  const items: MapleItem[] = [];
-  const itemIdRanges = [
-    // 포션류
-    { start: 2000000, count: 10 },
-    { start: 2010000, count: 10 },
-    { start: 2020000, count: 10 },
-    // 장비류
-    { start: 1000000, count: 10 },
-    { start: 1010000, count: 10 },
-    { start: 1020000, count: 10 },
-    // 기타 아이템
-    { start: 4000000, count: 10 },
-    { start: 5000000, count: 10 },
-  ];
-  
-  console.log('다양한 아이템 범위에서 데이터 로딩 중...');
-  
-  for (const range of itemIdRanges) {
-    const promises: Promise<void>[] = [];
-    
-    for (let i = 0; i < range.count; i++) {
-      const itemId = range.start + i;
-      
-      const promise = mapleAPI.getItem(itemId)
-        .then((item) => {
-          if (item && item.id && item.name) {
-            items.push(item);
-            console.log(`✓ 아이템 로드: ${item.name} (ID: ${item.id})`);
-          }
-        })
-        .catch((error) => {
-          // 404나 not found는 정상적인 경우이므로 무시
-          if (error?.response?.status !== 404 && !error.message?.includes('not found')) {
-            console.warn(`Failed to fetch item ${itemId}:`, error.message);
-          }
-        });
-      
-      promises.push(promise);
-    }
-    
-    await Promise.allSettled(promises);
-  }
-  
-  console.log(`총 ${items.length}개 아이템 로드 완료`);
-  
-  // ID순으로 정렬
-  return items.sort((a, b) => a.id - b.id);
+// 카테고리 옵션
+const ITEM_CATEGORIES = {
+  overallCategories: [
+    { value: 'Equip', label: '장비' },
+    { value: 'Use', label: '소비' },
+    { value: 'Setup', label: '설치' },
+    { value: 'Etc', label: '기타' },
+    { value: 'Cash', label: '캐시' },
+  ],
+  equipCategories: [
+    { value: 'Weapon', label: '무기' },
+    { value: 'Armor', label: '방어구' },
+    { value: 'Accessory', label: '악세서리' },
+  ],
+  armorSubCategories: [
+    { value: 'Hat', label: '모자' },
+    { value: 'Overall', label: '한벌옷' },
+    { value: 'Top', label: '상의' },
+    { value: 'Bottom', label: '하의' },
+    { value: 'Shoes', label: '신발' },
+    { value: 'Gloves', label: '장갑' },
+    { value: 'Cape', label: '망토' },
+    { value: 'Shield', label: '방패' },
+  ],
 };
 
 export default function ItemsPage() {
@@ -71,15 +46,27 @@ export default function ItemsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('name');
-  const pageSize = 20;
+  const [overallCategory, setOverallCategory] = useState<string>('Equip');
+  const [category, setCategory] = useState<string>('');
+  const [subCategory, setSubCategory] = useState<string>('');
+  const pageSize = 30;
 
-  // 초기 데이터 로드
+  // 카테고리별 데이터 로드
   useEffect(() => {
     const loadItems = async () => {
       setLoading(true);
+      setCurrentPage(1);
       try {
-        console.log('API에서 아이템 데이터 로딩 시작...');
-        const apiItems = await fetchItemsFromAPI(); // 다양한 범위의 아이템
+        const params = {
+          overallCategory,
+          ...(category && { category }),
+          ...(subCategory && { subCategory }),
+          page: 1,
+          count: 200, // 한 번에 더 많이 로드
+        };
+        
+        console.log('카테고리별 아이템 로딩:', params);
+        const apiItems = await mapleAPI.getItemsByCategory(params);
         
         console.log(`${apiItems.length}개 아이템 로드 완료`);
         setItems(apiItems);
@@ -93,7 +80,7 @@ export default function ItemsPage() {
     };
 
     loadItems();
-  }, []);
+  }, [overallCategory, category, subCategory]);
 
   // 검색 및 정렬 함수
   const filterAndSortItems = useCallback((query: string, sort: string) => {
@@ -159,6 +146,63 @@ export default function ItemsPage() {
           </Paragraph>
         </div>
 
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} sm={12} md={6}>
+            <Select
+              style={{ width: '100%' }}
+              size="large"
+              value={overallCategory}
+              onChange={(value) => {
+                setOverallCategory(value);
+                setCategory('');
+                setSubCategory('');
+              }}
+              placeholder="대분류"
+            >
+              {ITEM_CATEGORIES.overallCategories.map(cat => (
+                <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+              ))}
+            </Select>
+          </Col>
+          
+          {overallCategory === 'Equip' && (
+            <Col xs={24} sm={12} md={6}>
+              <Select
+                style={{ width: '100%' }}
+                size="large"
+                value={category}
+                onChange={(value) => {
+                  setCategory(value);
+                  setSubCategory('');
+                }}
+                placeholder="중분류"
+                allowClear
+              >
+                {ITEM_CATEGORIES.equipCategories.map(cat => (
+                  <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                ))}
+              </Select>
+            </Col>
+          )}
+          
+          {category === 'Armor' && (
+            <Col xs={24} sm={12} md={6}>
+              <Select
+                style={{ width: '100%' }}
+                size="large"
+                value={subCategory}
+                onChange={setSubCategory}
+                placeholder="소분류"
+                allowClear
+              >
+                {ITEM_CATEGORIES.armorSubCategories.map(cat => (
+                  <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                ))}
+              </Select>
+            </Col>
+          )}
+        </Row>
+        
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} sm={16} md={12}>
             <Search
