@@ -23,9 +23,14 @@ const ITEM_CATEGORIES = {
     { value: 'Cash', label: '캐시' },
   ],
   equipCategories: [
-    { value: 'Weapon', label: '무기' },
+    { value: 'Accessory', label: '장신구' },
     { value: 'Armor', label: '방어구' },
-    { value: 'Accessory', label: '악세서리' },
+    { value: 'Mount', label: '라이딩' },
+    { value: 'One-Handed Weapon', label: '한손 무기' },
+    { value: 'Other', label: '그 외' },
+    { value: 'Secondary Weapon', label: '보조 무기' },
+    { value: 'Two-Handed Weapon', label: '두손 무기' },
+    { value: 'Character', label: '성형/헤어' },
   ],
   armorSubCategories: [
     { value: 'Hat', label: '모자' },
@@ -49,7 +54,7 @@ export default function ItemsPage() {
   const [overallCategory, setOverallCategory] = useState<string>('Equip');
   const [category, setCategory] = useState<string>('');
   const [subCategory, setSubCategory] = useState<string>('');
-  const pageSize = 30;
+  const pageSize = 32;
 
   // 카테고리별 데이터 로드
   useEffect(() => {
@@ -57,20 +62,54 @@ export default function ItemsPage() {
       setLoading(true);
       setCurrentPage(1);
       try {
-        const params = {
-          overallCategory,
-          ...(category && { category }),
-          ...(subCategory && { subCategory }),
-          page: 1,
-          count: 200, // 한 번에 더 많이 로드
+        // 다양한 아이템 범위에서 데이터를 가져와서 클라이언트에서 필터링
+        const fetchFromMultipleRanges = async () => {
+          const ranges = [
+            { start: 0, count: 100, type: 'Accessory' },
+            { start: 100, count: 100, type: 'Accessory' },
+            { start: 200, count: 100, type: 'Accessory' },
+            { start: 300, count: 100, type: 'Accessory' },
+            { start: 400, count: 100, type: 'Accessory' },
+          ];
+          
+          const allItems: any[] = [];
+          
+          for (const range of ranges) {
+            try {
+              const params = {
+                overallCategory,
+                startPosition: range.start,
+                count: range.count,
+              };
+              
+              const items = await mapleAPI.getItemsByCategory(params);
+              allItems.push(...items);
+            } catch (error) {
+              console.warn(`Range ${range.start}-${range.start + range.count} failed:`, error);
+            }
+          }
+          
+          return allItems;
         };
         
-        console.log('카테고리별 아이템 로딩:', params);
-        const apiItems = await mapleAPI.getItemsByCategory(params);
+        const allItems = await fetchFromMultipleRanges();
         
-        console.log(`${apiItems.length}개 아이템 로드 완료`);
-        setItems(apiItems);
-        setFilteredItems(apiItems);
+        // 선택된 카테고리에 따라 클라이언트에서 필터링
+        let filteredByCategory = allItems;
+        if (category) {
+          filteredByCategory = allItems.filter(item => 
+            item.category && item.category.toLowerCase().includes(category.toLowerCase())
+          );
+        }
+        if (subCategory) {
+          filteredByCategory = filteredByCategory.filter(item => 
+            item.subcategory && item.subcategory.toLowerCase().includes(subCategory.toLowerCase())
+          );
+        }
+        
+        console.log(`총 ${allItems.length}개 아이템 중 ${filteredByCategory.length}개 필터링 완료`);
+        setItems(filteredByCategory);
+        setFilteredItems(filteredByCategory);
       } catch (error) {
         console.error('아이템 로딩 실패:', error);
         message.error('아이템 데이터를 불러오는데 실패했습니다.');
@@ -82,27 +121,27 @@ export default function ItemsPage() {
     loadItems();
   }, [overallCategory, category, subCategory]);
 
-  // 검색 및 정렬 함수
-  const filterAndSortItems = useCallback((query: string, sort: string) => {
-    let filtered = items;
+  // 검색 및 정렬 적용
+  useEffect(() => {
+    let filtered = [...items];
 
     // 검색 필터
-    if (query) {
-      filtered = items.filter(item => 
-        item.name.toLowerCase().includes(query.toLowerCase()) ||
-        item.description?.toLowerCase().includes(query.toLowerCase())
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
     // 정렬
-    filtered = [...filtered].sort((a, b) => {
-      switch (sort) {
+    filtered.sort((a, b) => {
+      switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          return a.name.localeCompare(b.name, 'ko', { numeric: true });
         case 'price':
           return (a.price || 0) - (b.price || 0);
         case 'category':
-          return (a.category || '').localeCompare(b.category || '');
+          return (a.category || '').localeCompare(b.category || '', 'ko');
         default:
           return 0;
       }
@@ -110,7 +149,13 @@ export default function ItemsPage() {
 
     setFilteredItems(filtered);
     setCurrentPage(1); // 검색/정렬 시 첫 페이지로 이동
-  }, [items]);
+  }, [items, searchQuery, sortBy]);
+
+  // 검색 및 정렬 함수
+  const filterAndSortItems = useCallback((query: string, sort: string) => {
+    setSearchQuery(query);
+    setSortBy(sort);
+  }, []);
 
   // 디바운스된 검색 핸들러
   const debouncedSearch = useCallback(
@@ -146,91 +191,108 @@ export default function ItemsPage() {
           </Paragraph>
         </div>
 
-        <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} sm={12} md={6}>
-            <Select
-              style={{ width: '100%' }}
-              size="large"
-              value={overallCategory}
-              onChange={(value) => {
-                setOverallCategory(value);
-                setCategory('');
-                setSubCategory('');
-              }}
-              placeholder="대분류"
-            >
-              {ITEM_CATEGORIES.overallCategories.map(cat => (
-                <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-              ))}
-            </Select>
-          </Col>
-          
-          {overallCategory === 'Equip' && (
-            <Col xs={24} sm={12} md={6}>
-              <Select
-                style={{ width: '100%' }}
-                size="large"
-                value={category}
-                onChange={(value) => {
-                  setCategory(value);
-                  setSubCategory('');
-                }}
-                placeholder="중분류"
-                allowClear
-              >
-                {ITEM_CATEGORIES.equipCategories.map(cat => (
-                  <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                ))}
-              </Select>
+        <div style={{ 
+          border: '1px solid #e5e7eb', 
+          borderRadius: '8px', 
+          padding: '24px',
+          marginTop: '32px',
+          marginBottom: '32px',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+        }}>
+          <Row gutter={[16, 24]}>
+            <Col span={24}>
+              <Row gutter={[16, 16]} align="middle">
+                <Col xs={24} sm={12} md={6}>
+                  <Select
+                    style={{ width: '100%' }}
+                    size="large"
+                    value={overallCategory}
+                    onChange={(value) => {
+                      setOverallCategory(value);
+                      setCategory('');
+                      setSubCategory('');
+                    }}
+                    placeholder="대분류"
+                  >
+                    {ITEM_CATEGORIES.overallCategories.map(cat => (
+                      <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                    ))}
+                  </Select>
+                </Col>
+                
+                {overallCategory === 'Equip' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category}
+                      onChange={(value) => {
+                        setCategory(value);
+                        setSubCategory('');
+                      }}
+                      placeholder="중분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.equipCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Armor' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="소분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.armorSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+              </Row>
             </Col>
-          )}
-          
-          {category === 'Armor' && (
-            <Col xs={24} sm={12} md={6}>
-              <Select
-                style={{ width: '100%' }}
-                size="large"
-                value={subCategory}
-                onChange={setSubCategory}
-                placeholder="소분류"
-                allowClear
-              >
-                {ITEM_CATEGORIES.armorSubCategories.map(cat => (
-                  <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                ))}
-              </Select>
+            
+            <Col span={24}>
+              <Row gutter={[16, 16]} align="middle">
+                <Col xs={24} sm={16} md={12}>
+                  <Search
+                    placeholder="아이템 이름을 검색하세요"
+                    allowClear
+                    enterButton={<SearchOutlined />}
+                    size="large"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    onSearch={handleSearch}
+                  />
+                </Col>
+                <Col xs={24} sm={8} md={6}>
+                  <Select
+                    style={{ width: '100%' }}
+                    size="large"
+                    value={sortBy}
+                    onChange={handleSortChange}
+                    placeholder="정렬 기준"
+                  >
+                    <Option value="name">이름순</Option>
+                    <Option value="category">카테고리순</Option>
+                    <Option value="price">가격순</Option>
+                  </Select>
+                </Col>
+              </Row>
             </Col>
-          )}
-        </Row>
-        
-        <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} sm={16} md={12}>
-            <Search
-              placeholder="아이템 이름을 검색하세요"
-              allowClear
-              enterButton={<SearchOutlined />}
-              size="large"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              onSearch={handleSearch}
-            />
-          </Col>
-          <Col xs={24} sm={8} md={6}>
-            <Select
-              style={{ width: '100%' }}
-              size="large"
-              value={sortBy}
-              onChange={handleSortChange}
-              placeholder="정렬 기준"
-            >
-              <Option value="name">이름순</Option>
-              <Option value="category">카테고리순</Option>
-              <Option value="price">가격순</Option>
-            </Select>
-          </Col>
-        </Row>
+          </Row>
+        </div>
 
-        <ItemList items={paginatedItems} loading={loading} />
+        <div style={{ marginBottom: '32px' }}>
+          <ItemList items={paginatedItems} loading={loading} />
+        </div>
 
         {!loading && filteredItems.length > 0 && (
           <div className="flex justify-center mt-8">

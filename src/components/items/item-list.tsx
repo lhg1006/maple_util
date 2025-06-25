@@ -50,10 +50,25 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   if (loading) {
     return (
       <Row gutter={[16, 16]}>
-        {Array.from({ length: 8 }).map((_, index) => (
-          <Col key={index} xs={24} sm={12} md={8} lg={6}>
-            <Card>
-              <Skeleton active />
+        {Array.from({ length: 16 }).map((_, index) => (
+          <Col key={index} xs={8} sm={6} md={4} lg={3} xl={3}>
+            <Card
+              styles={{ body: { padding: '12px' } }}
+              style={{
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+              }}
+              cover={
+                <Skeleton.Image 
+                  active 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    aspectRatio: '1 / 1' 
+                  }} 
+                />
+              }
+            >
+              <Skeleton active paragraph={{ rows: 1 }} />
             </Card>
           </Col>
         ))}
@@ -68,23 +83,47 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   return (
     <Row gutter={[16, 16]}>
       {items.map((item) => (
-        <Col key={item.id} xs={24} sm={12} md={8} lg={6}>
+        <Col key={item.id} xs={8} sm={6} md={4} lg={3} xl={3}>
           <Card
             hoverable
-            className="h-full"
+            className="h-full overflow-hidden"
+            styles={{ body: { padding: '12px' } }}
+            style={{
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+              transition: 'all 0.3s ease'
+            }}
             cover={
-              <div className="flex items-center justify-center p-4 bg-gray-50" style={{ height: '120px' }}>
-                {!imageErrors.has(item.id) ? (
+              <div 
+                className="relative overflow-hidden"
+                style={{ 
+                  aspectRatio: '1 / 1',
+                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {!imageErrors.has(item.id) && item.icon ? (
                   <img
-                    src={getItemImage(item.id)}
+                    src={item.icon}
                     alt={item.name}
-                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                    style={{ 
+                      width: '60%', 
+                      height: '60%', 
+                      objectFit: 'contain',
+                      imageRendering: 'pixelated'
+                    }}
                     onError={() => handleImageError(item.id)}
                   />
                 ) : (
                   <div className="text-gray-400 text-center">
-                    <div className="text-4xl mb-2">📦</div>
+                    <div className="text-5xl mb-2">📦</div>
                     <div className="text-xs">이미지 없음</div>
+                  </div>
+                )}
+                {item.cash && (
+                  <div className="absolute top-2 right-2">
+                    <Tag color="red" style={{ margin: 0 }}>캐시</Tag>
                   </div>
                 )}
               </div>
@@ -92,32 +131,32 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
           >
             <Card.Meta
               title={
-                <div className="flex items-center justify-between">
-                  <span className="truncate" title={item.name}>
+                <div className="text-center mb-2">
+                  <div className="font-medium text-sm truncate" title={item.name}>
                     {item.name}
-                  </span>
+                  </div>
                   {item.category && (
-                    <Tag color={getCategoryColor(item.category)} size="small">
+                    <Tag 
+                      color={getCategoryColor(item.category)} 
+                      size="small"
+                      style={{ fontSize: '10px', marginTop: '4px' }}
+                    >
                       {item.category}
                     </Tag>
                   )}
                 </div>
               }
               description={
-                <div className="space-y-2">
-                  {item.description && (
-                    <p className="text-xs text-gray-500 line-clamp-2" title={item.description}>
-                      {item.description}
-                    </p>
+                <div className="text-center">
+                  {item.price ? (
+                    <div className="text-xs text-yellow-600 font-semibold">
+                      {item.price.toLocaleString()} 메소
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-400">
+                      ID: {item.id}
+                    </div>
                   )}
-                  <div className="flex justify-between text-xs text-gray-600">
-                    <span>ID: {item.id}</span>
-                    {item.price && (
-                      <span className="text-yellow-600">
-                        {item.price.toLocaleString()} 메소
-                      </span>
-                    )}
-                  </div>
                 </div>
               }
             />

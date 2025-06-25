@@ -112,6 +112,7 @@ export class MapleStoryAPI {
       if (params.count) queryParams.append('count', params.count.toString());
       
       const url = `${this.getEndpoint('/item')}?${queryParams.toString()}`;
+      console.log('API 호출 URL:', `${API_BASE_URL}${url}`);
       const response = await apiClient.get(url);
       const items = response.data;
       
