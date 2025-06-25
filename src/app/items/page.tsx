@@ -40,12 +40,14 @@ const fetchItemsFromAPI = async (): Promise<MapleItem[]> => {
       
       const promise = mapleAPI.getItem(itemId)
         .then((item) => {
-          items.push(item);
-          console.log(`✓ 아이템 로드: ${item.name} (ID: ${item.id})`);
+          if (item && item.id && item.name) {
+            items.push(item);
+            console.log(`✓ 아이템 로드: ${item.name} (ID: ${item.id})`);
+          }
         })
         .catch((error) => {
-          // 404는 정상적인 경우이므로 경고만 출력
-          if (error?.response?.status !== 404) {
+          // 404나 not found는 정상적인 경우이므로 무시
+          if (error?.response?.status !== 404 && !error.message?.includes('not found')) {
             console.warn(`Failed to fetch item ${itemId}:`, error.message);
           }
         });

@@ -10,8 +10,8 @@ import {
 } from '@/types/maplestory';
 
 const API_BASE_URL = 'https://maplestory.io/api';
-const DEFAULT_REGION = 'GMS';
-const DEFAULT_VERSION = '208.2.0';
+const DEFAULT_REGION = 'KMS';
+const DEFAULT_VERSION = '284';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -58,21 +58,31 @@ export class MapleStoryAPI {
   async getItem(id: number): Promise<MapleItem> {
     try {
       const response = await apiClient.get(this.getEndpoint(`/item/${id}`));
-      const data = response.data as MapleItemResponse;
+      const data = response.data;
+      
+      // API가 null을 반환하는 경우 (아이템이 존재하지 않음)
+      if (data === null) {
+        throw new Error(`Item ${id} not found`);
+      }
+      
+      // 응답이 없거나 에러 메시지인 경우
+      if (!data || data.error || data.message) {
+        throw new Error(`Item ${id} not found`);
+      }
       
       // API 응답을 MapleItem 형식으로 변환
       return {
-        id: data.id,
-        name: data.description?.name || `Item ${data.id}`,
-        description: data.description?.description,
-        icon: data.metaInfo?.icon,
-        category: data.typeInfo?.overallCategory,
-        subcategory: data.typeInfo?.subCategory,
+        id: data.id || id,
+        name: data.description?.name || `Item ${id}`,
+        description: data.description?.description || '',
+        icon: data.metaInfo?.icon || '',
+        category: data.typeInfo?.overallCategory || 'Unknown',
+        subcategory: data.typeInfo?.subCategory || '',
         cash: data.metaInfo?.cash || false,
-        price: data.metaInfo?.price,
+        price: data.metaInfo?.price || 0,
       };
     } catch (error) {
-      console.error(`Failed to fetch item ${id}:`, error);
+      // 에러 로깅 제거하여 콘솔 스팸 방지
       throw error;
     }
   }
