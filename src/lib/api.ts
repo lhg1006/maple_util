@@ -4,13 +4,12 @@ import {
   MapleNPC, 
   MapleMob, 
   MapleJob, 
-  MapleSkill,
-  ApiResponse 
+  MapleSkill
 } from '@/types/maplestory';
 
 const API_BASE_URL = 'https://maplestory.io/api';
-const DEFAULT_REGION = 'GMS';
-const DEFAULT_VERSION = '208.2.0';
+const DEFAULT_REGION = 'KMS';
+const DEFAULT_VERSION = '284';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -19,6 +18,16 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export interface ItemQueryParams {
+  overallCategory?: string;
+  category?: string;
+  subCategory?: string;
+  page?: number;
+  startPosition?: number;
+  count?: number;
+}
+
 
 export class MapleStoryAPI {
   private region: string;
@@ -55,13 +64,88 @@ export class MapleStoryAPI {
 
   // Item API
   async getItem(id: number): Promise<MapleItem> {
-    const response = await apiClient.get(this.getEndpoint(`/item/${id}`));
-    return response.data;
+    try {
+      const response = await apiClient.get(this.getEndpoint(`/item/${id}`));
+      const data = response.data;
+      
+      // API가 null을 반환하는 경우 (아이템이 존재하지 않음)
+      if (data === null) {
+        throw new Error(`Item ${id} not found`);
+      }
+      
+      // 응답이 없거나 에러 메시지인 경우
+      if (!data || data.error || data.message) {
+        throw new Error(`Item ${id} not found`);
+      }
+      
+      // API 응답을 MapleItem 형식으로 변환
+      return {
+        id: data.id || id,
+        name: data.description?.name || `Item ${id}`,
+        description: data.description?.description || '',
+        icon: data.metaInfo?.icon || '',
+        category: data.typeInfo?.overallCategory || 'Unknown',
+        subcategory: data.typeInfo?.subCategory || '',
+        cash: data.metaInfo?.cash || false,
+        price: data.metaInfo?.price || 0,
+      };
+    } catch (error) {
+      // 에러 로깅 제거하여 콘솔 스팸 방지
+      throw error;
+    }
   }
 
   async getItemIcon(id: number): Promise<string> {
     return `${API_BASE_URL}${this.getEndpoint(`/item/${id}/icon`)}`;
   }
+
+  async getItemsByCategory(params: ItemQueryParams): Promise<MapleItem[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.overallCategory) queryParams.append('overallCategory', params.overallCategory);
+      if (params.category) queryParams.append('category', params.category);
+      if (params.subCategory) queryParams.append('subCategory', params.subCategory);
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.startPosition) queryParams.append('startPosition', params.startPosition.toString());
+      if (params.count) queryParams.append('count', params.count.toString());
+      
+      const url = `${this.getEndpoint('/item')}?${queryParams.toString()}`;
+      console.log('API 호출 URL:', `${API_BASE_URL}${url}`);
+      const response = await apiClient.get(url);
+      const items = response.data;
+      
+      if (!Array.isArray(items)) {
+        return [];
+      }
+      
+      // API 응답을 MapleItem 형식으로 변환
+      return items.map((item: {
+        id: number;
+        name?: string;
+        desc?: string;
+        isCash?: boolean;
+        price?: number;
+        typeInfo?: {
+          category?: string;
+          subCategory?: string;
+        };
+      }) => ({
+        id: item.id,
+        name: item.name || `Item ${item.id}`,
+        description: item.desc || '',
+        icon: `${API_BASE_URL}${this.getEndpoint(`/item/${item.id}/icon`)}`,
+        category: item.typeInfo?.category || 'Unknown',
+        subcategory: item.typeInfo?.subCategory || '',
+        cash: item.isCash || false,
+        price: item.price || 0,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch items by category:', error);
+      throw error;
+    }
+  }
+
 
   // Job API (if available)
   async getJob(id: number): Promise<MapleJob> {
@@ -86,7 +170,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
@@ -98,7 +182,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
@@ -110,7 +194,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
