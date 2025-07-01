@@ -63,47 +63,66 @@ export default function ItemsPage() {
       setLoading(true);
       setCurrentPage(1);
       try {
-        // 카테고리/서브카테고리별 시작 위치 (실제 아이템 ID 기준)
-        const categoryPositions: Record<string, Record<string, number> | number> = {
-          'Accessory': 0,
-          'Armor': {
-            'Hat': 0,        // ID 1000000 근처
-            'Top': 10000,    // ID 1040000 근처  
-            'Overall': 12000, // ID 1050000 근처
-            'Bottom': 15000,  // ID 1060000 근처
-            'Shoes': 17000,   // ID 1070000 근처
-            'Glove': 20000,   // ID 1080000 근처
-            'Shield': 23000,  // ID 1092000 근처
-            'Cape': 25000,    // ID 1100001 근처
-          },
-          'Character': 5000,
-          'One-Handed Weapon': 18000,
-          'Two-Handed Weapon': 20000,
-          'Secondary Weapon': 22000,
-          'Mount': 25000,
-          'Other': 30000,
-        };
-
+        // 대분류별 ID 범위에서 직접 가져오기 (API overallCategory 파라미터가 작동하지 않음)
         let startPosition = 0;
-        if (category && categoryPositions[category]) {
-          if (subCategory && typeof categoryPositions[category] === 'object') {
-            const subPositions = categoryPositions[category] as Record<string, number>;
-            startPosition = subPositions[subCategory] || Object.values(subPositions)[0];
-          } else if (typeof categoryPositions[category] === 'number') {
-            startPosition = categoryPositions[category] as number;
-          } else if (typeof categoryPositions[category] === 'object') {
-            startPosition = Object.values(categoryPositions[category] as Record<string, number>)[0];
-          }
+        let searchCount = 10000;
+        
+        switch (overallCategory) {
+          case 'Equip':
+            startPosition = 0;
+            searchCount = 30000;
+            break;
+          case 'Use':
+            startPosition = 30000; // Use 아이템은 API index 30000부터
+            searchCount = 20000;
+            break;
+          case 'Setup':
+            // Setup 아이템은 ID 3010000부터 시작하므로 직접 가져오기
+            startPosition = 0;
+            searchCount = 100000; // 전체에서 가져와서 필터링
+            break;
+          case 'Etc':
+            // Etc 아이템은 ID 4000000부터 시작하므로 직접 가져오기
+            startPosition = 0;
+            searchCount = 100000; // 전체에서 가져와서 필터링
+            break;
+          case 'Cash':
+            // Cash 아이템은 ID 5000000부터 시작하므로 직접 가져오기
+            startPosition = 0;
+            searchCount = 100000; // 전체에서 가져와서 필터링
+            break;
         }
 
         const params: ItemQueryParams = {
-          overallCategory,
-          startPosition: 0,
-          count: 30000, // 충분히 많이 가져와서 필터링
+          startPosition,
+          count: searchCount,
         };
         
         const items = await mapleAPI.getItemsByCategory(params);
         let filteredItems = items;
+        
+        // 대분류 필터링 (API 파라미터가 작동하지 않으므로 클라이언트에서 필터링)
+        filteredItems = filteredItems.filter(item => {
+          // typeInfo가 없는 경우 건너뛰기
+          if (!item.category && !item.subcategory) return false;
+          
+          // 실제 API 응답에서 overallCategory 확인이 어려우므로 ID 범위로 판단
+          const itemId = item.id;
+          switch (overallCategory) {
+            case 'Equip':
+              return itemId >= 1000000 && itemId < 2000000;
+            case 'Use':
+              return itemId >= 2000000 && itemId < 3000000;
+            case 'Setup':
+              return itemId >= 3000000 && itemId < 4000000;
+            case 'Etc':
+              return itemId >= 4000000 && itemId < 5000000;
+            case 'Cash':
+              return itemId >= 5000000;
+            default:
+              return true;
+          }
+        });
         
         // 카테고리 필터링
         if (category) {
