@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Typography, Row, Col, Pagination, Input, Select, message } from 'antd';
+import { Typography, Row, Col, Pagination, Input, Select, App } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { MapleItem } from '@/types/maplestory';
-import { mapleAPI } from '@/lib/api';
+import { mapleAPI, ItemQueryParams } from '@/lib/api';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -38,19 +38,20 @@ const ITEM_CATEGORIES = {
     { value: 'Top', label: '상의' },
     { value: 'Bottom', label: '하의' },
     { value: 'Shoes', label: '신발' },
-    { value: 'Gloves', label: '장갑' },
+    { value: 'Glove', label: '장갑' },
     { value: 'Cape', label: '망토' },
     { value: 'Shield', label: '방패' },
   ],
 };
 
 export default function ItemsPage() {
+  const { message } = App.useApp();
   const [items, setItems] = useState<MapleItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MapleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('category');
   const [overallCategory, setOverallCategory] = useState<string>('Equip');
   const [category, setCategory] = useState<string>('');
   const [subCategory, setSubCategory] = useState<string>('');
@@ -62,54 +63,61 @@ export default function ItemsPage() {
       setLoading(true);
       setCurrentPage(1);
       try {
-        // 다양한 아이템 범위에서 데이터를 가져와서 클라이언트에서 필터링
-        const fetchFromMultipleRanges = async () => {
-          const ranges = [
-            { start: 0, count: 100, type: 'Accessory' },
-            { start: 100, count: 100, type: 'Accessory' },
-            { start: 200, count: 100, type: 'Accessory' },
-            { start: 300, count: 100, type: 'Accessory' },
-            { start: 400, count: 100, type: 'Accessory' },
-          ];
-          
-          const allItems: any[] = [];
-          
-          for (const range of ranges) {
-            try {
-              const params = {
-                overallCategory,
-                startPosition: range.start,
-                count: range.count,
-              };
-              
-              const items = await mapleAPI.getItemsByCategory(params);
-              allItems.push(...items);
-            } catch (error) {
-              console.warn(`Range ${range.start}-${range.start + range.count} failed:`, error);
-            }
+        // 카테고리/서브카테고리별 시작 위치 (실제 아이템 ID 기준)
+        const categoryPositions: Record<string, Record<string, number> | number> = {
+          'Accessory': 0,
+          'Armor': {
+            'Hat': 0,        // ID 1000000 근처
+            'Top': 10000,    // ID 1040000 근처  
+            'Overall': 12000, // ID 1050000 근처
+            'Bottom': 15000,  // ID 1060000 근처
+            'Shoes': 17000,   // ID 1070000 근처
+            'Glove': 20000,   // ID 1080000 근처
+            'Shield': 23000,  // ID 1092000 근처
+            'Cape': 25000,    // ID 1100001 근처
+          },
+          'Character': 5000,
+          'One-Handed Weapon': 18000,
+          'Two-Handed Weapon': 20000,
+          'Secondary Weapon': 22000,
+          'Mount': 25000,
+          'Other': 30000,
+        };
+
+        let startPosition = 0;
+        if (category && categoryPositions[category]) {
+          if (subCategory && typeof categoryPositions[category] === 'object') {
+            const subPositions = categoryPositions[category] as Record<string, number>;
+            startPosition = subPositions[subCategory] || Object.values(subPositions)[0];
+          } else if (typeof categoryPositions[category] === 'number') {
+            startPosition = categoryPositions[category] as number;
+          } else if (typeof categoryPositions[category] === 'object') {
+            startPosition = Object.values(categoryPositions[category] as Record<string, number>)[0];
           }
-          
-          return allItems;
+        }
+
+        const params: ItemQueryParams = {
+          overallCategory,
+          startPosition: 0,
+          count: 30000, // 충분히 많이 가져와서 필터링
         };
         
-        const allItems = await fetchFromMultipleRanges();
+        const items = await mapleAPI.getItemsByCategory(params);
+        let filteredItems = items;
         
-        // 선택된 카테고리에 따라 클라이언트에서 필터링
-        let filteredByCategory = allItems;
+        // 카테고리 필터링
         if (category) {
-          filteredByCategory = allItems.filter(item => 
-            item.category && item.category.toLowerCase().includes(category.toLowerCase())
-          );
-        }
-        if (subCategory) {
-          filteredByCategory = filteredByCategory.filter(item => 
-            item.subcategory && item.subcategory.toLowerCase().includes(subCategory.toLowerCase())
-          );
+          filteredItems = filteredItems.filter(item => item.category === category);
         }
         
-        console.log(`총 ${allItems.length}개 아이템 중 ${filteredByCategory.length}개 필터링 완료`);
-        setItems(filteredByCategory);
-        setFilteredItems(filteredByCategory);
+        // 서브카테고리 필터링  
+        if (subCategory) {
+          filteredItems = filteredItems.filter(item => item.subcategory === subCategory);
+        }
+        
+        console.log(`총 ${filteredItems.length}개 아이템 로드 완료`);
+        setItems(filteredItems);
+        setFilteredItems(filteredItems);
       } catch (error) {
         console.error('아이템 로딩 실패:', error);
         message.error('아이템 데이터를 불러오는데 실패했습니다.');
@@ -119,7 +127,7 @@ export default function ItemsPage() {
     };
 
     loadItems();
-  }, [overallCategory, category, subCategory]);
+  }, [overallCategory, category, subCategory, message]);
 
   // 검색 및 정렬 적용
   useEffect(() => {
@@ -169,6 +177,35 @@ export default function ItemsPage() {
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     debouncedSearch(value);
+  };
+
+  // 전체 검색 기능 (엔터키로 실행)
+  const handleFullSearch = async (value: string) => {
+    if (!value.trim()) return;
+    
+    setLoading(true);
+    try {
+      const params: ItemQueryParams = {
+        overallCategory,
+        startPosition: 0,
+        count: 200, // 검색시 적당히 가져옴
+      };
+      
+      const items = await mapleAPI.getItemsByCategory(params);
+      const searchResults = items.filter(item => 
+        item.name.toLowerCase().includes(value.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(value.toLowerCase()))
+      );
+      
+      setItems(searchResults);
+      setFilteredItems(searchResults);
+      message.info(`검색 결과: ${searchResults.length}개 아이템`);
+    } catch (error) {
+      console.error('검색 실패:', error);
+      message.error('검색 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 정렬 변경 핸들러
@@ -263,13 +300,13 @@ export default function ItemsPage() {
               <Row gutter={[16, 16]} align="middle">
                 <Col xs={24} sm={16} md={12}>
                   <Search
-                    placeholder="아이템 이름을 검색하세요"
+                    placeholder="아이템 이름을 검색하세요 (엔터: 전체 검색)"
                     allowClear
                     enterButton={<SearchOutlined />}
                     size="large"
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
-                    onSearch={handleSearch}
+                    onSearch={handleFullSearch}
                   />
                 </Col>
                 <Col xs={24} sm={8} md={6}>
@@ -280,8 +317,8 @@ export default function ItemsPage() {
                     onChange={handleSortChange}
                     placeholder="정렬 기준"
                   >
-                    <Option value="name">이름순</Option>
                     <Option value="category">카테고리순</Option>
+                    <Option value="name">이름순</Option>
                     <Option value="price">가격순</Option>
                   </Select>
                 </Col>

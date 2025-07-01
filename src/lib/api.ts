@@ -1,12 +1,10 @@
 import axios from 'axios';
 import { 
   MapleItem, 
-  MapleItemResponse,
   MapleNPC, 
   MapleMob, 
   MapleJob, 
-  MapleSkill,
-  ApiResponse 
+  MapleSkill
 } from '@/types/maplestory';
 
 const API_BASE_URL = 'https://maplestory.io/api';
@@ -29,6 +27,7 @@ export interface ItemQueryParams {
   startPosition?: number;
   count?: number;
 }
+
 
 export class MapleStoryAPI {
   private region: string;
@@ -121,7 +120,17 @@ export class MapleStoryAPI {
       }
       
       // API 응답을 MapleItem 형식으로 변환
-      return items.map((item: any) => ({
+      return items.map((item: {
+        id: number;
+        name?: string;
+        desc?: string;
+        isCash?: boolean;
+        price?: number;
+        typeInfo?: {
+          category?: string;
+          subCategory?: string;
+        };
+      }) => ({
         id: item.id,
         name: item.name || `Item ${item.id}`,
         description: item.desc || '',
@@ -136,6 +145,7 @@ export class MapleStoryAPI {
       throw error;
     }
   }
+
 
   // Job API (if available)
   async getJob(id: number): Promise<MapleJob> {
@@ -160,7 +170,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
@@ -172,7 +182,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
@@ -184,7 +194,7 @@ export class MapleStoryAPI {
         params: { q: query, limit }
       });
       return response.data;
-    } catch (error) {
+    } catch {
       console.warn('Search not available, returning empty array');
       return [];
     }
