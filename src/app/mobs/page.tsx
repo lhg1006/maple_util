@@ -8,7 +8,7 @@ import { MobList } from '@/components/mobs/mob-list';
 import { MobDetailModal } from '@/components/mobs/mob-detail-modal';
 import { MapleMob } from '@/types/maplestory';
 import { mapleAPI } from '@/lib/api';
-import { SAMPLE_MONSTERS, SAMPLE_ITEMS, SAMPLE_MAPS } from '@/data/sample-data';
+import { loadMonsters, loadItems, loadMaps } from '@/lib/cdn-data-loader';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -47,8 +47,9 @@ export default function MobsPage() {
       setLoading(true);
       setCurrentPage(1);
       try {
-        // 샘플 데이터 사용
-        const localMobs = Object.values(SAMPLE_MONSTERS).map(monster => ({
+        // CDN에서 데이터 로드
+        const monstersData = await loadMonsters();
+        const localMobs = Object.values(monstersData).map((monster: any) => ({
           id: monster.id,
           name: monster.name,
           level: monster.level,
