@@ -1,7 +1,25 @@
 // 자동 드롭 데이터 생성 유틸리티 (osmlib.com 방식 참고)
-import { GENERATED_MONSTERS } from '@/data/generated-monsters';
-import { GENERATED_ITEMS } from '@/data/generated-items';
+import { loadMonsters, loadItems } from '@/lib/cdn-data-loader';
 import { DropInfo } from '@/data/drops';
+
+// 데이터 캐시
+let cachedMonsters: any = null;
+let cachedItems: any = null;
+
+// 데이터 로더 함수
+async function getMonsters() {
+  if (!cachedMonsters) {
+    cachedMonsters = await loadMonsters();
+  }
+  return cachedMonsters;
+}
+
+async function getItems() {
+  if (!cachedItems) {
+    cachedItems = await loadItems();
+  }
+  return cachedItems;
+}
 
 // osmlib.com 스타일의 정밀한 드롭 확률 매핑
 const DROP_RATE_PERCENTAGES = {
@@ -13,8 +31,9 @@ const DROP_RATE_PERCENTAGES = {
 };
 
 // 몬스터 레벨별 기본 드롭 아이템 생성
-export function generateAutoDrops(monsterId: number): DropInfo[] {
-  const monster = GENERATED_MONSTERS[monsterId];
+export async function generateAutoDrops(monsterId: number): Promise<DropInfo[]> {
+  const monsters = await getMonsters();
+  const monster = monsters[monsterId];
   if (!monster) return [];
 
   const drops: DropInfo[] = [];
@@ -136,20 +155,21 @@ export function generateAutoDrops(monsterId: number): DropInfo[] {
 }
 
 // 모든 생성된 몬스터에 대한 자동 드롭 생성
-export function generateAllAutoDrops(): Record<number, DropInfo[]> {
+export async function generateAllAutoDrops(): Promise<Record<number, DropInfo[]>> {
+  const monsters = await getMonsters();
   const autoDrops: Record<number, DropInfo[]> = {};
   
-  Object.values(GENERATED_MONSTERS).forEach(monster => {
-    const drops = generateAutoDrops(monster.id);
+  for (const monster of Object.values(monsters) as any[]) {
+    const drops = await generateAutoDrops(monster.id);
     if (drops.length > 0) {
       autoDrops[monster.id] = drops;
     }
-  });
+  }
   
   return autoDrops;
 }
 
 // 특정 몬스터의 자동 드롭 조회 (기존 드롭과 병합)
-export function getAutoDropsForMonster(monsterId: number): DropInfo[] {
-  return generateAutoDrops(monsterId);
+export async function getAutoDropsForMonster(monsterId: number): Promise<DropInfo[]> {
+  return await generateAutoDrops(monsterId);
 }

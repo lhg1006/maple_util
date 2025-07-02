@@ -120,7 +120,7 @@ export default function TestCDNPage() {
               <Text strong>카테고리 분포 (샘플 1000개):</Text>
               <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
                 {Object.entries(results.items.categories || {}).map(([cat, count]) => (
-                  <li key={cat}>{cat}: {count}개</li>
+                  <li key={cat}>{cat}: {count as number}개</li>
                 ))}
               </ul>
             </div>

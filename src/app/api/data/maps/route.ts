@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { COMPLETE_MAPS } from '@/data/complete-maps';
+import { loadMaps } from '@/lib/cdn-data-loader';
 
 export async function GET() {
   // 캐싱 헤더 설정 (1일)
@@ -7,5 +7,11 @@ export async function GET() {
     'Cache-Control': 'public, max-age=86400, stale-while-revalidate',
   };
 
-  return NextResponse.json(COMPLETE_MAPS, { headers });
+  try {
+    const maps = await loadMaps();
+    return NextResponse.json(maps, { headers });
+  } catch (error) {
+    console.error('Failed to load maps:', error);
+    return NextResponse.json({ error: 'Failed to load maps' }, { status: 500 });
+  }
 }

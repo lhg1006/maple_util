@@ -55,131 +55,21 @@ const ITEM_CATEGORIES = {
     { value: 'Emblem', label: '엠블렘' },
     { value: 'Pocket Item', label: '포켓 아이템' },
   ],
-  oneHandedWeaponSubCategories: [
-    { value: 'One-Handed Sword', label: '한손검' },
-    { value: 'One-Handed Axe', label: '한손도끼' },
-    { value: 'One-Handed Blunt Weapon', label: '한손둔기' },
-    { value: 'Dagger', label: '단검' },
-    { value: 'Cane', label: '케인' },
-    { value: 'Wand', label: '완드' },
-    { value: 'Staff', label: '스태프' },
-    { value: 'Shining Rod', label: '샤이닝로드' },
-    { value: 'Soul Shooter', label: '소울슈터' },
-    { value: 'Desperado', label: '데스페라도' },
-    { value: 'Whip Blade', label: '에너지소드' },
-    { value: 'Katara', label: '블레이드' },
-    { value: 'Ritual Fan', label: '부채' },
-    { value: 'Psy-limiter', label: 'ESP리미터' },
-    { value: 'Chain', label: '체인' },
-    { value: 'Gauntlet', label: '건틀렛' },
-  ],
-  twoHandedWeaponSubCategories: [
-    { value: 'Two-Handed Sword', label: '두손검' },
-    { value: 'Two-Handed Axe', label: '두손도끼' },
-    { value: 'Two-Handed Blunt', label: '두손둔기' },
-    { value: 'Spear', label: '창' },
-    { value: 'Pole Arm', label: '폴암' },
-    { value: 'Bow', label: '활' },
-    { value: 'Crossbow', label: '석궁' },
-    { value: 'Claw', label: '아대' },
-    { value: 'Knuckle', label: '너클' },
-    { value: 'Gun', label: '건' },
-    { value: 'Dual Bowgun', label: '듀얼보우건' },
-    { value: 'Hand Cannon', label: '핸드캐논' },
-    { value: 'Ancient Bow', label: '에인션트보우' },
-    { value: 'Arm Cannon', label: '암캐논' },
-  ],
-  secondaryWeaponSubCategories: [
-    { value: 'Spellbook', label: '주문서' },
-    { value: 'Magic Arrow', label: '마법화살' },
-    { value: 'Card', label: '카드' },
-    { value: 'Orb', label: '오브' },
-    { value: 'Rosary', label: '로사리오' },
-    { value: 'Iron Chain', label: '철사슬' },
-    { value: 'Magic Marble', label: '마법구슬' },
-    { value: 'Arrowhead', label: '화살촉' },
-    { value: 'Arrow Fletching', label: '시위' },
-    { value: 'Bow Thimble', label: '골무' },
-    { value: 'Dagger Scabbard', label: '단검 집' },
-    { value: 'Wrist Band', label: '손목보호대' },
-    { value: 'Magnum', label: '매그넘탄' },
-    { value: 'Powder Keg', label: '화약통' },
-    { value: 'Mass', label: '미사' },
-    { value: 'Jewel', label: '보석' },
-    { value: 'Relic', label: '유물' },
-    { value: 'Transmitter', label: '트랜스미터' },
-    { value: 'Medal', label: '메달' },
-    { value: 'Fox Marble', label: '여우구슬' },
-    { value: 'Chess Piece', label: '체스말' },
-    { value: 'Soul Ring', label: '소울링' },
-  ],
   useSubCategories: [
-    { value: 'Recovery', label: '회복' },
-    { value: 'Special', label: '특수' },
-    { value: 'Buff', label: '버프' },
-    { value: 'Scroll', label: '주문서' },
-    { value: 'Pet Use', label: '펫 전용' },
-    { value: 'Mastery Book', label: '마스터리북' },
-    { value: 'Cure', label: '치료' },
-    { value: 'Monster Riding', label: '몬스터 라이딩' },
-    { value: 'Teleport', label: '순간이동' },
-    { value: 'Weather', label: '날씨' },
-    { value: 'Transformation', label: '변신' },
-    { value: 'Summoning Bag', label: '소환가방' },
-  ],
-  setupSubCategories: [
-    { value: 'Chair', label: '의자' },
-    { value: 'Totem', label: '토템' },
-    { value: 'Jukebox', label: '음악상자' },
-    { value: 'Trap', label: '함정' },
-    { value: 'Extractor', label: '채집기' },
-    { value: 'Familiar', label: '패밀리어' },
-    { value: 'Android', label: '안드로이드' },
-    { value: 'Mechanical Heart', label: '기계심장' },
-    { value: 'Installation', label: '설치물' },
-  ],
-  etcSubCategories: [
-    { value: 'Potion Material', label: '포션 재료' },
-    { value: 'Mineral Ore', label: '광물 원석' },
-    { value: 'Jewel Ore', label: '보석 원석' },
-    { value: 'Crystal Ore', label: '크리스탈 원석' },
-    { value: 'Refined Ore', label: '정제된 원석' },
-    { value: 'Recipe', label: '레시피' },
-    { value: 'Smelting', label: '제련' },
-    { value: 'Monster Card', label: '몬스터 카드' },
-    { value: 'Quest Item', label: '퀘스트 아이템' },
-    { value: 'Harvesting', label: '채집' },
-    { value: 'Seed', label: '씨앗' },
-    { value: 'Coin', label: '코인' },
-    { value: 'Letter', label: '편지' },
-    { value: 'Invitation', label: '초대장' },
-    { value: 'Ticket', label: '티켓' },
-  ],
-  cashSubCategories: [
-    { value: 'Pet', label: '펫' },
-    { value: 'Pet Equipment', label: '펫 장비' },
-    { value: 'Package', label: '패키지' },
-    { value: 'Weather', label: '날씨' },
-    { value: 'Megaphone', label: '확성기' },
-    { value: 'Upgrade', label: '강화' },
-    { value: 'Special', label: '특수' },
-    { value: 'Decoration', label: '장식' },
-    { value: 'Premium', label: '프리미엄' },
-    { value: 'Label Ring', label: '라벨링' },
-    { value: 'Protect', label: '보호' },
-    { value: 'Skill', label: '스킬' },
-    { value: 'Beauty', label: '뷰티' },
-    { value: 'Karma', label: '카르마' },
-    { value: 'Cube', label: '큐브' },
-    { value: 'Familiar', label: '패밀리어' },
-  ],
-  cashPetSubCategories: [
-    { value: '일반펫', label: '일반펫' },
-    { value: '자석펫', label: '자석펫' },
+    { value: 'Consumable', label: '소비' },
+    { value: 'Character Modification', label: '성형/변경' },
+    { value: 'Armor Scroll', label: '방어구 주문서' },
+    { value: 'Weapon Scroll', label: '무기 주문서' },
+    { value: 'Special Scroll', label: '특수 주문서' },
+    { value: 'Recipe', label: '제작서' },
+    { value: 'Projectile', label: '투사체' },
+    { value: 'Monster/Familiar', label: '몬스터/펫' },
+    { value: 'Tablet', label: '태블릿' },
+    { value: 'Other', label: '기타' },
   ],
 };
 
-export default function ItemsPageSimple() {
+export default function ItemsPage() {
   const { message } = App.useApp();
   const [allItems, setAllItems] = useState<any>({});
   const [items, setItems] = useState<MapleItem[]>([]);
@@ -189,14 +79,12 @@ export default function ItemsPageSimple() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('name');
-  const [overallCategory, setOverallCategory] = useState<string>('Equip');
-  const [category, setCategory] = useState<string>('Accessory');
-  const [subCategory, setSubCategory] = useState<string>('Face Accessory');
-  const [subSubCategory, setSubSubCategory] = useState<string>('');
-  const [subSubSubCategory, setSubSubSubCategory] = useState<string>('');
+  const [overallCategory, setOverallCategory] = useState<string>('Use');
+  const [category, setCategory] = useState<string>('Consumable');
+  const [subCategory, setSubCategory] = useState<string>('Consumable');
   const pageSize = 24;
 
-  // CDN에서 전체 데이터 로드 (한 번만)
+  // CDN에서 전체 아이템 데이터 로드 (한 번만)
   useEffect(() => {
     const loadAllData = async () => {
       setDataLoading(true);
@@ -226,22 +114,26 @@ export default function ItemsPageSimple() {
       
       // 전체 데이터에서 해당 카테고리만 필터링
       const filteredData = Object.values(allItems).filter((item: any) => {
-        return item.typeInfo?.overallCategory === overallCategory;
+        const typeInfo = item.originalData?.typeInfo || item.typeInfo;
+        return typeInfo?.overallCategory === overallCategory;
       });
 
       console.log(`📊 ${overallCategory}: ${filteredData.length}개 아이템 발견`);
 
       // MapleItem 형식으로 변환
-      const convertedItems = filteredData.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        category: item.typeInfo?.category || '',
-        subcategory: item.typeInfo?.subCategory || '',
-        description: item.description || '',
-        icon: `https://maplestory.io/api/KMS/389/item/${item.id}/icon`,
-        cash: false,
-        price: 0,
-      })) as MapleItem[];
+      const convertedItems = filteredData.map((item: any) => {
+        const typeInfo = item.originalData?.typeInfo || item.typeInfo;
+        return {
+          id: item.id,
+          name: item.name,
+          category: typeInfo?.category || item.category || '',
+          subcategory: typeInfo?.subCategory || item.subCategory || '',
+          description: item.description || '',
+          icon: `https://maplestory.io/api/KMS/389/item/${item.id}/icon`,
+          cash: false,
+          price: 0,
+        };
+      }) as MapleItem[];
 
       setItems(convertedItems);
       setFilteredItems(convertedItems);
@@ -267,7 +159,10 @@ export default function ItemsPageSimple() {
     // 2차 카테고리 필터
     if (category && overallCategory === 'Equip') {
       filtered = filtered.filter(item => item.category === category);
-    } else if (category && overallCategory !== 'Equip') {
+    }
+    
+    // 소비아이템 2차 카테고리 필터
+    if (category && overallCategory === 'Use') {
       filtered = filtered.filter(item => item.category === category);
     }
 
@@ -296,8 +191,6 @@ export default function ItemsPageSimple() {
   useEffect(() => {
     setCategory('');
     setSubCategory('');
-    setSubSubCategory('');
-    setSubSubSubCategory('');
   }, [overallCategory]);
 
   // 검색 핸들러
@@ -317,11 +210,12 @@ export default function ItemsPageSimple() {
     return (
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px' }}>
-          <Spin size="large" spinning={true} tip="CDN에서 데이터를 로딩하는 중...">
+          <Spin size="large" spinning={true} tip="전체 아이템 데이터를 로딩하는 중...">
             <div style={{ minHeight: '200px' }} />
           </Spin>
           <div style={{ marginTop: '20px', color: '#666' }}>
-            109,945개의 아이템 데이터를 다운로드하고 있습니다...
+            57,490개의 완전한 아이템 데이터를 청크별로 다운로드하고 있습니다...<br/>
+            모든 방어구 아이템 (한벌옷, 하의, 신발, 장갑, 방패 등)이 포함됩니다.
           </div>
         </div>
       </MainLayout>
@@ -390,52 +284,9 @@ export default function ItemsPageSimple() {
                     </Select>
                   </Col>
                 )}
+                
+                {/* 소비아이템 2차 분류 */}
                 {overallCategory === 'Use' && (
-                  <Col xs={24} sm={12} md={8}>
-                    <Select
-                      style={{ width: '100%' }}
-                      size="large"
-                      value={category}
-                      onChange={setCategory}
-                      placeholder="소비 아이템 분류"
-                    >
-                      {ITEM_CATEGORIES.useSubCategories.map(cat => (
-                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                      ))}
-                    </Select>
-                  </Col>
-                )}
-                {overallCategory === 'Setup' && (
-                  <Col xs={24} sm={12} md={8}>
-                    <Select
-                      style={{ width: '100%' }}
-                      size="large"
-                      value={category}
-                      onChange={setCategory}
-                      placeholder="설치 아이템 분류"
-                    >
-                      {ITEM_CATEGORIES.setupSubCategories.map(cat => (
-                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                      ))}
-                    </Select>
-                  </Col>
-                )}
-                {overallCategory === 'Etc' && (
-                  <Col xs={24} sm={12} md={8}>
-                    <Select
-                      style={{ width: '100%' }}
-                      size="large"
-                      value={category}
-                      onChange={setCategory}
-                      placeholder="기타 아이템 분류"
-                    >
-                      {ITEM_CATEGORIES.etcSubCategories.map(cat => (
-                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                      ))}
-                    </Select>
-                  </Col>
-                )}
-                {overallCategory === 'Cash' && (
                   <Col xs={24} sm={12} md={8}>
                     <Select
                       style={{ width: '100%' }}
@@ -443,11 +294,12 @@ export default function ItemsPageSimple() {
                       value={category}
                       onChange={(value) => {
                         setCategory(value);
-                        setSubCategory(''); // 펫 선택시 하위 초기화
+                        setSubCategory(''); // 상위 카테고리 변경시 하위 초기화
                       }}
-                      placeholder="캐시 아이템 분류"
+                      placeholder="소비아이템 종류"
+                      allowClear
                     >
-                      {ITEM_CATEGORIES.cashSubCategories.map(cat => (
+                      {ITEM_CATEGORIES.useSubCategories.map(cat => (
                         <Option key={cat.value} value={cat.value}>{cat.label}</Option>
                       ))}
                     </Select>
@@ -492,81 +344,9 @@ export default function ItemsPageSimple() {
                       </Select>
                     </Col>
                   )}
-                  {category === 'One-Handed Weapon' && (
-                    <Col xs={24} sm={12} md={8}>
-                      <Select
-                        style={{ width: '100%' }}
-                        size="large"
-                        value={subCategory}
-                        onChange={setSubCategory}
-                        placeholder="한손 무기 종류"
-                        allowClear
-                      >
-                        {ITEM_CATEGORIES.oneHandedWeaponSubCategories.map(cat => (
-                          <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                        ))}
-                      </Select>
-                    </Col>
-                  )}
-                  {category === 'Two-Handed Weapon' && (
-                    <Col xs={24} sm={12} md={8}>
-                      <Select
-                        style={{ width: '100%' }}
-                        size="large"
-                        value={subCategory}
-                        onChange={setSubCategory}
-                        placeholder="두손 무기 종류"
-                        allowClear
-                      >
-                        {ITEM_CATEGORIES.twoHandedWeaponSubCategories.map(cat => (
-                          <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                        ))}
-                      </Select>
-                    </Col>
-                  )}
-                  {category === 'Secondary Weapon' && (
-                    <Col xs={24} sm={12} md={8}>
-                      <Select
-                        style={{ width: '100%' }}
-                        size="large"
-                        value={subCategory}
-                        onChange={setSubCategory}
-                        placeholder="보조 무기 종류"
-                        allowClear
-                      >
-                        {ITEM_CATEGORIES.secondaryWeaponSubCategories.map(cat => (
-                          <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                        ))}
-                      </Select>
-                    </Col>
-                  )}
                 </Row>
               </Col>
             )}
-
-            {/* 펫 세부 분류 (캐시 > 펫) */}
-            {overallCategory === 'Cash' && category === 'Pet' && (
-              <Col span={24}>
-                <Row gutter={[16, 16]} align="middle">
-                  <Col xs={24} sm={12} md={8}>
-                    <Select
-                      style={{ width: '100%' }}
-                      size="large"
-                      value={subCategory}
-                      onChange={setSubCategory}
-                      placeholder="펫 종류"
-                      allowClear
-                    >
-                      {ITEM_CATEGORIES.cashPetSubCategories.map(cat => (
-                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                      ))}
-                    </Select>
-                  </Col>
-                </Row>
-              </Col>
-            )}
-              </Row>
-            </Col>
             
             {/* 검색 및 정렬 */}
             <Col span={24}>
@@ -606,7 +386,6 @@ export default function ItemsPageSimple() {
           marginBottom: '16px' 
         }}>
           <span>
-            {/* 카테고리 경로 표시 */}
             {overallCategory && (
               <>
                 {ITEM_CATEGORIES.overallCategories.find(cat => cat.value === overallCategory)?.label}
@@ -615,9 +394,6 @@ export default function ItemsPageSimple() {
                     {' > '}
                     {overallCategory === 'Equip' && ITEM_CATEGORIES.equipCategories.find(cat => cat.value === category)?.label}
                     {overallCategory === 'Use' && ITEM_CATEGORIES.useSubCategories.find(cat => cat.value === category)?.label}
-                    {overallCategory === 'Setup' && ITEM_CATEGORIES.setupSubCategories.find(cat => cat.value === category)?.label}
-                    {overallCategory === 'Etc' && ITEM_CATEGORIES.etcSubCategories.find(cat => cat.value === category)?.label}
-                    {overallCategory === 'Cash' && ITEM_CATEGORIES.cashSubCategories.find(cat => cat.value === category)?.label}
                   </>
                 )}
                 {subCategory && (
@@ -625,10 +401,6 @@ export default function ItemsPageSimple() {
                     {' > '}
                     {category === 'Armor' && ITEM_CATEGORIES.armorSubCategories.find(cat => cat.value === subCategory)?.label}
                     {category === 'Accessory' && ITEM_CATEGORIES.accessorySubCategories.find(cat => cat.value === subCategory)?.label}
-                    {category === 'One-Handed Weapon' && ITEM_CATEGORIES.oneHandedWeaponSubCategories.find(cat => cat.value === subCategory)?.label}
-                    {category === 'Two-Handed Weapon' && ITEM_CATEGORIES.twoHandedWeaponSubCategories.find(cat => cat.value === subCategory)?.label}
-                    {category === 'Secondary Weapon' && ITEM_CATEGORIES.secondaryWeaponSubCategories.find(cat => cat.value === subCategory)?.label}
-                    {category === 'Pet' && ITEM_CATEGORIES.cashPetSubCategories.find(cat => cat.value === subCategory)?.label}
                   </>
                 )}
               </>

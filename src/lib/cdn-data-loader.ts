@@ -2,7 +2,7 @@
 const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@main';
 
 // 로컬 개발시 public 폴더 사용 (옵션)
-const USE_LOCAL = process.env.NODE_ENV === 'development' && false;
+const USE_LOCAL = process.env.NODE_ENV === 'development' && true;
 const LOCAL_BASE_URL = '/data-cdn';
 
 const BASE_URL = USE_LOCAL ? LOCAL_BASE_URL : CDN_BASE_URL;

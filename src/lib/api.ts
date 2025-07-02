@@ -83,6 +83,7 @@ export class MapleStoryAPI {
         name: mob.name || `Mob ${mob.id}`,
         level: mob.level || null,
         hp: mob.hp || null,
+        mp: mob.mp || null,
         exp: mob.exp || null,
       }));
     } catch (error) {

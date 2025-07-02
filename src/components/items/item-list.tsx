@@ -144,7 +144,6 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
                   {item.category && (
                     <Tag 
                       color={getCategoryColor(item.category)} 
-                      size="small"
                       style={{ fontSize: '10px', marginTop: '4px' }}
                     >
                       {item.category}

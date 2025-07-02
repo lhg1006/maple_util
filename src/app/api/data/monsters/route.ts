@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { COMPLETE_MONSTERS } from '@/data/complete-monsters';
+import { loadMonsters } from '@/lib/cdn-data-loader';
 
 export async function GET() {
   // 캐싱 헤더 설정 (1일)
@@ -7,5 +7,11 @@ export async function GET() {
     'Cache-Control': 'public, max-age=86400, stale-while-revalidate',
   };
 
-  return NextResponse.json(COMPLETE_MONSTERS, { headers });
+  try {
+    const monsters = await loadMonsters();
+    return NextResponse.json(monsters, { headers });
+  } catch (error) {
+    console.error('Failed to load monsters:', error);
+    return NextResponse.json({ error: 'Failed to load monsters' }, { status: 500 });
+  }
 }

@@ -45,3 +45,5 @@ next-env.d.ts
 /src/data/generated-*.ts
 /public/data/*.json
 /data-cdn/
+/data-cdn-clean/
+/public/data-cdn/

@@ -55,12 +55,12 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
       setMob(mobData as DetailedMob);
       
       // 로컬 데이터에서 상세 정보 로드
-      const detailedData = getMonsterDetails(mobId);
+      const detailedData = await getMonsterDetails(mobId);
       setGameData(detailedData);
     } catch (error) {
       console.error('몬스터 상세 정보 로딩 실패:', error);
       // API 실패 시에도 로컬 데이터는 시도
-      const detailedData = getMonsterDetails(mobId);
+      const detailedData = await getMonsterDetails(mobId);
       setGameData(detailedData);
     } finally {
       setLoading(false);
