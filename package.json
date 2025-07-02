@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-data": "node scripts/generate-data.js",
+    "generate-complete": "node scripts/generate-complete-data.js"
   },
   "dependencies": {
     "@ant-design/colors": "^7.2.1",

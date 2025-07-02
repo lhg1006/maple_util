@@ -13,10 +13,8 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   const getItemImage = (itemId: number) => {
-    // 여러 버전 시도
-    const versions = ['210.1.1', '208.2.0', '207.0.0'];
-    const version = versions[0]; // 기본 버전
-    return `https://maplestory.io/api/GMS/${version}/item/${itemId}/icon`;
+    // KMS 389 버전 사용 (데이터와 일치)
+    return `https://maplestory.io/api/KMS/389/item/${itemId}/icon`;
   };
 
   const getCategoryColor = (category: string | undefined) => {
@@ -103,9 +101,9 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
                   justifyContent: 'center'
                 }}
               >
-                {!imageErrors.has(item.id) && item.icon ? (
+                {!imageErrors.has(item.id) ? (
                   <img
-                    src={item.icon}
+                    src={item.icon || getItemImage(item.id)}
                     alt={item.name}
                     style={{ 
                       width: '60%', 

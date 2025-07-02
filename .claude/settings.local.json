@@ -19,7 +19,24 @@
       "Bash(# Test versions around 300 to find the starting point\nfor version in 280 290 295 298 299 300 301 310 320 330 340 360 370; do\n  echo \"Testing KMS version $version:\"\n  response=$(curl -s \"https://maplestory.io/api/KMS/$version/item/2000000\")\n  if echo \"$response\" | grep -q \"error\"; then\n    echo \"Error: Not available\"\n  else\n    echo \"$response\" | jq -r '.description.name' 2>/dev/null || echo \"Failed to parse\"\n  fi\n  echo \"---\"\ndone)",
       "Bash(# Test the exact starting point\nfor version in 292 293 294 295; do\n  echo \"Testing KMS version $version:\"\n  response=$(curl -s \"https://maplestory.io/api/KMS/$version/item/2000000\")\n  if echo \"$response\" | grep -q \"error\"; then\n    echo \"Error: Not available\"\n  else\n    echo \"Available - Name: $(echo \"$response\" | jq -r '.description.name' 2>/dev/null)\"\n  fi\ndone\n\necho -e \"\\n--- Testing multiple items with KMS version 295 ---\"\n# Test multiple items with version 295\nfor itemId in 2000000 2000001 2000002 2000003 2000004 2000005; do\n  echo -n \"Item $itemId: \"\n  curl -s \"https://maplestory.io/api/KMS/295/item/$itemId\" | jq -r '.description.name' 2>/dev/null || echo \"Failed\"\ndone)",
       "Bash(# Test higher KMS versions to find the upper limit\nfor version in 400 450 500 550 600; do\n  echo -n \"Testing KMS version $version: \"\n  response=$(curl -s \"https://maplestory.io/api/KMS/$version/item/2000000\")\n  if echo \"$response\" | grep -q \"error\"; then\n    echo \"Not available\"\n  else\n    echo \"Available\"\n  fi\ndone\n\n# Test the latest versions\necho -e \"\\nTesting latest GMS version for comparison:\"\ncurl -s \"https://maplestory.io/api/GMS/latest/item/2000000\" | jq -r '.description.name' 2>/dev/null || echo \"Failed\")",
-      "Bash(# Binary search for upper limit\nfor version in 380 390 395 398 399; do\n  echo -n \"Testing KMS version $version: \"\n  response=$(curl -s \"https://maplestory.io/api/KMS/$version/item/2000000\")\n  if echo \"$response\" | grep -q \"error\"; then\n    echo \"Not available\"\n  else\n    echo \"Available - $(echo \"$response\" | jq -r '.description.name' 2>/dev/null)\"\n  fi\ndone\n\n# Test if we can get version information or available versions list\necho -e \"\\nChecking for version list endpoint:\"\ncurl -s \"https://maplestory.io/api/wz\" | jq '.' 2>/dev/null | head -20)"
+      "Bash(# Binary search for upper limit\nfor version in 380 390 395 398 399; do\n  echo -n \"Testing KMS version $version: \"\n  response=$(curl -s \"https://maplestory.io/api/KMS/$version/item/2000000\")\n  if echo \"$response\" | grep -q \"error\"; then\n    echo \"Not available\"\n  else\n    echo \"Available - $(echo \"$response\" | jq -r '.description.name' 2>/dev/null)\"\n  fi\ndone\n\n# Test if we can get version information or available versions list\necho -e \"\\nChecking for version list endpoint:\"\ncurl -s \"https://maplestory.io/api/wz\" | jq '.' 2>/dev/null | head -20)",
+      "Bash(find:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(lsof:*)",
+      "Bash(npm run lint)",
+      "WebFetch(domain:maplestory.fandom.com)",
+      "WebFetch(domain:maplestory.wiki)",
+      "WebFetch(domain:mapledb.kr)",
+      "WebFetch(domain:osmlib.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run generate-data:*)",
+      "Bash(ls:*)",
+      "Bash(npm run generate-complete:*)",
+      "Bash(grep:*)",
+      "Bash(pkill:*)",
+      "Bash(sed:*)",
+      "Bash(echo:*)"
     ],
     "deny": []
   }

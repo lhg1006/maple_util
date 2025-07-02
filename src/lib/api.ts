@@ -9,7 +9,7 @@ import {
 
 const API_BASE_URL = 'https://maplestory.io/api';
 const DEFAULT_REGION = 'KMS';
-const DEFAULT_VERSION = '284';
+const DEFAULT_VERSION = '389';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -60,6 +60,35 @@ export class MapleStoryAPI {
 
   async getMobRender(id: number, action: string = 'stand'): Promise<string> {
     return `${API_BASE_URL}${this.getEndpoint(`/mob/${id}/render/${action}`)}`;
+  }
+
+  // Mob 목록 API
+  async getMobsByCategory(params: { startPosition?: number; count?: number }): Promise<MapleMob[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.startPosition) queryParams.append('startPosition', params.startPosition.toString());
+      if (params.count) queryParams.append('count', params.count.toString());
+      
+      const url = `${this.getEndpoint('/mob')}?${queryParams.toString()}`;
+      const response = await apiClient.get(url);
+      const mobs = response.data;
+      
+      if (!Array.isArray(mobs)) {
+        return [];
+      }
+      
+      return mobs.map((mob: any) => ({
+        id: mob.id,
+        name: mob.name || `Mob ${mob.id}`,
+        level: mob.level || null,
+        hp: mob.hp || null,
+        exp: mob.exp || null,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch mobs:', error);
+      throw error;
+    }
   }
 
   // Item API
