@@ -172,6 +172,85 @@ const ITEM_CATEGORIES = {
     { value: 'Core', label: '코어' },
     { value: 'Mission', label: '미션' },
   ],
+  etcCategories: [
+    { value: 'Other', label: '일반 기타' },
+    { value: 'Crafting', label: '제작' },
+    { value: 'Cash Shop', label: '캐시샵' },
+  ],
+  etcOtherSubCategories: [
+    { value: 'Quest Item', label: '퀘스트 아이템' },
+    { value: 'Monster Drop', label: '몬스터 드롭' },
+    { value: 'Coin', label: '코인' },
+    { value: 'Book', label: '책' },
+    { value: 'Pet Command', label: '펫 명령어' },
+    { value: 'Container', label: '컨테이너' },
+    { value: 'Event Item', label: '이벤트 아이템' },
+    { value: 'Minigame', label: '미니게임' },
+    { value: 'Cosmetic', label: '코스메틱' },
+    { value: 'Item Pot', label: '아이템 포트' },
+    { value: 'Other', label: '기타' },
+  ],
+  etcCraftingSubCategories: [
+    { value: 'Maker', label: '메이커' },
+    { value: 'Crafting Item', label: '제작 아이템' },
+    { value: 'Herb', label: '허브' },
+    { value: 'Herb Oil', label: '허브 오일' },
+    { value: 'Rare Processed  Ore', label: '희귀 가공 광석' },
+    { value: 'Rare Ore', label: '희귀 광석' },
+    { value: 'Mineral Processed', label: '가공 광물' },
+    { value: 'Mineral Ore', label: '광물 원석' },
+  ],
+  etcCashShopSubCategories: [
+    { value: 'Reward Item', label: '보상 아이템' },
+    { value: 'Wedding', label: '웨딩' },
+  ],
+  cashCategories: [
+    { value: 'Random Reward', label: '랜덤 보상' },
+    { value: 'Miscellaneous', label: '기타' },
+    { value: 'Free Market', label: '기능성' },
+    { value: 'Appearance', label: '외형' },
+    { value: 'Messenger and Social', label: '메신저/소셜' },
+    { value: 'Pet', label: '펫 장비/스킬' },
+    { value: 'Equipment Modification', label: '장비 개조' },
+    { value: 'Time Saver', label: '시간 절약' },
+    { value: 'Character Modification', label: '캐릭터 변경' },
+    { value: 'Weapon', label: '무기' },
+    { value: 'Accessory', label: '장신구' },
+  ],
+  cashRandomRewardSubCategories: [
+    { value: 'Exchange Coupon', label: '교환 쿠폰' },
+    { value: 'Special Item', label: '특별 아이템' },
+    { value: 'Gachapon', label: '가챠폰' },
+  ],
+  cashFreeMarketSubCategories: [
+    { value: 'Pet', label: '펫' },
+    { value: 'Hired Merchant', label: '고용 상인' },
+    { value: 'Store Permit', label: '상점 허가증' },
+    { value: 'Auction House', label: '경매장' },
+    { value: 'Other', label: '기타' },
+  ],
+  cashPetSubCategories: [
+    { value: 'Regular Pet', label: '일반 펫' },
+    { value: 'New Series', label: 'New 시리즈' },
+    { value: 'Mini Series', label: '미니 시리즈' },
+    { value: 'Special Color', label: '색상 특별판' },
+    { value: 'Other', label: '기타' },
+  ],
+  cashRegularPetSubCategories: [
+    { value: 'All', label: '전체' },
+    { value: 'Magnet Pet', label: '자석펫 (P)' },
+  ],
+  cashAppearanceSubCategories: [
+    { value: 'Effect', label: '이펙트' },
+    { value: 'Hair Coupon', label: '헤어 쿠폰' },
+    { value: 'Face Coupon', label: '성형 쿠폰' },
+    { value: 'Facial Expression', label: '표정' },
+    { value: 'Hair Color Coupon', label: '헤어 컬러 쿠폰' },
+    { value: 'Skin Coupon', label: '피부 쿠폰' },
+    { value: 'Cosmetic Lens', label: '컬러렌즈' },
+    { value: 'Ear', label: '귀' },
+    { value: 'Special', label: '특별' },
+  ],
 };
 
 export default function ItemsPage() {
@@ -185,6 +264,8 @@ export default function ItemsPage() {
   const [overallCategory, setOverallCategory] = useState<string>('Equip');
   const [category, setCategory] = useState<string>('Accessory'); // 기본값: 장신구
   const [subCategory, setSubCategory] = useState<string>('Face Accessory'); // 기본값: 얼굴장식
+  const [subSubCategory, setSubSubCategory] = useState<string>(''); // 4단계 분류 (펫 타입 등)
+  const [subSubSubCategory, setSubSubSubCategory] = useState<string>(''); // 5단계 분류 (자석펫 등)
   const pageSize = 24; // 8x3 그리드
 
   // 카테고리별 데이터 로드
@@ -341,6 +422,68 @@ export default function ItemsPage() {
           filteredItems = filteredItems.filter(item => item.subcategory === subCategory);
         }
         
+        // 4단계 필터링 (펫 타입별)
+        if (subSubCategory) {
+          filteredItems = filteredItems.filter(item => {
+            // 펫 이름 기반으로 타입 분류
+            const itemName = item.name.toLowerCase();
+            switch (subSubCategory) {
+              case 'New Series':
+                return itemName.includes('new ');
+              case 'Mini Series':
+                return itemName.includes('미니');
+              case 'Special Color':
+                return itemName.includes('골드') || itemName.includes('실버') || 
+                       itemName.includes('레드') || itemName.includes('블루') || 
+                       itemName.includes('그린') || itemName.includes('핑크') ||
+                       itemName.includes('옐로') || itemName.includes('다크') ||
+                       itemName.includes('프린스');
+              case 'Regular Pet':
+                return !itemName.includes('new ') && !itemName.includes('미니') &&
+                       !itemName.includes('골드') && !itemName.includes('실버') &&
+                       !itemName.includes('레드') && !itemName.includes('블루') &&
+                       !itemName.includes('그린') && !itemName.includes('핑크') &&
+                       !itemName.includes('옐로') && !itemName.includes('다크') &&
+                       !itemName.includes('프린스') && !itemName.includes('주문서');
+              case 'Other':
+                return itemName.includes('주문서') || 
+                       (!itemName.includes('new ') && !itemName.includes('미니') &&
+                        !itemName.includes('골드') && !itemName.includes('실버') &&
+                        !itemName.includes('레드') && !itemName.includes('블루') &&
+                        !itemName.includes('그린') && !itemName.includes('핑크') &&
+                        !itemName.includes('옐로') && !itemName.includes('다크') &&
+                        !itemName.includes('프린스'));
+              default:
+                return true;
+            }
+          });
+        }
+        
+        // 5단계 필터링 (자석펫 분류)
+        if (subSubSubCategory && subSubSubCategory !== 'All') {
+          filteredItems = filteredItems.filter(item => {
+            switch (subSubSubCategory) {
+              case 'Magnet Pet':
+                // "더욱 넓은 영역의 아이템을 획득할 수 있습니다" 설명이 있는 펫만
+                return item.description?.includes('더욱 넓은 영역의 아이템을 획득할 수 있습니다');
+              default:
+                return true;
+            }
+          });
+        }
+        
+        // 중복 제거 (같은 이름의 아이템이 여러 개인 경우 하나만 남기기)
+        if (subCategory === 'Pet') {
+          const uniqueItems = new Map();
+          filteredItems.forEach(item => {
+            const key = item.name.toLowerCase().trim();
+            if (!uniqueItems.has(key)) {
+              uniqueItems.set(key, item);
+            }
+          });
+          filteredItems = Array.from(uniqueItems.values());
+        }
+        
         console.log(`총 ${filteredItems.length}개 아이템 로드 완료`);
         console.log(`필터링된 아이템 샘플:`, filteredItems.slice(0, 5).map(item => ({
           id: item.id,
@@ -360,7 +503,7 @@ export default function ItemsPage() {
     };
 
     loadItems();
-  }, [overallCategory, category, subCategory, message]);
+  }, [overallCategory, category, subCategory, subSubCategory, subSubSubCategory, message]);
 
   // 검색 및 정렬 적용
   useEffect(() => {
@@ -501,15 +644,33 @@ export default function ItemsPage() {
                       if (value === 'Equip') {
                         setCategory('Accessory');
                         setSubCategory('Face Accessory');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
                       } else if (value === 'Use') {
                         setCategory('Consumable');
                         setSubCategory('Potion');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
                       } else if (value === 'Setup') {
                         setCategory('Other');
                         setSubCategory('Chair');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
+                      } else if (value === 'Etc') {
+                        setCategory('Other');
+                        setSubCategory('Quest Item');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
+                      } else if (value === 'Cash') {
+                        setCategory('Random Reward');
+                        setSubCategory('Exchange Coupon');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
                       } else {
                         setCategory('');
                         setSubCategory('');
+                        setSubSubCategory('');
+                        setSubSubSubCategory('');
                       }
                     }}
                     placeholder="대분류"
@@ -601,6 +762,66 @@ export default function ItemsPage() {
                       allowClear
                     >
                       {ITEM_CATEGORIES.setupCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {overallCategory === 'Etc' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category}
+                      onChange={(value) => {
+                        setCategory(value);
+                        // 기타 아이템 카테고리별 기본 소분류 설정
+                        if (value === 'Other') {
+                          setSubCategory('Quest Item'); // 일반 기타 선택 시 퀘스트 아이템이 기본값
+                        } else if (value === 'Crafting') {
+                          setSubCategory('Maker'); // 제작 선택 시 메이커가 기본값
+                        } else if (value === 'Cash Shop') {
+                          setSubCategory('Reward Item'); // 캐시샵 선택 시 보상 아이템이 기본값
+                        } else {
+                          setSubCategory('');
+                        }
+                      }}
+                      placeholder="중분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.etcCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {overallCategory === 'Cash' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category}
+                      onChange={(value) => {
+                        setCategory(value);
+                        // 캐시 아이템 카테고리별 기본 소분류 설정
+                        if (value === 'Random Reward') {
+                          setSubCategory('Exchange Coupon'); // 랜덤 보상 선택 시 교환 쿠폰이 기본값
+                        } else if (value === 'Free Market') {
+                          setSubCategory('Pet'); // 기능성 선택 시 펫이 기본값
+                          setSubSubCategory('Regular Pet'); // 펫 선택 시 일반 펫이 기본값
+                          setSubSubSubCategory('All'); // 일반 펫 선택 시 전체가 기본값
+                        } else if (value === 'Appearance') {
+                          setSubCategory('Effect'); // 외형 선택 시 이펙트가 기본값
+                        } else {
+                          setSubCategory('');
+                        }
+                      }}
+                      placeholder="중분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashCategories.map(cat => (
                         <Option key={cat.value} value={cat.value}>{cat.label}</Option>
                       ))}
                     </Select>
@@ -759,8 +980,162 @@ export default function ItemsPage() {
                     </Select>
                   </Col>
                 )}
+                
+                {category === 'Other' && overallCategory === 'Etc' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="기타 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.etcOtherSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Crafting' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="제작 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.etcCraftingSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Cash Shop' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="캐시샵 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.etcCashShopSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Random Reward' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="랜덤 보상 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashRandomRewardSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Free Market' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="기능성 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashFreeMarketSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Appearance' && overallCategory === 'Cash' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="외형 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashAppearanceSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
               </Row>
             </Col>
+            
+            {/* 4단계 분류 (펫 타입) */}
+            {subCategory === 'Pet' && (
+              <Col span={24}>
+                <Row gutter={[16, 16]} align="middle">
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subSubCategory}
+                      onChange={(value) => {
+                        setSubSubCategory(value);
+                        // 일반 펫 선택 시 기본값 설정
+                        if (value === 'Regular Pet') {
+                          setSubSubSubCategory('All');
+                        } else {
+                          setSubSubSubCategory('');
+                        }
+                      }}
+                      placeholder="펫 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashPetSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                </Row>
+              </Col>
+            )}
+            
+            {/* 5단계 분류 (자석펫) */}
+            {subSubCategory === 'Regular Pet' && (
+              <Col span={24}>
+                <Row gutter={[16, 16]} align="middle">
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subSubSubCategory}
+                      onChange={setSubSubSubCategory}
+                      placeholder="펫 타입"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashRegularPetSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                </Row>
+              </Col>
+            )}
             
             <Col span={24}>
               <Row gutter={[16, 16]} align="middle">

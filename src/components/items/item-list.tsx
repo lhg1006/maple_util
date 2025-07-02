@@ -124,6 +124,14 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
                     <Tag color="red" style={{ margin: 0 }}>캐시</Tag>
                   </div>
                 )}
+                {/* 프리미엄 펫 라벨 */}
+                {item.category === 'Free Market' && 
+                 item.subcategory === 'Pet' && 
+                 item.description?.includes('더욱 넓은 영역의 아이템을 획득할 수 있습니다') && (
+                  <div className="absolute top-2 left-2">
+                    <Tag color="purple" style={{ margin: 0, fontWeight: 'bold' }}>P</Tag>
+                  </div>
+                )}
               </div>
             }
           >
