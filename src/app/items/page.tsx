@@ -127,6 +127,51 @@ const ITEM_CATEGORIES = {
     { value: 'Face', label: '성형' },
     { value: 'Head', label: '피부' },
   ],
+  useCategories: [
+    { value: 'Consumable', label: '소모품' },
+    { value: 'Armor Scroll', label: '방어구 주문서' },
+    { value: 'Recipe', label: '제작 레시피' },
+    { value: 'Special Scroll', label: '특수 주문서' },
+    { value: 'Character Modification', label: '캐릭터 변경' },
+    { value: 'Weapon Scroll', label: '무기 주문서' },
+    { value: 'Monster/Familiar', label: '몬스터/펫' },
+    { value: 'Projectile', label: '투사체' },
+    { value: 'Tablet', label: '태블릿' },
+    { value: 'Other', label: '기타' },
+  ],
+  consumableSubCategories: [
+    { value: 'Potion', label: '포션' },
+    { value: 'Food and Drink', label: '음식/음료' },
+    { value: 'EXP Potion', label: '경험치 포션' },
+    { value: 'EXP Buff', label: '경험치 버프' },
+    { value: 'Equipment Box', label: '장비 상자' },
+    { value: 'Transformation', label: '변신' },
+    { value: 'Appearance', label: '외형' },
+    { value: 'Teleport Item', label: '이동 아이템' },
+    { value: 'Status Cure', label: '상태 치료' },
+    { value: 'Character Modification', label: '캐릭터 변경' },
+    { value: 'Pet Food', label: '펫 음식' },
+    { value: 'Time Saver', label: '시간 절약' },
+    { value: 'Consumable', label: '일반 소모품' },
+    { value: 'Other', label: '기타' },
+  ],
+  setupCategories: [
+    { value: 'Other', label: '일반 설치' },
+    { value: 'Evolution Lab', label: '진화의 실험실' },
+  ],
+  setupOtherSubCategories: [
+    { value: 'Chair', label: '의자' },
+    { value: 'Event Item', label: '이벤트 아이템' },
+    { value: 'Title', label: '칭호' },
+    { value: 'Decoration', label: '장식' },
+    { value: 'Container', label: '컨테이너' },
+    { value: 'Extractor', label: '추출기' },
+    { value: 'Other', label: '기타' },
+  ],
+  setupEvolutionLabSubCategories: [
+    { value: 'Core', label: '코어' },
+    { value: 'Mission', label: '미션' },
+  ],
 };
 
 export default function ItemsPage() {
@@ -140,7 +185,7 @@ export default function ItemsPage() {
   const [overallCategory, setOverallCategory] = useState<string>('Equip');
   const [category, setCategory] = useState<string>('Accessory'); // 기본값: 장신구
   const [subCategory, setSubCategory] = useState<string>('Face Accessory'); // 기본값: 얼굴장식
-  const pageSize = 32;
+  const pageSize = 24; // 8x3 그리드
 
   // 카테고리별 데이터 로드
   useEffect(() => {
@@ -452,8 +497,20 @@ export default function ItemsPage() {
                     value={overallCategory}
                     onChange={(value) => {
                       setOverallCategory(value);
-                      setCategory('');
-                      setSubCategory('');
+                      // 대분류별 기본 중분류 설정
+                      if (value === 'Equip') {
+                        setCategory('Accessory');
+                        setSubCategory('Face Accessory');
+                      } else if (value === 'Use') {
+                        setCategory('Consumable');
+                        setSubCategory('Potion');
+                      } else if (value === 'Setup') {
+                        setCategory('Other');
+                        setSubCategory('Chair');
+                      } else {
+                        setCategory('');
+                        setSubCategory('');
+                      }
                     }}
                     placeholder="대분류"
                   >
@@ -492,6 +549,58 @@ export default function ItemsPage() {
                       allowClear
                     >
                       {ITEM_CATEGORIES.equipCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {overallCategory === 'Use' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category}
+                      onChange={(value) => {
+                        setCategory(value);
+                        // 소비 아이템 카테고리별 기본 소분류 설정
+                        if (value === 'Consumable') {
+                          setSubCategory('Potion'); // 소모품 선택 시 포션이 기본값
+                        } else {
+                          setSubCategory('');
+                        }
+                      }}
+                      placeholder="중분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.useCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {overallCategory === 'Setup' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category}
+                      onChange={(value) => {
+                        setCategory(value);
+                        // 설치 아이템 카테고리별 기본 소분류 설정
+                        if (value === 'Other') {
+                          setSubCategory('Chair'); // 일반 설치 선택 시 의자가 기본값
+                        } else if (value === 'Evolution Lab') {
+                          setSubCategory('Core'); // 진화의 실험실 선택 시 코어가 기본값
+                        } else {
+                          setSubCategory('');
+                        }
+                      }}
+                      placeholder="중분류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.setupCategories.map(cat => (
                         <Option key={cat.value} value={cat.value}>{cat.label}</Option>
                       ))}
                     </Select>
@@ -599,6 +708,57 @@ export default function ItemsPage() {
                     </Select>
                   </Col>
                 )}
+                
+                {category === 'Consumable' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="소모품 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.consumableSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Other' && overallCategory === 'Setup' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="설치 아이템 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.setupOtherSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+                
+                {category === 'Evolution Lab' && (
+                  <Col xs={24} sm={12} md={6}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory}
+                      onChange={setSubCategory}
+                      placeholder="진화의 실험실 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.setupEvolutionLabSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
               </Row>
             </Col>
             
@@ -633,12 +793,12 @@ export default function ItemsPage() {
           </Row>
         </div>
 
-        <div style={{ marginBottom: '32px' }}>
+        <div style={{ marginBottom: '12px' }}>
           <ItemList items={paginatedItems} loading={loading} />
         </div>
 
         {!loading && filteredItems.length > 0 && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center">
             <Pagination
               current={currentPage}
               total={filteredItems.length}

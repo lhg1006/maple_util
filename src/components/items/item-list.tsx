@@ -48,10 +48,10 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   if (loading) {
     return (
       <Row gutter={[16, 16]}>
-        {Array.from({ length: 16 }).map((_, index) => (
-          <Col key={index} xs={8} sm={6} md={4} lg={3} xl={3}>
+        {Array.from({ length: 24 }).map((_, index) => (
+          <Col key={index} xs={12} sm={8} md={6} lg={3} xl={3}>
             <Card
-              styles={{ body: { padding: '12px' } }}
+              styles={{ body: { padding: '4px' } }}
               style={{
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
               }}
@@ -81,11 +81,11 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   return (
     <Row gutter={[16, 16]}>
       {items.map((item) => (
-        <Col key={item.id} xs={8} sm={6} md={4} lg={3} xl={3}>
+        <Col key={item.id} xs={12} sm={8} md={6} lg={3} xl={3}>
           <Card
             hoverable
             className="h-full overflow-hidden"
-            styles={{ body: { padding: '12px' } }}
+            styles={{ body: { padding: '4px' } }}
             style={{
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
               transition: 'all 0.3s ease'
