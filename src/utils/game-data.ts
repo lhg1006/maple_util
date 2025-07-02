@@ -6,9 +6,7 @@ import { DROPS, DropInfo, DROP_RATE_CONFIG, MONSTERS_BY_ITEM } from '@/data/drop
 import { GENERATED_MONSTERS } from '@/data/generated-monsters';
 import { GENERATED_ITEMS } from '@/data/generated-items';
 import { GENERATED_MAPS } from '@/data/generated-maps';
-import { COMPLETE_MONSTERS } from '@/data/complete-monsters';
-import { COMPLETE_ITEMS } from '@/data/complete-items';
-import { COMPLETE_MAPS } from '@/data/complete-maps';
+import { SAMPLE_MONSTERS, SAMPLE_ITEMS, SAMPLE_MAPS } from '@/data/sample-data';
 import { getAutoDropsForMonster } from '@/utils/auto-drops';
 
 // 통합 게임 데이터 인터페이스
@@ -32,7 +30,7 @@ export function getMonsterDetails(monsterId: number): GameData | null {
   
   // 없으면 완전한 데이터에서 찾기
   if (!monster) {
-    const completeMonster = COMPLETE_MONSTERS[monsterId];
+    const completeMonster = SAMPLE_MONSTERS[monsterId];
     if (completeMonster) {
       monster = {
         id: completeMonster.id,
@@ -85,7 +83,7 @@ export function getMonsterDetails(monsterId: number): GameData | null {
     
     // 없으면 완전한 아이템에서 찾기
     if (!item) {
-      const completeItem = COMPLETE_ITEMS[drop.itemId];
+      const completeItem = SAMPLE_ITEMS[drop.itemId];
       if (completeItem) {
         item = {
           id: completeItem.id,
@@ -147,7 +145,7 @@ export function getMonsterDetails(monsterId: number): GameData | null {
   // 맵 정보 찾기 (완전한 데이터 우선)
   if (monster.maps && monster.maps.length > 0) {
     maps = monster.maps.map(mapId => 
-      MAPS[mapId] || COMPLETE_MAPS[mapId] || GENERATED_MAPS[mapId]
+      MAPS[mapId] || SAMPLE_MAPS[mapId] || GENERATED_MAPS[mapId]
     ).filter(Boolean);
   }
   

@@ -7,7 +7,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { MapleItem } from '@/types/maplestory';
 import { mapleAPI, ItemQueryParams } from '@/lib/api';
-import { COMPLETE_ITEMS } from '@/data/complete-items';
+import { SAMPLE_ITEMS } from '@/data/sample-data';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -304,8 +304,8 @@ export default function ItemsPage() {
             break;
         }
 
-        // 완전한 데이터베이스 사용
-        let filteredItems = Object.values(COMPLETE_ITEMS).map(item => ({
+        // 샘플 데이터 사용
+        let filteredItems = Object.values(SAMPLE_ITEMS).map(item => ({
           id: item.id,
           name: item.name,
           category: item.category || '', // 중분류 (Armor, Accessory 등)
@@ -324,17 +324,17 @@ export default function ItemsPage() {
         // 카테고리별 아이템 수 확인
         const categoryCount = {};
         filteredItems.forEach(item => {
-          const completeItem = COMPLETE_ITEMS[item.id];
-          const cat = completeItem?.originalData?.typeInfo?.overallCategory || 'Unknown';
+          const sampleItem = SAMPLE_ITEMS[item.id];
+          const cat = sampleItem?.originalData?.typeInfo?.overallCategory || 'Unknown';
           categoryCount[cat] = (categoryCount[cat] || 0) + 1;
         });
         console.log('전체 카테고리 분포:', categoryCount);
         
         filteredItems = filteredItems.filter(item => {
-          // COMPLETE_ITEMS에서 원본 데이터 확인
-          const completeItem = COMPLETE_ITEMS[item.id];
-          if (completeItem && completeItem.originalData?.typeInfo?.overallCategory) {
-            const originalOverallCategory = completeItem.originalData.typeInfo.overallCategory;
+          // SAMPLE_ITEMS에서 원본 데이터 확인
+          const sampleItem = SAMPLE_ITEMS[item.id];
+          if (sampleItem && sampleItem.originalData?.typeInfo?.overallCategory) {
+            const originalOverallCategory = sampleItem.originalData.typeInfo.overallCategory;
             const matches = originalOverallCategory === overallCategory;
             
             // Setup과 Etc 아이템 샘플 로그
