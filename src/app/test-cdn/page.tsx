@@ -98,7 +98,9 @@ export default function TestCDNPage() {
       
       {loading && (
         <div style={{ textAlign: 'center', padding: '50px' }}>
-          <Spin size="large" tip="CDN에서 데이터를 로딩 중..." />
+          <Spin size="large" spinning={true} tip="CDN에서 데이터를 로딩 중...">
+            <div style={{ minHeight: '100px' }} />
+          </Spin>
         </div>
       )}
       

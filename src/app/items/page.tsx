@@ -154,7 +154,9 @@ export default function ItemsPageSimple() {
     return (
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px' }}>
-          <Spin size="large" tip="CDN에서 데이터를 로딩하는 중..." />
+          <Spin size="large" spinning={true} tip="CDN에서 데이터를 로딩하는 중...">
+            <div style={{ minHeight: '200px' }} />
+          </Spin>
           <div style={{ marginTop: '20px', color: '#666' }}>
             109,945개의 아이템 데이터를 다운로드하고 있습니다...
           </div>
