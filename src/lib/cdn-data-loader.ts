@@ -1,8 +1,8 @@
 // CDN에서 데이터 로드
 const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@latest';
 
-// 로컬 개발시 public 폴더 사용 (옵션)
-const USE_LOCAL = process.env.NODE_ENV === 'development' && true;
+// 로컬 개발시 public 폴더 사용 (옵션) - 로컬 파일 제거했으므로 항상 CDN 사용
+const USE_LOCAL = false; // 로컬 파일들을 제거했으므로 항상 CDN 사용
 const LOCAL_BASE_URL = '/data-cdn';
 
 const BASE_URL = USE_LOCAL ? LOCAL_BASE_URL : CDN_BASE_URL;
@@ -84,10 +84,51 @@ export async function loadMaps(): Promise<Record<number, any>> {
   }
 }
 
-// 아이템 데이터 로드 (비활성화됨 - API 사용)
+// 아이템 데이터 로드 (CDN에서 청크 단위로)
 export async function loadItems(): Promise<Record<number, any>> {
-  console.warn('⚠️ loadItems() 호출됨: 이제 API를 사용하므로 빈 객체 반환');
-  return {};
+  if (cache.items) return cache.items;
+  if (cache.itemsLoading) {
+    while (cache.itemsLoading) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return cache.items;
+  }
+
+  cache.itemsLoading = true;
+  try {
+    console.log('📥 CDN에서 아이템 데이터 로딩 중...');
+    
+    // 먼저 인덱스 파일 로드 (캐시 버스팅)
+    const indexResponse = await fetch(`${BASE_URL}/items-index.json?t=${Date.now()}`);
+    if (!indexResponse.ok) throw new Error(`HTTP ${indexResponse.status}`);
+    
+    const index: ItemsIndex = await indexResponse.json();
+    console.log(`📋 ${index.totalItems}개 아이템, ${index.chunks.length}개 청크`);
+    
+    // 모든 청크를 병렬로 로드 (캐시 버스팅)
+    const chunkPromises = index.chunks.map(async (chunk, i) => {
+      console.log(`  📦 청크 ${i + 1}/${index.chunks.length} 로딩...`);
+      const response = await fetch(`${BASE_URL}/${chunk.file}?t=${Date.now()}`);
+      if (!response.ok) throw new Error(`청크 로드 실패: ${chunk.file}`);
+      return response.json();
+    });
+    
+    const chunks = await Promise.all(chunkPromises);
+    
+    // 모든 청크를 하나로 병합
+    const allItems = chunks.reduce((acc, chunk) => {
+      return { ...acc, ...chunk };
+    }, {});
+    
+    cache.items = allItems;
+    console.log(`✅ ${Object.keys(allItems).length}개 아이템 로드 완료`);
+    return allItems;
+  } catch (error) {
+    console.error('CDN 아이템 데이터 로드 실패:', error);
+    return {};
+  } finally {
+    cache.itemsLoading = false;
+  }
 }
 
 // 모든 데이터 프리로드 (아이템 제외)

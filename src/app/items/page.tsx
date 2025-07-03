@@ -7,7 +7,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { ItemDetailModal } from '@/components/items/item-detail-modal';
 import { MapleItem } from '@/types/maplestory';
-import { loadItems, clearCache } from '@/lib/cdn-data-loader';
+import { loadItems } from '@/lib/cdn-data-loader';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -139,13 +139,28 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const pageSize = 24;
 
-  // 임시: CDN 아이템 데이터 제거로 인한 비활성화
+  // CDN에서 아이템 데이터 로드
   useEffect(() => {
-    setDataLoading(false);
-    setAllItems({});
-    setItems([]);
-    setFilteredItems([]);
-    message.info('아이템 데이터는 API 전용으로 변경되었습니다. 개별 아이템 검색은 다른 페이지에서 이용해주세요.');
+    const loadData = async () => {
+      try {
+        setDataLoading(true);
+        console.log('🚀 CDN 아이템 데이터 로딩 시작...');
+        
+        const itemsData = await loadItems();
+        console.log('✅ CDN 아이템 데이터 로드 완료:', Object.keys(itemsData).length);
+        
+        setAllItems(itemsData);
+        message.success(`${Object.keys(itemsData).length.toLocaleString()}개 아이템 데이터를 성공적으로 로드했습니다.`);
+      } catch (error) {
+        console.error('❌ CDN 아이템 데이터 로드 실패:', error);
+        message.error('아이템 데이터 로드에 실패했습니다. 페이지를 새로고침해주세요.');
+        setAllItems({});
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    loadData();
   }, [message]);
 
   // 카테고리별 필터링

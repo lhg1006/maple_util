@@ -82,7 +82,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
   const enhancedItem = React.useMemo(() => {
     if (!item) return null;
     
-    let result = { ...item };
+    const result = { ...item };
     
     // API에서 가져온 스탯 데이터 병합
     if (statsData) {
