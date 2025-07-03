@@ -74,32 +74,49 @@ const ITEM_CATEGORIES = {
   setupSubCategories: [
     { value: '전체', label: '전체' },
     { value: 'Chair', label: '의자' },
-    { value: 'Portal', label: '포탈' },
-    { value: 'Jukebox', label: '주크박스' },
-    { value: 'Weather', label: '날씨' },
-    { value: 'BGM', label: 'BGM' },
     { value: 'Decoration', label: '장식' },
+    { value: 'Container', label: '컨테이너' },
+    { value: 'Core', label: '코어' },
+    { value: 'Event Item', label: '이벤트' },
+    { value: 'Extractor', label: '추출기' },
+    { value: 'Mission', label: '미션' },
+    { value: 'Title', label: '타이틀' },
     { value: 'Other', label: '기타' },
   ],
   etcSubCategories: [
     { value: '전체', label: '전체' },
-    { value: 'Quest', label: '퀘스트' },
-    { value: 'Material', label: '재료' },
-    { value: 'Mineral', label: '광물' },
+    { value: 'Quest Item', label: '퀘스트' },
+    { value: 'Monster Drop', label: '몬스터 드롭' },
+    { value: 'Crafting Item', label: '제작 재료' },
+    { value: 'Mineral Ore', label: '광물' },
+    { value: 'Mineral Processed', label: '가공 광물' },
+    { value: 'Rare Ore', label: '희귀 광물' },
+    { value: 'Rare Processed  Ore', label: '희귀 가공 광물' },
+    { value: 'Herb', label: '약초' },
+    { value: 'Herb Oil', label: '약초 오일' },
     { value: 'Coin', label: '코인' },
-    { value: 'Key', label: '열쇠' },
     { value: 'Book', label: '책' },
-    { value: 'Collection', label: '수집' },
+    { value: 'Container', label: '컨테이너' },
+    { value: 'Event Item', label: '이벤트' },
+    { value: 'Reward Item', label: '보상' },
     { value: 'Other', label: '기타' },
   ],
   cashSubCategories: [
     { value: '전체', label: '전체' },
     { value: 'Pet', label: '펫' },
     { value: 'Package', label: '패키지' },
-    { value: 'Cube', label: '큐브' },
+    { value: 'Miracle Cube', label: '큐브' },
     { value: 'Special', label: '특수' },
-    { value: 'Coupon', label: '쿠폰' },
-    { value: 'Service', label: '서비스' },
+    { value: 'Face Coupon', label: '얼굴 쿠폰' },
+    { value: 'Hair Coupon', label: '헤어 쿠폰' },
+    { value: 'Hair Color Coupon', label: '헤어 색상 쿠폰' },
+    { value: 'Skin Coupon', label: '피부 쿠폰' },
+    { value: 'EXP Coupon', label: 'EXP 쿠폰' },
+    { value: 'Exchange Coupon', label: '교환 쿠폰' },
+    { value: 'Teleport Rock', label: '텔레포트 록' },
+    { value: 'Protection', label: '보호' },
+    { value: 'Scroll', label: '주문서' },
+    { value: 'Inventory Slot', label: '인벤토리' },
     { value: 'Other', label: '기타' },
   ],
 };
@@ -155,30 +172,6 @@ export default function ItemsPage() {
       });
 
       console.log(`📊 ${overallCategory}: ${filteredData.length}개 아이템 발견`);
-      
-      // 데이터 구조 디버깅 - 각 카테고리별 샘플 데이터 로깅
-      if (filteredData.length > 0) {
-        const sampleItem = filteredData[0];
-        const typeInfo = sampleItem.originalData?.typeInfo || sampleItem.typeInfo;
-        console.log(`🔍 ${overallCategory} 샘플 데이터:`, {
-          id: sampleItem.id,
-          name: sampleItem.name,
-          overallCategory: typeInfo?.overallCategory,
-          category: typeInfo?.category,
-          subCategory: typeInfo?.subCategory,
-          fullTypeInfo: typeInfo,
-          originalData: sampleItem.originalData ? 'exists' : 'missing',
-          directTypeInfo: sampleItem.typeInfo ? 'exists' : 'missing'
-        });
-        
-        // 각 카테고리별 실제 category 값들 분석
-        const categoryValues = [...new Set(filteredData.map((item: any) => {
-          const typeInfo = item.originalData?.typeInfo || item.typeInfo;
-          return typeInfo?.category;
-        }))].filter(Boolean);
-        
-        console.log(`📈 ${overallCategory} 실제 category 값들:`, categoryValues);
-      }
 
       // MapleItem 형식으로 변환
       const convertedItems = filteredData.map((item: any) => {
@@ -193,16 +186,6 @@ export default function ItemsPage() {
           cash: false,
           price: 0,
         };
-        
-        // 소비 아이템 디버깅
-        if (overallCategory === 'Use' && Math.random() < 0.001) {
-          console.log('소비 아이템 매핑:', {
-            name: item.name,
-            category: mappedItem.category,
-            subcategory: mappedItem.subcategory,
-            originalData: typeInfo
-          });
-        }
         
         return mappedItem;
       }) as MapleItem[];
@@ -248,24 +231,24 @@ export default function ItemsPage() {
       }
     }
     
-    // 설치아이템 카테고리 필터
+    // 설치아이템 카테고리 필터 (subCategory 기반)
     if (overallCategory === 'Setup') {
       if (category && category !== '전체') {
-        filtered = filtered.filter(item => item.category === category);
+        filtered = filtered.filter(item => item.subcategory === category);
       }
     }
     
-    // 기타아이템 카테고리 필터
+    // 기타아이템 카테고리 필터 (subCategory 기반)
     if (overallCategory === 'Etc') {
       if (category && category !== '전체') {
-        filtered = filtered.filter(item => item.category === category);
+        filtered = filtered.filter(item => item.subcategory === category);
       }
     }
     
-    // 캐시아이템 카테고리 필터
+    // 캐시아이템 카테고리 필터 (subCategory 기반)
     if (overallCategory === 'Cash') {
       if (category && category !== '전체') {
-        filtered = filtered.filter(item => item.category === category);
+        filtered = filtered.filter(item => item.subcategory === category);
       }
     }
 
