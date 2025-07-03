@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from '../providers/theme-provider';
+import { Footer } from './footer';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -92,7 +93,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               textOverflow: 'ellipsis'
             }}
           >
-            {collapsed ? 'ML' : '메이플랜드'}
+            {collapsed ? 'MS' : '메이플스토리'}
           </Title>
         </div>
         <Menu
@@ -133,7 +134,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 fontSize: isMobile ? '16px' : '20px'
               }}
             >
-              {isMobile ? '메이플 유틸' : '메이플랜드 유틸리티'}
+              {isMobile ? '메이플 유틸' : '메이플스토리 유틸리티'}
             </Title>
           </Space>
           <ThemeToggle />
@@ -145,16 +146,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             width: '100%',
             overflowX: 'hidden',
             overflowY: 'auto',
-            padding: isMobile ? '8px' : '16px'
+            padding: isMobile ? '8px' : '16px',
+            display: 'flex',
+            flexDirection: 'column'
           }}
         >
           <div style={{ 
             width: '100%', 
             maxWidth: '100%', 
-            overflow: 'hidden' 
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            flex: 1,
+            minHeight: 0
           }}>
             {children}
           </div>
+          <Footer />
         </Content>
       </Layout>
     </Layout>

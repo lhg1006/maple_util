@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "메이플랜드 유틸리티",
-  description: "메이플랜드와 메이플스토리 종합 정보 사이트",
+  title: "메이플스토리 유틸리티",
+  description: "메이플스토리 종합 정보 사이트",
 };
 
 export default function RootLayout({

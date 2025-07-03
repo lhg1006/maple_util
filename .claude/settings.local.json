@@ -70,7 +70,9 @@
       "Bash(rg:*)",
       "Bash(gtimeout 10s npm run dev 2 >& 1)",
       "Bash(python3:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git count-objects:*)",
+      "Bash(git gc:*)"
     ],
     "deny": []
   }

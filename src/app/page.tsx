@@ -11,9 +11,9 @@ export default function Home() {
     <MainLayout>
       <div className="space-y-6">
         <div className="text-center mb-8">
-          <Title level={1}>메이플랜드 유틸리티에 오신 것을 환영합니다!</Title>
+          <Title level={1}>메이플스토리 유틸리티에 오신 것을 환영합니다!</Title>
           <Paragraph className="text-lg">
-            메이플랜드와 메이플스토리의 모든 정보를 한 곳에서 확인하세요.
+            메이플스토리의 모든 정보를 한 곳에서 확인하세요.
           </Paragraph>
         </div>
 
@@ -22,7 +22,7 @@ export default function Home() {
             <Card className="text-center hover:shadow-md transition-shadow">
               <Statistic
                 title="아이템 정보"
-                value="10,000+"
+                value="57,490"
                 prefix={<ShoppingOutlined />}
                 valueStyle={{ color: '#3f8600' }}
               />
@@ -80,7 +80,7 @@ export default function Home() {
             <Card title="최근 업데이트" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>
-                  <Title level={5}>메이플랜드 신규 아이템 추가</Title>
+                  <Title level={5}>메이플스토리 신규 아이템 추가</Title>
                   <Paragraph>
                     최신 업데이트로 추가된 신규 아이템들의 정보가 업데이트되었습니다.
                   </Paragraph>
