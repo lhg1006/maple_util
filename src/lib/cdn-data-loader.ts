@@ -84,66 +84,24 @@ export async function loadMaps(): Promise<Record<number, any>> {
   }
 }
 
-// 아이템 데이터 로드 (청크 단위)
+// 아이템 데이터 로드 (비활성화됨 - API 사용)
 export async function loadItems(): Promise<Record<number, any>> {
-  if (cache.items) return cache.items;
-  if (cache.itemsLoading) {
-    while (cache.itemsLoading) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    return cache.items;
-  }
-
-  cache.itemsLoading = true;
-  try {
-    console.log('📥 아이템 데이터 로딩 중...');
-    
-    // 먼저 인덱스 파일 로드 (캐시 버스팅)
-    const indexResponse = await fetch(`${BASE_URL}/items-index.json?t=${Date.now()}`);
-    if (!indexResponse.ok) throw new Error(`HTTP ${indexResponse.status}`);
-    
-    const index: ItemsIndex = await indexResponse.json();
-    console.log(`📋 ${index.totalItems}개 아이템, ${index.chunks.length}개 청크`);
-    
-    // 모든 청크를 병렬로 로드 (캐시 버스팅)
-    const chunkPromises = index.chunks.map(async (chunk, i) => {
-      console.log(`  📦 청크 ${i + 1}/${index.chunks.length} 로딩...`);
-      const response = await fetch(`${BASE_URL}/${chunk.file}?t=${Date.now()}`);
-      if (!response.ok) throw new Error(`청크 로드 실패: ${chunk.file}`);
-      return response.json();
-    });
-    
-    const chunks = await Promise.all(chunkPromises);
-    
-    // 모든 청크를 하나로 병합
-    const allItems = chunks.reduce((acc, chunk) => {
-      return { ...acc, ...chunk };
-    }, {});
-    
-    cache.items = allItems;
-    console.log(`✅ ${Object.keys(allItems).length}개 아이템 로드 완료`);
-    return allItems;
-  } catch (error) {
-    console.error('아이템 데이터 로드 실패:', error);
-    return {};
-  } finally {
-    cache.itemsLoading = false;
-  }
+  console.warn('⚠️ loadItems() 호출됨: 이제 API를 사용하므로 빈 객체 반환');
+  return {};
 }
 
-// 모든 데이터 프리로드
+// 모든 데이터 프리로드 (아이템 제외)
 export async function preloadAllData() {
-  console.log('🚀 전체 데이터 프리로딩 시작...');
+  console.log('🚀 전체 데이터 프리로딩 시작... (몬스터, 맵만)');
   const start = Date.now();
   
   await Promise.all([
     loadMonsters(),
-    loadMaps(),
-    loadItems()
+    loadMaps()
   ]);
   
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-  console.log(`✨ 전체 데이터 로드 완료 (${elapsed}초)`);
+  console.log(`✨ 데이터 로드 완료 (${elapsed}초) - 아이템은 API 사용`);
 }
 
 // 데이터 캐시 클리어
