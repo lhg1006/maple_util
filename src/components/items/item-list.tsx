@@ -1,20 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Row, Col, Card, Tag, Empty, Skeleton } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 
 interface ItemListProps {
   items: MapleItem[];
   loading?: boolean;
+  onItemClick?: (item: MapleItem) => void;
 }
 
-export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
+export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick }) => {
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [imageVersions, setImageVersions] = useState<Record<number, string>>({});
 
   const getItemImage = (itemId: number) => {
-    // KMS 389 버전 사용 (데이터와 일치)
+    // 여러 버전 시도를 위한 기본 버전
     return `https://maplestory.io/api/KMS/389/item/${itemId}/icon`;
+  };
+  
+  const getItemImageFallback = (itemId: number, version: string = '284') => {
+    return `https://maplestory.io/api/KMS/${version}/item/${itemId}/icon`;
+  };
+
+  // PC방 아이템 판별
+  const isPCBang = (item: MapleItem) => {
+    const name = item.name?.toLowerCase() || '';
+    const description = item.description?.toLowerCase() || '';
+    return name.includes('pc방') || name.includes('pc') || 
+           description.includes('pc방') || description.includes('피시방') ||
+           name.includes('internet cafe') || name.includes('cafe');
+  };
+
+  // 아이템 버전 구분
+  const getItemVersion = (item: MapleItem) => {
+    const name = item.name || '';
+    if (name.includes('테스트')) return '테스트';
+    if (name.includes('(이벤트)')) return '이벤트';
+    if (name.includes('(PC방)')) return 'PC방';
+    if (isPCBang(item)) return 'PC방';
+    return null;
+  };
+
+  // 영어 카테고리명을 한국어로 번역
+  const translateCategory = (category: string) => {
+    const translations: Record<string, string> = {
+      'Accessory': '장신구',
+      'Armor': '방어구',
+      'One-Handed Weapon': '한손 무기',
+      'Two-Handed Weapon': '두손 무기',
+      'Secondary Weapon': '보조 무기',
+      'Weapon': '무기',
+      'Consumable': '소비',
+      'Chair': '의자',
+      'Decoration': '장식',
+      'Pet': '펫',
+      'Mount': '라이딩',
+      'Character': '성형/헤어/피부',
+      'Cash': '캐시',
+      'Setup': '설치',
+      'Etc': '기타',
+      'Use': '소비',
+      'Equip': '장비'
+    };
+    return translations[category] || category;
   };
 
   const getCategoryColor = (category: string | undefined) => {
@@ -42,7 +91,20 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
   };
 
   const handleImageError = (itemId: number) => {
-    setImageErrors(prev => new Set(prev).add(itemId));
+    const versions = ['389', '284', '283', '285'];
+    const currentVersion = imageVersions[itemId] || '389';
+    const currentIndex = versions.indexOf(currentVersion);
+    
+    if (currentIndex < versions.length - 1) {
+      // 다음 버전 시도
+      const nextVersion = versions[currentIndex + 1];
+      setImageVersions(prev => ({ ...prev, [itemId]: nextVersion }));
+      console.log(`🔄 아이템 ${itemId} 이미지 버전 변경: ${currentVersion} → ${nextVersion}`);
+    } else {
+      // 모든 버전 실패
+      setImageErrors(prev => new Set(prev).add(itemId));
+      console.log(`❌ 아이템 ${itemId} 모든 이미지 버전 실패`);
+    }
   };
 
   if (loading) {
@@ -88,7 +150,12 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
             styles={{ body: { padding: '4px' } }}
             style={{
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              cursor: onItemClick ? 'pointer' : 'default'
+            }}
+            onClick={() => {
+              console.log('🖱️ 아이템 클릭됨:', item.name, item.id);
+              onItemClick?.(item);
             }}
             cover={
               <div 
@@ -103,7 +170,10 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
               >
                 {!imageErrors.has(item.id) ? (
                   <img
-                    src={item.icon || getItemImage(item.id)}
+                    src={imageVersions[item.id] ? 
+                      getItemImageFallback(item.id, imageVersions[item.id]) : 
+                      (item.icon || getItemImage(item.id))
+                    }
                     alt={item.name}
                     style={{ 
                       width: '60%', 
@@ -119,11 +189,54 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
                     <div className="text-xs">이미지 없음</div>
                   </div>
                 )}
-                {item.cash && (
-                  <div className="absolute top-2 right-2">
-                    <Tag color="red" style={{ margin: 0 }}>캐시</Tag>
-                  </div>
-                )}
+                {/* 배지들 */}
+                <div className="absolute top-1 right-1" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {/* Cash 배지 */}
+                  {item.cash && (
+                    <div 
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: '#FFD700',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        color: '#000',
+                        border: '1px solid #FFA500',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                      }}
+                      title="캐시 아이템"
+                    >
+                      ₩
+                    </div>
+                  )}
+                  
+                  {/* PC방 배지 */}
+                  {isPCBang(item) && (
+                    <div 
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        backgroundColor: '#00D2FF',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '8px',
+                        fontWeight: 'bold',
+                        color: '#FFF',
+                        border: '1px solid #0099CC',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                      }}
+                      title="PC방 전용 아이템"
+                    >
+                      PC
+                    </div>
+                  )}
+                </div>
                 {/* 프리미엄 펫 라벨 */}
                 {item.category === 'Free Market' && 
                  item.subcategory === 'Pet' && 
@@ -141,14 +254,24 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading }) => {
                   <div className="font-medium text-sm truncate" title={item.name}>
                     {item.name}
                   </div>
-                  {item.category && (
-                    <Tag 
-                      color={getCategoryColor(item.category)} 
-                      style={{ fontSize: '10px', marginTop: '4px' }}
-                    >
-                      {item.category}
-                    </Tag>
-                  )}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    {item.category && (
+                      <Tag 
+                        color={getCategoryColor(item.category)} 
+                        style={{ fontSize: '10px', margin: 0 }}
+                      >
+                        {translateCategory(item.category)}
+                      </Tag>
+                    )}
+                    {getItemVersion(item) && (
+                      <Tag 
+                        color="blue" 
+                        style={{ fontSize: '9px', margin: 0 }}
+                      >
+                        {getItemVersion(item)}
+                      </Tag>
+                    )}
+                  </div>
                 </div>
               }
               description={
