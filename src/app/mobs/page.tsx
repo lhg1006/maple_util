@@ -8,7 +8,7 @@ import { MobList } from '@/components/mobs/mob-list';
 import { MobDetailModal } from '@/components/mobs/mob-detail-modal';
 import { MapleMob } from '@/types/maplestory';
 import { mapleAPI } from '@/lib/api';
-import { loadMonsters, loadItems, loadMaps } from '@/lib/cdn-data-loader';
+import { loadMonsters } from '@/lib/cdn-data-loader';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;

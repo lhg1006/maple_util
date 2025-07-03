@@ -6,9 +6,9 @@ import { SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useTheme } from './providers/theme-provider';
 
 export const ThemeToggle: React.FC = () => {
-  try {
-    const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
+  try {
     return (
       <Button
         type="text"

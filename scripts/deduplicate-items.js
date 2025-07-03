@@ -12,32 +12,68 @@ async function deduplicateItems() {
     
     console.log('🔧 중복 아이템 제거 및 데이터 정리 시작!\n');
     
-    // 모든 기존 청크 파일 읽기
-    const inputDir = path.join(__dirname, '../public/data-cdn');
-    const files = fs.readdirSync(inputDir).filter(f => f.startsWith('items-') && f.endsWith('.json') && !f.includes('index'));
+    // complete-items.ts 파일에서 데이터 추출
+    const completeItemsPath = path.join(__dirname, '../public/maple-data/complete-items.ts');
+    console.log('📂 complete-items.ts 파일 읽는 중...');
     
-    console.log(`📦 ${files.length}개 청크 파일 발견`);
+    const fileContent = fs.readFileSync(completeItemsPath, 'utf8');
     
-    // 모든 아이템을 하나의 맵으로 합치기 (중복 자동 제거)
-    const allItems = {};
-    let totalProcessed = 0;
+    // export const COMPLETE_ITEMS = { 부분 찾기
+    const startMatch = fileContent.match(/export const COMPLETE_ITEMS[^=]*=\s*{/);
+    if (!startMatch) {
+        throw new Error('COMPLETE_ITEMS 객체를 찾을 수 없습니다');
+    }
+    
+    const startPos = startMatch.index + startMatch[0].length - 1; // { 포함
+    let braceCount = 0;
+    let endPos = startPos;
+    
+    // 매칭되는 } 찾기
+    for (let i = startPos; i < fileContent.length; i++) {
+        if (fileContent[i] === '{') braceCount++;
+        if (fileContent[i] === '}') braceCount--;
+        if (braceCount === 0) {
+            endPos = i;
+            break;
+        }
+    }
+    
+    const objectStr = fileContent.slice(startPos, endPos + 1);
+    console.log('📊 파싱된 객체 크기:', Math.round(objectStr.length / 1024), 'KB');
+    
+    // JSON으로 파싱 (eval 대신 안전한 방법)
+    const cleanedStr = objectStr
+        .replace(/'/g, '"')
+        .replace(/(\w+):/g, '"$1":')
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']');
+    
+    let allItems;
+    try {
+        allItems = JSON.parse(cleanedStr);
+    } catch (e) {
+        console.error('JSON 파싱 실패:', e.message);
+        // 백업 방법: eval 사용 (주의!)
+        console.log('백업 방법으로 eval 사용...');
+        allItems = eval('(' + objectStr + ')');
+    }
+    
+    const totalProcessed = Object.keys(allItems).length;
+    console.log(`📦 총 ${totalProcessed}개 아이템 로드됨`);
+    
+    // 중복 확인 (ID 기준)
+    const uniqueItems = {};
     let duplicatesRemoved = 0;
     
-    for (const file of files) {
-        console.log(`  처리 중: ${file}`);
-        const filePath = path.join(inputDir, file);
-        const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        
-        Object.entries(data).forEach(([id, item]) => {
-            totalProcessed++;
-            if (allItems[id]) {
-                duplicatesRemoved++;
-                console.log(`    중복 제거: ${id} - ${item.name}`);
-            } else {
-                allItems[id] = item;
-            }
-        });
-    }
+    Object.entries(allItems).forEach(([id, item]) => {
+        if (uniqueItems[id]) {
+            duplicatesRemoved++;
+        } else {
+            uniqueItems[id] = item;
+        }
+    });
+    
+    allItems = uniqueItems;
     
     console.log(`\n📊 처리 완료:`);
     console.log(`  총 처리된 아이템: ${totalProcessed}개`);
@@ -92,15 +128,71 @@ async function deduplicateItems() {
         }, null, 2)
     );
     
-    // 다른 파일들 복사
-    const otherFiles = ['monsters.json', 'maps.json', 'metadata.json'];
-    for (const file of otherFiles) {
-        if (fs.existsSync(path.join(inputDir, file))) {
-            fs.copyFileSync(
-                path.join(inputDir, file),
-                path.join(outputDir, file)
+    // 몬스터 데이터 추출
+    console.log('\n📂 몬스터 데이터 추출 중...');
+    const monstersPath = path.join(__dirname, '../public/maple-data/complete-monsters.ts');
+    const monstersContent = fs.readFileSync(monstersPath, 'utf8');
+    const monstersMatch = monstersContent.match(/export const COMPLETE_MONSTERS[^=]*=\s*{/);
+    if (monstersMatch) {
+        const startPos = monstersMatch.index + monstersMatch[0].length - 1;
+        let braceCount = 0;
+        let endPos = startPos;
+        
+        for (let i = startPos; i < monstersContent.length; i++) {
+            if (monstersContent[i] === '{') braceCount++;
+            if (monstersContent[i] === '}') braceCount--;
+            if (braceCount === 0) {
+                endPos = i;
+                break;
+            }
+        }
+        
+        const monstersStr = monstersContent.slice(startPos, endPos + 1);
+        console.log('몬스터 객체 크기:', Math.round(monstersStr.length / 1024), 'KB');
+        
+        try {
+            const monsters = eval('(' + monstersStr + ')');
+            fs.writeFileSync(
+                path.join(outputDir, 'monsters.json'),
+                JSON.stringify(monsters)
             );
-            console.log(`  📄 ${file} 복사됨`);
+            console.log(`  ✅ monsters.json: ${Object.keys(monsters).length}개 몬스터 저장`);
+        } catch (e) {
+            console.error('몬스터 데이터 처리 실패:', e.message);
+        }
+    }
+
+    // 맵 데이터 추출
+    console.log('📂 맵 데이터 추출 중...');
+    const mapsPath = path.join(__dirname, '../public/maple-data/complete-maps.ts');
+    const mapsContent = fs.readFileSync(mapsPath, 'utf8');
+    const mapsMatch = mapsContent.match(/export const COMPLETE_MAPS[^=]*=\s*{/);
+    if (mapsMatch) {
+        const startPos = mapsMatch.index + mapsMatch[0].length - 1;
+        let braceCount = 0;
+        let endPos = startPos;
+        
+        for (let i = startPos; i < mapsContent.length; i++) {
+            if (mapsContent[i] === '{') braceCount++;
+            if (mapsContent[i] === '}') braceCount--;
+            if (braceCount === 0) {
+                endPos = i;
+                break;
+            }
+        }
+        
+        const mapsStr = mapsContent.slice(startPos, endPos + 1);
+        console.log('맵 객체 크기:', Math.round(mapsStr.length / 1024), 'KB');
+        
+        try {
+            const maps = eval('(' + mapsStr + ')');
+            fs.writeFileSync(
+                path.join(outputDir, 'maps.json'),
+                JSON.stringify(maps)
+            );
+            console.log(`  ✅ maps.json: ${Object.keys(maps).length}개 맵 저장`);
+        } catch (e) {
+            console.error('맵 데이터 처리 실패:', e.message);
         }
     }
     

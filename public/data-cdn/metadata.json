@@ -1,0 +1,12 @@
+{
+  "version": "389",
+  "generated": "2025-07-03T00:06:23.227Z",
+  "source": "complete-*.ts files (deduplicated)",
+  "totalItems": 57490,
+  "duplicatesRemoved": 0,
+  "files": {
+    "monsters": "monsters.json",
+    "maps": "maps.json",
+    "items": "see items-index.json"
+  }
+}

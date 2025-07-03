@@ -1,5 +1,5 @@
 // CDN에서 데이터 로드
-const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@main';
+const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@latest';
 
 // 로컬 개발시 public 폴더 사용 (옵션)
 const USE_LOCAL = process.env.NODE_ENV === 'development' && false;
@@ -98,17 +98,17 @@ export async function loadItems(): Promise<Record<number, any>> {
   try {
     console.log('📥 아이템 데이터 로딩 중...');
     
-    // 먼저 인덱스 파일 로드
-    const indexResponse = await fetch(`${BASE_URL}/items-index.json`);
+    // 먼저 인덱스 파일 로드 (캐시 버스팅)
+    const indexResponse = await fetch(`${BASE_URL}/items-index.json?t=${Date.now()}`);
     if (!indexResponse.ok) throw new Error(`HTTP ${indexResponse.status}`);
     
     const index: ItemsIndex = await indexResponse.json();
     console.log(`📋 ${index.totalItems}개 아이템, ${index.chunks.length}개 청크`);
     
-    // 모든 청크를 병렬로 로드
+    // 모든 청크를 병렬로 로드 (캐시 버스팅)
     const chunkPromises = index.chunks.map(async (chunk, i) => {
       console.log(`  📦 청크 ${i + 1}/${index.chunks.length} 로딩...`);
-      const response = await fetch(`${BASE_URL}/${chunk.file}`);
+      const response = await fetch(`${BASE_URL}/${chunk.file}?t=${Date.now()}`);
       if (!response.ok) throw new Error(`청크 로드 실패: ${chunk.file}`);
       return response.json();
     });

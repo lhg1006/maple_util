@@ -1,0 +1,202 @@
+{
+  "totalItems": 57490,
+  "chunks": [
+    {
+      "file": "items-1.json",
+      "count": 1500,
+      "range": "chunk-1"
+    },
+    {
+      "file": "items-2.json",
+      "count": 1500,
+      "range": "chunk-2"
+    },
+    {
+      "file": "items-3.json",
+      "count": 1500,
+      "range": "chunk-3"
+    },
+    {
+      "file": "items-4.json",
+      "count": 1500,
+      "range": "chunk-4"
+    },
+    {
+      "file": "items-5.json",
+      "count": 1500,
+      "range": "chunk-5"
+    },
+    {
+      "file": "items-6.json",
+      "count": 1500,
+      "range": "chunk-6"
+    },
+    {
+      "file": "items-7.json",
+      "count": 1500,
+      "range": "chunk-7"
+    },
+    {
+      "file": "items-8.json",
+      "count": 1500,
+      "range": "chunk-8"
+    },
+    {
+      "file": "items-9.json",
+      "count": 1500,
+      "range": "chunk-9"
+    },
+    {
+      "file": "items-10.json",
+      "count": 1500,
+      "range": "chunk-10"
+    },
+    {
+      "file": "items-11.json",
+      "count": 1500,
+      "range": "chunk-11"
+    },
+    {
+      "file": "items-12.json",
+      "count": 1500,
+      "range": "chunk-12"
+    },
+    {
+      "file": "items-13.json",
+      "count": 1500,
+      "range": "chunk-13"
+    },
+    {
+      "file": "items-14.json",
+      "count": 1500,
+      "range": "chunk-14"
+    },
+    {
+      "file": "items-15.json",
+      "count": 1500,
+      "range": "chunk-15"
+    },
+    {
+      "file": "items-16.json",
+      "count": 1500,
+      "range": "chunk-16"
+    },
+    {
+      "file": "items-17.json",
+      "count": 1500,
+      "range": "chunk-17"
+    },
+    {
+      "file": "items-18.json",
+      "count": 1500,
+      "range": "chunk-18"
+    },
+    {
+      "file": "items-19.json",
+      "count": 1500,
+      "range": "chunk-19"
+    },
+    {
+      "file": "items-20.json",
+      "count": 1500,
+      "range": "chunk-20"
+    },
+    {
+      "file": "items-21.json",
+      "count": 1500,
+      "range": "chunk-21"
+    },
+    {
+      "file": "items-22.json",
+      "count": 1500,
+      "range": "chunk-22"
+    },
+    {
+      "file": "items-23.json",
+      "count": 1500,
+      "range": "chunk-23"
+    },
+    {
+      "file": "items-24.json",
+      "count": 1500,
+      "range": "chunk-24"
+    },
+    {
+      "file": "items-25.json",
+      "count": 1500,
+      "range": "chunk-25"
+    },
+    {
+      "file": "items-26.json",
+      "count": 1500,
+      "range": "chunk-26"
+    },
+    {
+      "file": "items-27.json",
+      "count": 1500,
+      "range": "chunk-27"
+    },
+    {
+      "file": "items-28.json",
+      "count": 1500,
+      "range": "chunk-28"
+    },
+    {
+      "file": "items-29.json",
+      "count": 1500,
+      "range": "chunk-29"
+    },
+    {
+      "file": "items-30.json",
+      "count": 1500,
+      "range": "chunk-30"
+    },
+    {
+      "file": "items-31.json",
+      "count": 1500,
+      "range": "chunk-31"
+    },
+    {
+      "file": "items-32.json",
+      "count": 1500,
+      "range": "chunk-32"
+    },
+    {
+      "file": "items-33.json",
+      "count": 1500,
+      "range": "chunk-33"
+    },
+    {
+      "file": "items-34.json",
+      "count": 1500,
+      "range": "chunk-34"
+    },
+    {
+      "file": "items-35.json",
+      "count": 1500,
+      "range": "chunk-35"
+    },
+    {
+      "file": "items-36.json",
+      "count": 1500,
+      "range": "chunk-36"
+    },
+    {
+      "file": "items-37.json",
+      "count": 1500,
+      "range": "chunk-37"
+    },
+    {
+      "file": "items-38.json",
+      "count": 1500,
+      "range": "chunk-38"
+    },
+    {
+      "file": "items-39.json",
+      "count": 490,
+      "range": "chunk-39"
+    }
+  ],
+  "generated": "2025-07-03T00:06:23.120Z",
+  "note": "Deduplicated and cleaned data"
+}

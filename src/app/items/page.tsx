@@ -6,7 +6,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { MapleItem } from '@/types/maplestory';
-import { loadItems } from '@/lib/cdn-data-loader';
+import { loadItems, clearCache } from '@/lib/cdn-data-loader';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -23,6 +23,7 @@ const ITEM_CATEGORIES = {
     { value: 'Cash', label: '캐시' },
   ],
   equipCategories: [
+    { value: '전체', label: '전체' },
     { value: 'Accessory', label: '장신구' },
     { value: 'Armor', label: '방어구' },
     { value: 'One-Handed Weapon', label: '한손 무기' },
@@ -33,6 +34,7 @@ const ITEM_CATEGORIES = {
     { value: 'Other', label: '그 외' },
   ],
   armorSubCategories: [
+    { value: '전체', label: '전체' },
     { value: 'Hat', label: '모자' },
     { value: 'Overall', label: '한벌옷' },
     { value: 'Top', label: '상의' },
@@ -43,6 +45,7 @@ const ITEM_CATEGORIES = {
     { value: 'Shield', label: '방패' },
   ],
   accessorySubCategories: [
+    { value: '전체', label: '전체' },
     { value: 'Face Accessory', label: '얼굴장식' },
     { value: 'Eye Decoration', label: '눈장식' },
     { value: 'Earrings', label: '귀걸이' },
@@ -56,6 +59,7 @@ const ITEM_CATEGORIES = {
     { value: 'Pocket Item', label: '포켓 아이템' },
   ],
   useSubCategories: [
+    { value: '전체', label: '전체' },
     { value: 'Consumable', label: '소비' },
     { value: 'Character Modification', label: '성형/변경' },
     { value: 'Armor Scroll', label: '방어구 주문서' },
@@ -65,6 +69,37 @@ const ITEM_CATEGORIES = {
     { value: 'Projectile', label: '투사체' },
     { value: 'Monster/Familiar', label: '몬스터/펫' },
     { value: 'Tablet', label: '태블릿' },
+    { value: 'Other', label: '기타' },
+  ],
+  setupSubCategories: [
+    { value: '전체', label: '전체' },
+    { value: 'Chair', label: '의자' },
+    { value: 'Portal', label: '포탈' },
+    { value: 'Jukebox', label: '주크박스' },
+    { value: 'Weather', label: '날씨' },
+    { value: 'BGM', label: 'BGM' },
+    { value: 'Decoration', label: '장식' },
+    { value: 'Other', label: '기타' },
+  ],
+  etcSubCategories: [
+    { value: '전체', label: '전체' },
+    { value: 'Quest', label: '퀘스트' },
+    { value: 'Material', label: '재료' },
+    { value: 'Mineral', label: '광물' },
+    { value: 'Coin', label: '코인' },
+    { value: 'Key', label: '열쇠' },
+    { value: 'Book', label: '책' },
+    { value: 'Collection', label: '수집' },
+    { value: 'Other', label: '기타' },
+  ],
+  cashSubCategories: [
+    { value: '전체', label: '전체' },
+    { value: 'Pet', label: '펫' },
+    { value: 'Package', label: '패키지' },
+    { value: 'Cube', label: '큐브' },
+    { value: 'Special', label: '특수' },
+    { value: 'Coupon', label: '쿠폰' },
+    { value: 'Service', label: '서비스' },
     { value: 'Other', label: '기타' },
   ],
 };
@@ -78,10 +113,10 @@ export default function ItemsPage() {
   const [dataLoading, setDataLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('name');
-  const [overallCategory, setOverallCategory] = useState<string>('Use');
-  const [category, setCategory] = useState<string>('Consumable');
-  const [subCategory, setSubCategory] = useState<string>('Consumable');
+  const [sortBy, setSortBy] = useState('category');
+  const [overallCategory, setOverallCategory] = useState<string>('Equip');
+  const [category, setCategory] = useState<string>('전체');
+  const [subCategory, setSubCategory] = useState<string>('전체');
   const pageSize = 24;
 
   // CDN에서 전체 아이템 데이터 로드 (한 번만)
@@ -90,6 +125,7 @@ export default function ItemsPage() {
       setDataLoading(true);
       try {
         console.log('📥 CDN에서 전체 아이템 데이터 로딩...');
+        clearCache(); // 캐시 강제 클리어
         const itemsData = await loadItems();
         setAllItems(itemsData);
         console.log(`✅ ${Object.keys(itemsData).length}개 아이템 로드 완료`);
@@ -119,11 +155,35 @@ export default function ItemsPage() {
       });
 
       console.log(`📊 ${overallCategory}: ${filteredData.length}개 아이템 발견`);
+      
+      // 데이터 구조 디버깅 - 각 카테고리별 샘플 데이터 로깅
+      if (filteredData.length > 0) {
+        const sampleItem = filteredData[0];
+        const typeInfo = sampleItem.originalData?.typeInfo || sampleItem.typeInfo;
+        console.log(`🔍 ${overallCategory} 샘플 데이터:`, {
+          id: sampleItem.id,
+          name: sampleItem.name,
+          overallCategory: typeInfo?.overallCategory,
+          category: typeInfo?.category,
+          subCategory: typeInfo?.subCategory,
+          fullTypeInfo: typeInfo,
+          originalData: sampleItem.originalData ? 'exists' : 'missing',
+          directTypeInfo: sampleItem.typeInfo ? 'exists' : 'missing'
+        });
+        
+        // 각 카테고리별 실제 category 값들 분석
+        const categoryValues = [...new Set(filteredData.map((item: any) => {
+          const typeInfo = item.originalData?.typeInfo || item.typeInfo;
+          return typeInfo?.category;
+        }))].filter(Boolean);
+        
+        console.log(`📈 ${overallCategory} 실제 category 값들:`, categoryValues);
+      }
 
       // MapleItem 형식으로 변환
       const convertedItems = filteredData.map((item: any) => {
         const typeInfo = item.originalData?.typeInfo || item.typeInfo;
-        return {
+        const mappedItem = {
           id: item.id,
           name: item.name,
           category: typeInfo?.category || item.category || '',
@@ -133,6 +193,18 @@ export default function ItemsPage() {
           cash: false,
           price: 0,
         };
+        
+        // 소비 아이템 디버깅
+        if (overallCategory === 'Use' && Math.random() < 0.001) {
+          console.log('소비 아이템 매핑:', {
+            name: item.name,
+            category: mappedItem.category,
+            subcategory: mappedItem.subcategory,
+            originalData: typeInfo
+          });
+        }
+        
+        return mappedItem;
       }) as MapleItem[];
 
       setItems(convertedItems);
@@ -156,19 +228,45 @@ export default function ItemsPage() {
       );
     }
 
-    // 2차 카테고리 필터
-    if (category && overallCategory === 'Equip') {
-      filtered = filtered.filter(item => item.category === category);
+    // 장비 카테고리 필터
+    if (overallCategory === 'Equip') {
+      // 2차 카테고리 필터 ('전체'가 아닐 때만 필터링)
+      if (category && category !== '전체') {
+        filtered = filtered.filter(item => item.category === category);
+      }
+      
+      // 3차 카테고리 필터 ('전체'가 아닐 때만 필터링)
+      if (subCategory && subCategory !== '전체') {
+        filtered = filtered.filter(item => item.subcategory === subCategory);
+      }
     }
     
-    // 소비아이템 2차 카테고리 필터
-    if (category && overallCategory === 'Use') {
-      filtered = filtered.filter(item => item.category === category);
+    // 소비아이템 카테고리 필터 (2차와 3차가 동일하므로 한 번만 적용)
+    if (overallCategory === 'Use') {
+      if (category && category !== '전체') {
+        filtered = filtered.filter(item => item.category === category);
+      }
     }
-
-    // 3차 카테고리 필터 (세부 분류)
-    if (subCategory) {
-      filtered = filtered.filter(item => item.subcategory === subCategory);
+    
+    // 설치아이템 카테고리 필터
+    if (overallCategory === 'Setup') {
+      if (category && category !== '전체') {
+        filtered = filtered.filter(item => item.category === category);
+      }
+    }
+    
+    // 기타아이템 카테고리 필터
+    if (overallCategory === 'Etc') {
+      if (category && category !== '전체') {
+        filtered = filtered.filter(item => item.category === category);
+      }
+    }
+    
+    // 캐시아이템 카테고리 필터
+    if (overallCategory === 'Cash') {
+      if (category && category !== '전체') {
+        filtered = filtered.filter(item => item.category === category);
+      }
     }
 
     // 정렬
@@ -250,14 +348,36 @@ export default function ItemsPage() {
           <Row gutter={[16, 24]}>
             {/* 대분류 */}
             <Col span={24}>
-              <Row gutter={[16, 16]} align="middle">
-                <Col xs={24} sm={12} md={8}>
+              <Row gutter={[12, 16]} align="middle">
+                <Col xs={24} sm={8} md={6} lg={4}>
                   <Select
                     style={{ width: '100%' }}
                     size="large"
                     value={overallCategory}
-                    onChange={setOverallCategory}
-                    placeholder="대분류 선택"
+                    onChange={(value) => {
+                      setOverallCategory(value);
+                      // 대분류 변경 시 하위 카테고리를 전체로 설정
+                      if (value === 'Equip') {
+                        setCategory('전체');
+                        setSubCategory('전체');
+                      } else if (value === 'Use') {
+                        setCategory('전체');
+                        setSubCategory('전체');
+                      } else if (value === 'Setup') {
+                        setCategory('전체');
+                        setSubCategory('전체');
+                      } else if (value === 'Etc') {
+                        setCategory('전체');
+                        setSubCategory('전체');
+                      } else if (value === 'Cash') {
+                        setCategory('전체');
+                        setSubCategory('전체');
+                      } else {
+                        setCategory('');
+                        setSubCategory('');
+                      }
+                    }}
+                    placeholder="대분류"
                   >
                     {ITEM_CATEGORIES.overallCategories.map(cat => (
                       <Option key={cat.value} value={cat.value}>{cat.label}</Option>
@@ -267,16 +387,26 @@ export default function ItemsPage() {
                 
                 {/* 2차 분류 */}
                 {overallCategory === 'Equip' && (
-                  <Col xs={24} sm={12} md={8}>
+                  <Col xs={24} sm={8} md={6} lg={4}>
                     <Select
                       style={{ width: '100%' }}
                       size="large"
-                      value={category}
+                      value={category || '전체'}
                       onChange={(value) => {
                         setCategory(value);
-                        setSubCategory(''); // 상위 카테고리 변경시 하위 초기화
+                        // 2차 분류 변경 시 하위 카테고리를 첫 번째 옵션으로 설정
+                        if (value === '전체') {
+                          setSubCategory('전체');
+                        } else if (value === 'Accessory') {
+                          setSubCategory('전체');
+                        } else if (value === 'Armor') {
+                          setSubCategory('전체');
+                        } else if (value === 'Character') {
+                          setSubCategory('Face');
+                        } else {
+                          setSubCategory('');
+                        }
                       }}
-                      placeholder="2차 분류 선택"
                     >
                       {ITEM_CATEGORIES.equipCategories.map(cat => (
                         <Option key={cat.value} value={cat.value}>{cat.label}</Option>
@@ -287,16 +417,20 @@ export default function ItemsPage() {
                 
                 {/* 소비아이템 2차 분류 */}
                 {overallCategory === 'Use' && (
-                  <Col xs={24} sm={12} md={8}>
+                  <Col xs={24} sm={8} md={6} lg={4}>
                     <Select
                       style={{ width: '100%' }}
                       size="large"
-                      value={category}
+                      value={category || '전체'}
                       onChange={(value) => {
                         setCategory(value);
-                        setSubCategory(''); // 상위 카테고리 변경시 하위 초기화
+                        // 소비 아이템의 하위 카테고리 설정
+                        if (value === '전체') {
+                          setSubCategory('전체');
+                        } else {
+                          setSubCategory(value); // 소비 아이템은 2차와 3차가 같음
+                        }
                       }}
-                      placeholder="소비아이템 종류"
                       allowClear
                     >
                       {ITEM_CATEGORIES.useSubCategories.map(cat => (
@@ -305,48 +439,107 @@ export default function ItemsPage() {
                     </Select>
                   </Col>
                 )}
+
+                {/* 설치아이템 2차 분류 */}
+                {overallCategory === 'Setup' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category || '전체'}
+                      onChange={(value) => {
+                        setCategory(value);
+                        setSubCategory(value); // 설치 아이템도 2차와 3차가 같음
+                      }}
+                      placeholder="설치 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.setupSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+
+                {/* 기타아이템 2차 분류 */}
+                {overallCategory === 'Etc' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category || '전체'}
+                      onChange={(value) => {
+                        setCategory(value);
+                        setSubCategory(value); // 기타 아이템도 2차와 3차가 같음
+                      }}
+                      placeholder="기타 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.etcSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+
+                {/* 캐시아이템 2차 분류 */}
+                {overallCategory === 'Cash' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={category || '전체'}
+                      onChange={(value) => {
+                        setCategory(value);
+                        setSubCategory(value); // 캐시 아이템도 2차와 3차가 같음
+                      }}
+                      placeholder="캐시 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.cashSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+
+                {/* 3차 분류 - 방어구 */}
+                {overallCategory === 'Equip' && category === 'Armor' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory || '전체'}
+                      onChange={setSubCategory}
+                      placeholder="방어구 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.armorSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
+
+                {/* 3차 분류 - 장신구 */}
+                {overallCategory === 'Equip' && category === 'Accessory' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory || '전체'}
+                      onChange={setSubCategory}
+                      placeholder="장신구 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.accessorySubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
               </Row>
             </Col>
-
-            {/* 3차 분류 (장비 세부 분류) */}
-            {overallCategory === 'Equip' && category && (
-              <Col span={24}>
-                <Row gutter={[16, 16]} align="middle">
-                  {category === 'Armor' && (
-                    <Col xs={24} sm={12} md={8}>
-                      <Select
-                        style={{ width: '100%' }}
-                        size="large"
-                        value={subCategory}
-                        onChange={setSubCategory}
-                        placeholder="방어구 종류"
-                        allowClear
-                      >
-                        {ITEM_CATEGORIES.armorSubCategories.map(cat => (
-                          <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                        ))}
-                      </Select>
-                    </Col>
-                  )}
-                  {category === 'Accessory' && (
-                    <Col xs={24} sm={12} md={8}>
-                      <Select
-                        style={{ width: '100%' }}
-                        size="large"
-                        value={subCategory}
-                        onChange={setSubCategory}
-                        placeholder="장신구 종류"
-                        allowClear
-                      >
-                        {ITEM_CATEGORIES.accessorySubCategories.map(cat => (
-                          <Option key={cat.value} value={cat.value}>{cat.label}</Option>
-                        ))}
-                      </Select>
-                    </Col>
-                  )}
-                </Row>
-              </Col>
-            )}
             
             {/* 검색 및 정렬 */}
             <Col span={24}>
@@ -369,8 +562,8 @@ export default function ItemsPage() {
                     onChange={setSortBy}
                     placeholder="정렬 기준"
                   >
-                    <Option value="name">이름순</Option>
                     <Option value="category">카테고리순</Option>
+                    <Option value="name">이름순</Option>
                   </Select>
                 </Col>
               </Row>
@@ -394,6 +587,9 @@ export default function ItemsPage() {
                     {' > '}
                     {overallCategory === 'Equip' && ITEM_CATEGORIES.equipCategories.find(cat => cat.value === category)?.label}
                     {overallCategory === 'Use' && ITEM_CATEGORIES.useSubCategories.find(cat => cat.value === category)?.label}
+                    {overallCategory === 'Setup' && ITEM_CATEGORIES.setupSubCategories.find(cat => cat.value === category)?.label}
+                    {overallCategory === 'Etc' && ITEM_CATEGORIES.etcSubCategories.find(cat => cat.value === category)?.label}
+                    {overallCategory === 'Cash' && ITEM_CATEGORIES.cashSubCategories.find(cat => cat.value === category)?.label}
                   </>
                 )}
                 {subCategory && (
