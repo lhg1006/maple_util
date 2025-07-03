@@ -61,7 +61,16 @@
       "Bash(git rebase:*)",
       "Bash(sudo rm:*)",
       "Bash(chmod:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git rm:*)",
+      "Bash(git -C ../maple-util-data status)",
+      "Bash(git -C ../maple-util-data add .)",
+      "Bash(git -C ../maple-util-data commit -m \"$(cat <<'EOF'\nfeat: 장비 상세 정보가 포함된 향상된 CDN 데이터\n\n🎮 새로운 기능:\n- 모든 장비에 요구 조건 (레벨, 스탯, 직업) 추가\n- 전투 스탯 (공격력, 마력, 방어력) 포함\n- 능력치 증가 정보 (STR, DEX, INT, LUK, HP, MP)\n- 강화 정보 (업그레이드 슬롯, 고유 아이템)\n- 특수 속성 (교환/판매 제한) 정보\n\n📊 데이터:\n- 총 57,490개 아이템 (39개 청크)\n- 8,299개 몬스터\n- 9,993개 맵\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C ../maple-util-data push origin main)",
+      "Bash(rg:*)",
+      "Bash(gtimeout 10s npm run dev 2 >& 1)",
+      "Bash(python3:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": []
   }

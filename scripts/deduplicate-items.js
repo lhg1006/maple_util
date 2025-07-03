@@ -1,6 +1,241 @@
 const fs = require('fs');
 const path = require('path');
 
+// 아이템에 장비 상세 정보 추가
+function enhanceItemWithStats(item) {
+    const enhanced = { ...item };
+    const originalData = item.originalData || {};
+    
+    // 장비인지 확인
+    const typeInfo = originalData.typeInfo || item.typeInfo;
+    const isEquipment = typeInfo?.overallCategory === 'Equip';
+    
+    if (isEquipment) {
+        // 현재 데이터에서 사용 가능한 정보로 요구 조건 설정
+        enhanced.requirements = {
+            level: originalData.requiredLevel || item.level || 0,
+            str: getRequiredStat(item, 'STR'),
+            dex: getRequiredStat(item, 'DEX'), 
+            int: getRequiredStat(item, 'INT'),
+            luk: getRequiredStat(item, 'LUK'),
+            job: originalData.requiredJobs ? getJobId(originalData.requiredJobs[0]) : 0,
+        };
+        
+        // 레벨 기반 추정 스탯 (임시)
+        const estimatedStats = getEstimatedStats(item);
+        
+        // 공격/방어 스탯 (레벨 기반 추정)
+        enhanced.combat = {
+            attack: estimatedStats.attack,
+            magicAttack: estimatedStats.magicAttack,
+            defense: estimatedStats.defense,
+            magicDefense: estimatedStats.magicDefense,
+            accuracy: estimatedStats.accuracy,
+            avoidability: estimatedStats.avoidability,
+            speed: 0,
+            jump: 0,
+        };
+        
+        // 스탯 증가 (레벨 기반 추정)
+        enhanced.stats = {
+            str: estimatedStats.statBonus.str,
+            dex: estimatedStats.statBonus.dex,
+            int: estimatedStats.statBonus.int,
+            luk: estimatedStats.statBonus.luk,
+            hp: estimatedStats.statBonus.hp,
+            mp: estimatedStats.statBonus.mp,
+        };
+        
+        // 강화 정보
+        enhanced.enhancement = {
+            upgradeSlots: getUpgradeSlots(item),
+            attackSpeed: getAttackSpeed(item),
+            isUnique: item.rarity === 'unique' || item.name.includes('유니크'),
+            isCash: item.isCash || false,
+        };
+        
+        // 특수 속성
+        enhanced.special = {
+            tradeable: !item.name.includes('교환불가'),
+            sellable: item.sellPrice > 0,
+            expireOnLogout: item.name.includes('로그아웃'),
+            accountSharable: item.name.includes('계정'),
+        };
+        
+        // 무기 전용 정보
+        if (typeInfo?.category?.includes('Weapon')) {
+            enhanced.weapon = {
+                attackSpeed: getAttackSpeed(item),
+                weaponType: typeInfo.category,
+                isTwoHanded: typeInfo.category === 'Two-Handed Weapon',
+            };
+        }
+        
+        // 방어구 전용 정보
+        if (typeInfo?.category === 'Armor') {
+            enhanced.armor = {
+                slot: typeInfo.subCategory,
+                bodyPart: getBodyPartKorean(typeInfo.subCategory),
+            };
+        }
+        
+        // 장신구 전용 정보  
+        if (typeInfo?.category === 'Accessory') {
+            enhanced.accessory = {
+                type: typeInfo.subCategory,
+                typeKorean: getAccessoryTypeKorean(typeInfo.subCategory),
+            };
+        }
+    }
+    
+    return enhanced;
+}
+
+// 레벨 기반 스탯 추정 함수
+function getEstimatedStats(item) {
+    const level = item.level || 0;
+    const category = item.category || '';
+    
+    // 무기 공격력 추정
+    let attack = 0;
+    let magicAttack = 0;
+    
+    if (category.includes('Weapon')) {
+        // 레벨 기반 공격력 추정
+        attack = Math.floor(level * 1.2) + (level >= 10 ? 10 : 0);
+        
+        if (category.includes('Wand') || category.includes('Staff')) {
+            magicAttack = attack;
+            attack = Math.floor(attack * 0.3);
+        }
+    }
+    
+    // 방어구 방어력 추정
+    let defense = 0;
+    let magicDefense = 0;
+    
+    if (category === 'Armor') {
+        defense = Math.floor(level * 0.8) + (level >= 20 ? 5 : 0);
+        magicDefense = Math.floor(defense * 0.7);
+    }
+    
+    // 명중률/회피율
+    const accuracy = level >= 30 ? Math.floor(level * 0.5) : 0;
+    const avoidability = level >= 30 ? Math.floor(level * 0.3) : 0;
+    
+    // 스탯 보너스 추정
+    const statBonus = {
+        str: category.includes('Weapon') && level >= 20 ? Math.floor(level / 20) : 0,
+        dex: category.includes('Bow') && level >= 20 ? Math.floor(level / 20) : 0,
+        int: (category.includes('Wand') || category.includes('Staff')) && level >= 20 ? Math.floor(level / 20) : 0,
+        luk: category.includes('Claw') && level >= 20 ? Math.floor(level / 20) : 0,
+        hp: category === 'Armor' && level >= 15 ? level * 2 : 0,
+        mp: (category.includes('Wand') || category.includes('Staff')) && level >= 15 ? level * 2 : 0,
+    };
+    
+    return {
+        attack,
+        magicAttack,
+        defense,
+        magicDefense,
+        accuracy,
+        avoidability,
+        statBonus
+    };
+}
+
+// 요구 스탯 추정
+function getRequiredStat(item, statType) {
+    const level = item.level || 0;
+    const category = item.category || '';
+    
+    if (level < 10) return 0;
+    
+    switch (statType) {
+        case 'STR':
+            return category.includes('Sword') || category.includes('Axe') || category.includes('Blunt') 
+                ? level * 4 : 0;
+        case 'DEX':
+            return category.includes('Bow') || category.includes('Crossbow') 
+                ? level * 4 : 0;
+        case 'INT':
+            return category.includes('Wand') || category.includes('Staff') 
+                ? level * 4 : 0;
+        case 'LUK':
+            return category.includes('Claw') || category.includes('Dagger') 
+                ? level * 4 : 0;
+        default:
+            return 0;
+    }
+}
+
+// 직업 ID 매핑
+function getJobId(jobName) {
+    const jobIds = {
+        'Beginner': 0,
+        'Warrior': 100,
+        'Magician': 200,
+        'Bowman': 300,
+        'Thief': 400,
+        'Pirate': 500,
+    };
+    return jobIds[jobName] || 0;
+}
+
+// 업그레이드 슬롯 추정
+function getUpgradeSlots(item) {
+    const level = item.level || 0;
+    if (level < 10) return 0;
+    if (level < 30) return 7;
+    if (level < 60) return 8;
+    return 9;
+}
+
+// 공격속도 추정
+function getAttackSpeed(item) {
+    const category = item.category || '';
+    
+    if (category.includes('Dagger') || category.includes('Claw')) return 4; // 빠름
+    if (category.includes('Sword') || category.includes('Bow')) return 6; // 보통
+    if (category.includes('Axe') || category.includes('Blunt')) return 7; // 느림
+    if (category.includes('Two-Handed')) return 8; // 매우 느림
+    
+    return 6; // 기본값
+}
+
+// 방어구 부위 한글 변환
+function getBodyPartKorean(subCategory) {
+    const bodyParts = {
+        'Hat': '모자',
+        'Overall': '한벌옷',
+        'Top': '상의', 
+        'Bottom': '하의',
+        'Shoes': '신발',
+        'Glove': '장갑',
+        'Cape': '망토',
+        'Shield': '방패',
+    };
+    return bodyParts[subCategory] || subCategory;
+}
+
+// 장신구 종류 한글 변환
+function getAccessoryTypeKorean(subCategory) {
+    const accessoryTypes = {
+        'Face Accessory': '얼굴장식',
+        'Eye Decoration': '눈장식',
+        'Earrings': '귀걸이',
+        'Ring': '반지',
+        'Pendant': '펜던트',
+        'Belt': '벨트',
+        'Medal': '메달',
+        'Shoulder Accessory': '어깨장식',
+        'Badge': '뱃지',
+        'Emblem': '엠블렘',
+        'Pocket Item': '포켓 아이템',
+    };
+    return accessoryTypes[subCategory] || subCategory;
+}
+
 // 중복 아이템 제거 및 정리
 async function deduplicateItems() {
     const outputDir = path.join(__dirname, '../data-cdn-clean');
@@ -69,7 +304,9 @@ async function deduplicateItems() {
         if (uniqueItems[id]) {
             duplicatesRemoved++;
         } else {
-            uniqueItems[id] = item;
+            // 장비 상세 정보 추출 및 추가
+            const enhancedItem = enhanceItemWithStats(item);
+            uniqueItems[id] = enhancedItem;
         }
     });
     

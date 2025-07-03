@@ -139,25 +139,13 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const pageSize = 24;
 
-  // CDN에서 전체 아이템 데이터 로드 (한 번만)
+  // 임시: CDN 아이템 데이터 제거로 인한 비활성화
   useEffect(() => {
-    const loadAllData = async () => {
-      setDataLoading(true);
-      try {
-        console.log('📥 CDN에서 전체 아이템 데이터 로딩...');
-        clearCache(); // 캐시 강제 클리어
-        const itemsData = await loadItems();
-        setAllItems(itemsData);
-        console.log(`✅ ${Object.keys(itemsData).length}개 아이템 로드 완료`);
-      } catch (error) {
-        console.error('❌ 데이터 로드 실패:', error);
-        message.error('데이터를 불러오는데 실패했습니다.');
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    loadAllData();
+    setDataLoading(false);
+    setAllItems({});
+    setItems([]);
+    setFilteredItems([]);
+    message.info('아이템 데이터는 API 전용으로 변경되었습니다. 개별 아이템 검색은 다른 페이지에서 이용해주세요.');
   }, [message]);
 
   // 카테고리별 필터링

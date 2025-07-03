@@ -2,7 +2,7 @@
 const CDN_BASE_URL = 'https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@latest';
 
 // 로컬 개발시 public 폴더 사용 (옵션)
-const USE_LOCAL = process.env.NODE_ENV === 'development' && false;
+const USE_LOCAL = process.env.NODE_ENV === 'development' && true;
 const LOCAL_BASE_URL = '/data-cdn';
 
 const BASE_URL = USE_LOCAL ? LOCAL_BASE_URL : CDN_BASE_URL;
@@ -151,5 +151,8 @@ export function clearCache() {
   cache.items = null;
   cache.monsters = null;
   cache.maps = null;
-  console.log('🗑️ 데이터 캐시 클리어됨');
+  cache.itemsLoading = false;
+  cache.monstersLoading = false;
+  cache.mapsLoading = false;
+  console.log('🗑️ 데이터 캐시 완전 클리어됨');
 }
