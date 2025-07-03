@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large data files
+/src/data/complete-*.ts
+/src/data/generated-*.ts
+/public/data/*.json
+/data-cdn-clean/

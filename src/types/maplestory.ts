@@ -1,3 +1,79 @@
+// 장비 요구 조건
+export interface ItemRequirements {
+  level: number;
+  str: number;
+  dex: number;
+  int: number;
+  luk: number;
+  job: number;
+}
+
+// 전투 관련 스탯
+export interface ItemCombatStats {
+  attack: number;
+  magicAttack: number;
+  defense: number;
+  magicDefense: number;
+  accuracy: number;
+  avoidability: number;
+  speed: number;
+  jump: number;
+  bossDamage?: number;
+  ignoreDefense?: number;
+}
+
+// 기본 스탯 증가
+export interface ItemStatBonus {
+  str: number;
+  dex: number;
+  int: number;
+  luk: number;
+  hp: number;
+  mp: number;
+}
+
+// 강화 정보
+export interface ItemEnhancement {
+  upgradeSlots: number;
+  attackSpeed: number;
+  isUnique: boolean;
+  isCash: boolean;
+}
+
+// 셋 아이템 정보
+export interface ItemSetInfo {
+  setId: number;
+  setName: string;
+  completeCount: number;
+}
+
+// 특수 속성
+export interface ItemSpecialProps {
+  tradeable: boolean;
+  sellable: boolean;
+  expireOnLogout: boolean;
+  accountSharable: boolean;
+}
+
+// 무기 정보
+export interface ItemWeaponInfo {
+  attackSpeed: number;
+  weaponType: string;
+  isTwoHanded: boolean;
+}
+
+// 방어구 정보
+export interface ItemArmorInfo {
+  slot: string;
+  bodyPart: string;
+}
+
+// 장신구 정보
+export interface ItemAccessoryInfo {
+  type: string;
+  typeKorean: string;
+}
+
 export interface MapleItem {
   id: number;
   name: string;
@@ -7,6 +83,21 @@ export interface MapleItem {
   subcategory?: string;
   cash?: boolean;
   price?: number;
+  level?: number;
+  rarity?: string;
+  // 확장된 장비 정보
+  requirements?: ItemRequirements;
+  combat?: ItemCombatStats;
+  stats?: ItemStatBonus;
+  enhancement?: ItemEnhancement;
+  setInfo?: ItemSetInfo;
+  special?: ItemSpecialProps;
+  weapon?: ItemWeaponInfo;
+  armor?: ItemArmorInfo;
+  accessory?: ItemAccessoryInfo;
+  // 내부 필드
+  _hasValidStats?: boolean;
+  _noStatsAvailable?: boolean;
 }
 
 // API Response 타입
