@@ -145,13 +145,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #000000;
-  border: 2px solid #333333;
+  background: #F5F5F5;
+  border: 2px solid #D1D5DB;
   padding: 20px;
-  border-radius: 4px;
+  border-radius: 8px;
   width: 150px;
   height: 150px;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .maple-tooltip-icon {
@@ -162,6 +163,8 @@ body {
   image-rendering: crisp-edges;
   display: block;
   margin: 0;
+  object-fit: contain;
+  object-position: center;
 }
 
 /* 스탯 섹션 */
@@ -239,6 +242,7 @@ body {
   font-size: 13px;
   text-align: center;
   background: #2A2A4A;
+  margin: 10px 0;
 }
 
 /* 세트 효과 */
