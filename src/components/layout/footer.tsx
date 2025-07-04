@@ -9,9 +9,9 @@ export const Footer: React.FC = () => {
   return (
     <AntFooter style={{ 
       textAlign: 'center', 
-      padding: '24px 16px',
-      borderTop: '1px solid #f0f0f0',
-      backgroundColor: 'var(--ant-color-bg-container)'
+      padding: '32px 24px',
+      marginTop: '48px',
+      background: 'transparent'
     }}>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <Space split={<Divider type="vertical" />} wrap>
@@ -40,11 +40,15 @@ export const Footer: React.FC = () => {
           </Space>
         </Space>
         
-        <Text type="secondary" style={{ fontSize: '12px' }}>
-          이 사이트는 maplestory.io API에서 제공하는 데이터를 기반으로 제작되었습니다.
+        <div style={{ marginTop: '16px' }}>
+          <Text type="secondary" style={{ fontSize: '13px', opacity: 0.65 }}>
+            이 사이트는 maplestory.io API에서 제공하는 데이터를 기반으로 제작되었습니다.
+          </Text>
           <br />
-          모든 게임 데이터의 저작권은 넥슨(NEXON)에 있습니다.
-        </Text>
+          <Text type="secondary" style={{ fontSize: '12px', opacity: 0.45 }}>
+            모든 게임 데이터의 저작권은 넥슨(NEXON)에 있습니다.
+          </Text>
+        </div>
       </Space>
     </AntFooter>
   );
