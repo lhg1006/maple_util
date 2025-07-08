@@ -110,21 +110,6 @@ export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobCl
                   </Text>
                 </div>
                 
-                {mob.hp && (
-                  <div>
-                    <Text type="secondary" className="text-xs">
-                      HP: {mob.hp.toLocaleString()}
-                    </Text>
-                  </div>
-                )}
-
-                {mob.exp && (
-                  <div>
-                    <Text type="secondary" className="text-xs">
-                      EXP: {mob.exp.toLocaleString()}
-                    </Text>
-                  </div>
-                )}
               </div>
             </div>
           </Card>

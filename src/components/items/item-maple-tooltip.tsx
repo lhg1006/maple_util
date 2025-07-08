@@ -16,8 +16,24 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
       case 2: return "마법사";
       case 4: return "궁수";
       case 8: return "도적";
+      case 16: return "해적";
       case 24: return "도적";
       default: return jobCode.toString();
+    }
+  };
+
+  // 공격속도를 텍스트로 변환
+  const getAttackSpeedText = (speed: number): string => {
+    switch (speed) {
+      case 9: return "매우느림";
+      case 8:
+      case 7: return "느림";
+      case 6: return "보통";
+      case 5:
+      case 4: return "빠름";
+      case 3:
+      case 2: return "매우빠름";
+      default: return speed.toString();
     }
   };
 
@@ -26,6 +42,12 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
     if (!description) return description;
 
     let parsed = description;
+
+    // 줄바꿈 처리 (가장 먼저 처리)
+    parsed = parsed.replace(/\\r\\n/g, '<br>');
+    parsed = parsed.replace(/\\n/g, '<br>');
+    parsed = parsed.replace(/\r\n/g, '<br>');
+    parsed = parsed.replace(/\n/g, '<br>');
 
     // #...# 일반 강조 마크업
     parsed = parsed.replace(/#([^#czBit]+)#/g, '<span style="color: #FFD700; font-weight: bold;">$1</span>');
@@ -101,6 +123,10 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
     (item.category && ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'].includes(item.category))
   );
 
+  // 공격속도 표시 여부 (무기 아이템에만 표시)
+  const hasAttackSpeed = (item.weapon?.attackSpeed || stats?.weapon?.attackSpeed || item.enhancement?.attackSpeed || stats?.enhancement?.attackSpeed) && 
+                        (item.category === 'One-Handed Weapon' || item.category === 'Two-Handed Weapon' || item.category === 'Secondary Weapon');
+
   // 하단 스탯 영역에 실제 표시될 내용이 있는지 미리 계산
   const hasBottomStats = useMemo(() => {
     // renderStat 함수와 동일한 로직으로 실제 표시될 스탯 확인
@@ -125,11 +151,11 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
     const hasJump = checkStat(item.combat?.jump || stats?.combat?.jump);
     
     // 업그레이드
-    const hasUpgrade = item.enhancement?.upgradeSlots > 0;
+    const hasUpgrade = item.enhancement?.upgradeSlots && item.enhancement.upgradeSlots > 0;
     
     return hasAttack || hasMagicAttack || hasStr || hasDex || hasInt || hasLuk || 
-           hasDefense || hasMagicDefense || hasAccuracy || hasAvoidability || hasSpeed || hasJump || hasUpgrade;
-  }, [item, stats]);
+           hasDefense || hasMagicDefense || hasAccuracy || hasAvoidability || hasSpeed || hasJump || hasAttackSpeed || hasUpgrade;
+  }, [item, stats, hasAttackSpeed]);
 
   return (
     <div className="maple-tooltip">
@@ -186,13 +212,29 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
       </div>
 
       {/* 하단 스탯 영역 - 실제 렌더링될 내용이 있을 때만 표시 */}
-      {hasBottomStats && (
+      {!!hasBottomStats && (
         <>
           {/* 구분선 */}
           <div className="maple-tooltip-divider"></div>
           
           <div className="maple-tooltip-bottom-stats">
-            {/* 1. 공격력/마력 */}
+            {/* 1. 공격속도 (무기만) - 맨 위 */}
+            {!!hasAttackSpeed && (
+              <div className="maple-tooltip-stat">
+                <span className="maple-tooltip-stat-label">공격속도 : </span>
+                <span className="maple-tooltip-stat-value stat-normal">
+                  {getAttackSpeedText(
+                    item.weapon?.attackSpeed || 
+                    stats?.weapon?.attackSpeed || 
+                    item.enhancement?.attackSpeed || 
+                    stats?.enhancement?.attackSpeed || 
+                    0
+                  )} ({item.weapon?.attackSpeed || stats?.weapon?.attackSpeed || item.enhancement?.attackSpeed || stats?.enhancement?.attackSpeed})
+                </span>
+              </div>
+            )}
+            
+            {/* 2. 공격력/마력 */}
             {!!(item.combat || stats?.combat) && (
               <>
                 {renderStat('공격력', item.combat?.attack || stats?.combat?.attack, 'enhance')}
@@ -200,7 +242,7 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
               </>
             )}
             
-            {/* 2. 주스텟 (STR, DEX, INT, LUK) */}
+            {/* 3. 주스텟 (STR, DEX, INT, LUK) */}
             {!!(item.stats || stats?.stats) && (
               <>
                 {renderStat('STR', item.stats?.str || stats?.stats?.str, 'bonus')}
@@ -210,7 +252,7 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
               </>
             )}
             
-            {/* 3. 나머지 스탯 */}
+            {/* 4. 나머지 스탯 */}
             {!!(item.combat || stats?.combat) && (
               <>
                 {renderStat('물리방어력', item.combat?.defense || stats?.combat?.defense)}
@@ -222,8 +264,8 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
               </>
             )}
             
-            {/* 4. 업그레이드 가능 횟수 */}
-            {item.enhancement?.upgradeSlots > 0 && (
+            {/* 5. 업그레이드 가능 횟수 */}
+            {!!(item.enhancement?.upgradeSlots && item.enhancement.upgradeSlots > 0) && (
               <div className="maple-tooltip-upgrade">
                 업그레이드 가능 횟수 : {item.enhancement.upgradeSlots}
                 {(item.enhancement as any)?.hammerApplied && (
@@ -262,7 +304,7 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
       )}
 
       {/* 판매 가격 */}
-      {item.price > 0 && (
+      {!!(item.price && item.price > 0) && (
         <div className="maple-tooltip-price">
           판매가격 : {item.price.toLocaleString()} 메소
         </div>

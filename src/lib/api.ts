@@ -45,11 +45,237 @@ export class MapleStoryAPI {
   // NPC API
   async getNPC(id: number): Promise<MapleNPC> {
     const response = await apiClient.get(this.getEndpoint(`/npc/${id}`));
-    return response.data;
+    const npcData = response.data;
+    
+    // 첫 번째 맵 정보 가져오기 (foundAt 배열의 첫 번째 요소)
+    let mapInfo = undefined;
+    if (npcData.foundAt && npcData.foundAt.length > 0) {
+      try {
+        const mapId = npcData.foundAt[0].id;
+        const mapResponse = await apiClient.get(this.getEndpoint(`/map/${mapId}`));
+        const mapData = mapResponse.data;
+        mapInfo = {
+          id: mapId,
+          name: mapData.streetName || mapData.mapName || `맵 ${mapId}`,
+          category: mapData.category,
+          region: mapData.region,
+        };
+      } catch (error) {
+        console.warn('Failed to fetch map info for NPC:', id);
+      }
+    }
+    
+    return {
+      id: npcData.id,
+      name: npcData.name,
+      description: npcData.dialogue ? Object.values(npcData.dialogue).join('\n') : '',
+      location: mapInfo?.name,
+      scripts: npcData.dialogue ? Object.values(npcData.dialogue) : [],
+      map: mapInfo,
+      func: npcData.isShop ? 'shop' : '',
+      sprites: [],
+    };
   }
 
   async getNPCRender(id: number, action: string = 'stand'): Promise<string> {
     return `${API_BASE_URL}${this.getEndpoint(`/npc/${id}/render/${action}`)}`;
+  }
+
+  // NPC 목록 API (옵션으로 상세 정보 포함)
+  async getNPCsByCategory(params: { startPosition?: number; count?: number; includeDetails?: boolean }): Promise<MapleNPC[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.startPosition) queryParams.append('startPosition', params.startPosition.toString());
+      if (params.count) queryParams.append('count', params.count.toString());
+      
+      const url = `${this.getEndpoint('/npc')}?${queryParams.toString()}`;
+      const response = await apiClient.get(url);
+      const npcs = response.data;
+      
+      if (!Array.isArray(npcs)) {
+        return [];
+      }
+      
+      // 상세 정보 포함 여부에 따라 다르게 처리
+      if (params.includeDetails) {
+        // 처음 100개만 상세 정보 포함 (성능 고려)
+        const limitedNPCs = npcs.slice(0, 100);
+        
+        const npcDetailsPromises = limitedNPCs.map(async (npc: any) => {
+          try {
+            const detailResponse = await apiClient.get(this.getEndpoint(`/npc/${npc.id}`));
+            const npcData = detailResponse.data;
+            
+            // 첫 번째 맵 정보 가져오기
+            let mapInfo = undefined;
+            if (npcData.foundAt && npcData.foundAt.length > 0) {
+              try {
+                const mapId = npcData.foundAt[0].id;
+                const mapResponse = await apiClient.get(this.getEndpoint(`/map/${mapId}`));
+                const mapData = mapResponse.data;
+                mapInfo = {
+                  id: mapId,
+                  name: mapData.streetName || mapData.mapName || `맵 ${mapId}`,
+                  category: mapData.category,
+                  region: mapData.region,
+                };
+              } catch (mapError) {
+                console.warn('Failed to fetch map info for NPC:', npc.id);
+              }
+            }
+            
+            return {
+              id: npc.id,
+              name: npcData.name || npc.name,
+              description: npcData.dialogue ? Object.values(npcData.dialogue).join('\n') : '',
+              location: mapInfo?.name,
+              scripts: npcData.dialogue ? Object.values(npcData.dialogue).map(d => String(d)) : [],
+              map: mapInfo,
+              func: npcData.isShop ? 'shop' : '',
+              sprites: [],
+            };
+          } catch (error) {
+            console.warn('Failed to fetch detail for NPC:', npc.id);
+            return {
+              id: npc.id,
+              name: npc.name,
+              description: '',
+              location: undefined,
+              scripts: [],
+              map: undefined,
+              func: '',
+              sprites: [],
+            };
+          }
+        });
+        
+        const detailedNPCs = await Promise.all(npcDetailsPromises);
+        
+        // 나머지 NPC들은 기본 정보만
+        const remainingNPCs = npcs.slice(100)
+          .filter((npc: any) => npc.name) // 이름이 있는 NPC만 필터링
+          .map((npc: any) => ({
+            id: npc.id,
+            name: npc.name,
+            description: '',
+            location: undefined,
+            scripts: [],
+            map: undefined,
+            func: '',
+            sprites: [],
+          }));
+        
+        return [...detailedNPCs, ...remainingNPCs];
+      } else {
+        // 기본 정보만 반환 (빠른 로딩)
+        return npcs
+          .filter((npc: any) => npc.name) // 이름이 있는 NPC만 필터링
+          .map((npc: any) => ({
+            id: npc.id,
+            name: npc.name,
+            description: '',
+            location: undefined,
+            scripts: [],
+            map: undefined,
+            func: '',
+            sprites: [],
+          }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch NPCs:', error);
+      throw error;
+    }
+  }
+
+  // 맵 목록 가져오기
+  async getMaps(params: { startPosition?: number; count?: number } = {}): Promise<any[]> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.startPosition) queryParams.append('startPosition', params.startPosition.toString());
+      if (params.count) queryParams.append('count', params.count.toString());
+      
+      const url = `${this.getEndpoint('/map')}?${queryParams.toString()}`;
+      const response = await apiClient.get(url);
+      const maps = response.data || [];
+      
+      return maps.map((map: any) => ({
+        id: map.id,
+        name: map.name,
+        streetName: map.streetName,
+        displayName: map.streetName ? `${map.streetName} - ${map.name}` : map.name,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch maps:', error);
+      throw error;
+    }
+  }
+
+  // 특정 맵의 NPC 목록 가져오기 (간단 버전)
+  async getNPCsByMap(mapId: number): Promise<MapleNPC[]> {
+    try {
+      console.log(`🗺️ Fetching NPCs for map ${mapId}...`);
+      
+      // 1단계: 맵 정보 가져오기
+      const mapResponse = await apiClient.get(this.getEndpoint(`/map/${mapId}`));
+      const mapData = mapResponse.data;
+      
+      if (!mapData || !mapData.npcs || mapData.npcs.length === 0) {
+        console.log(`No NPCs found in map ${mapId}`);
+        return [];
+      }
+      
+      const mapInfo = {
+        id: mapId,
+        name: mapData.streetName ? `${mapData.streetName} - ${mapData.name}` : mapData.name,
+        category: mapData.category,
+        region: mapData.region,
+      };
+      
+      console.log(`Found ${mapData.npcs.length} NPCs in ${mapInfo.name}`);
+      
+      // 2단계: 각 NPC의 이름 가져오기 (처음 20개만)
+      const npcPromises = mapData.npcs.slice(0, 20).map(async (npc: any) => {
+        try {
+          const npcResponse = await apiClient.get(this.getEndpoint(`/npc/${npc.id}`));
+          const npcData = npcResponse.data;
+          
+          return {
+            id: npc.id,
+            name: npcData.name || `NPC ${npc.id}`,
+            description: npcData.dialogue ? Object.values(npcData.dialogue).join(' ') : '',
+            location: mapInfo.name,
+            scripts: [],
+            map: mapInfo,
+            func: npcData.isShop ? 'shop' : '',
+            sprites: [],
+          };
+        } catch (error) {
+          console.warn(`Failed to load NPC ${npc.id}:`, error);
+          return null;
+        }
+      });
+      
+      const npcs = (await Promise.all(npcPromises)).filter(npc => npc !== null) as MapleNPC[];
+      
+      console.log(`✅ Successfully loaded ${npcs.length} NPCs from ${mapInfo.name}`);
+      return npcs;
+      
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.warn(`Map ${mapId} not found (404)`);
+        return [];
+      }
+      console.error(`Failed to fetch NPCs for map ${mapId}:`, error);
+      return []; // 에러 시 빈 배열 반환 (throw 대신)
+    }
+  }
+
+  // 기본 NPC 목록 (빈 상태용)
+  async getAllNPCs(): Promise<MapleNPC[]> {
+    // 기본적으로는 빈 배열 반환
+    return [];
   }
 
   // Mob API
@@ -177,16 +403,60 @@ export class MapleStoryAPI {
   }
 
 
-  // Job API (if available)
+  // Job API (static data)
   async getJob(id: number): Promise<MapleJob> {
-    const response = await apiClient.get(this.getEndpoint(`/job/${id}`));
-    return response.data;
+    try {
+      const response = await fetch('/jobs.json');
+      const jobs = await response.json();
+      const job = jobs.find((j: any) => j.id === id);
+      if (!job) {
+        throw new Error(`Job ${id} not found`);
+      }
+      return job;
+    } catch (error) {
+      console.warn('Failed to fetch job from static data:', error);
+      throw error;
+    }
   }
 
-  // Skill API (if available)
+  // Jobs List API (static data)
+  async getJobs(): Promise<MapleJob[]> {
+    try {
+      const response = await fetch('/jobs.json');
+      const jobs = await response.json();
+      return jobs;
+    } catch (error) {
+      console.warn('Failed to fetch jobs from static data:', error);
+      throw error;
+    }
+  }
+
+  // Skill API (static data)
   async getSkill(id: number): Promise<MapleSkill> {
-    const response = await apiClient.get(this.getEndpoint(`/skill/${id}`));
-    return response.data;
+    try {
+      const response = await fetch('/skills.json');
+      const skills = await response.json();
+      const skill = skills.find((s: any) => s.id === id);
+      if (!skill) {
+        throw new Error(`Skill ${id} not found`);
+      }
+      return skill;
+    } catch (error) {
+      console.warn('Failed to fetch skill from static data:', error);
+      throw error;
+    }
+  }
+
+  // Skills List API (static data)
+  async getSkills(): Promise<MapleSkill[]> {
+    try {
+      const response = await fetch('/skills.json');
+      const skills = await response.json();
+      return skills;
+    } catch (error) {
+      console.warn('Failed to fetch skills from static data:', error);
+      throw error;
+    }
   }
 
   async getSkillIcon(id: number): Promise<string> {
@@ -208,12 +478,16 @@ export class MapleStoryAPI {
 
   async searchNPCs(query: string, limit: number = 20): Promise<MapleNPC[]> {
     try {
-      const response = await apiClient.get(this.getEndpoint(`/npc/search`), {
-        params: { q: query, limit }
-      });
-      return response.data;
-    } catch {
-      console.warn('Search not available, returning empty array');
+      // maplestory.io API는 검색 기능이 없으므로 전체 NPC 목록에서 클라이언트 사이드 검색 구현
+      const allNPCs = await this.getNPCsByCategory({ startPosition: 0, count: 1000 });
+      
+      const filteredNPCs = allNPCs.filter(npc => 
+        npc.name.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, limit);
+      
+      return filteredNPCs;
+    } catch (error) {
+      console.warn('NPC search failed:', error);
       return [];
     }
   }

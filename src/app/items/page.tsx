@@ -59,6 +59,22 @@ const ITEM_CATEGORIES = {
     { value: 'Emblem', label: '엠블렘' },
     { value: 'Pocket Item', label: '포켓 아이템' },
   ],
+  twoHandedWeaponSubCategories: [
+    { value: '전체', label: '전체' },
+    { value: 'Two-Handed Sword', label: '두손검' },
+    { value: 'Two-Handed Axe', label: '두손도끼' },
+    { value: 'Two-Handed Blunt', label: '두손둔기' },
+    { value: 'Spear', label: '창' },
+    { value: 'Pole Arm', label: '폴암' },
+    { value: 'Bow', label: '활' },
+    { value: 'Crossbow', label: '석궁' },
+    { value: 'Claw', label: '아대' },
+    { value: 'Knuckle', label: '너클' },
+    { value: 'Gun', label: '총' },
+    { value: 'Dual Bowgun', label: '듀얼보우건' },
+    { value: 'Hand Cannon', label: '핸드캐논' },
+    { value: 'Arm Cannon', label: '암캐논' },
+  ],
   useSubCategories: [
     { value: '전체', label: '전체' },
     { value: 'Consumable', label: '소비' },
@@ -499,6 +515,8 @@ export default function ItemsPage() {
                           setSubCategory('전체');
                         } else if (value === 'Armor') {
                           setSubCategory('전체');
+                        } else if (value === 'Two-Handed Weapon') {
+                          setSubCategory('전체');
                         } else if (value === 'Character') {
                           setSubCategory('Face');
                         } else {
@@ -636,6 +654,24 @@ export default function ItemsPage() {
                     </Select>
                   </Col>
                 )}
+
+                {/* 3차 분류 - 두손 무기 */}
+                {overallCategory === 'Equip' && category === 'Two-Handed Weapon' && (
+                  <Col xs={24} sm={8} md={6} lg={4}>
+                    <Select
+                      style={{ width: '100%' }}
+                      size="large"
+                      value={subCategory || '전체'}
+                      onChange={setSubCategory}
+                      placeholder="두손 무기 종류"
+                      allowClear
+                    >
+                      {ITEM_CATEGORIES.twoHandedWeaponSubCategories.map(cat => (
+                        <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                      ))}
+                    </Select>
+                  </Col>
+                )}
               </Row>
             </Col>
             
@@ -695,6 +731,7 @@ export default function ItemsPage() {
                     {' > '}
                     {category === 'Armor' && ITEM_CATEGORIES.armorSubCategories.find(cat => cat.value === subCategory)?.label}
                     {category === 'Accessory' && ITEM_CATEGORIES.accessorySubCategories.find(cat => cat.value === subCategory)?.label}
+                    {category === 'Two-Handed Weapon' && ITEM_CATEGORIES.twoHandedWeaponSubCategories.find(cat => cat.value === subCategory)?.label}
                   </>
                 )}
               </>

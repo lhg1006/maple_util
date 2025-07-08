@@ -1,7 +1,5 @@
 // 게임 데이터 연결 및 조회 유틸리티
-import { loadMonsters, loadItems, loadMaps } from '@/lib/cdn-data-loader';
-import { DROPS, DropInfo, DROP_RATE_CONFIG, MONSTERS_BY_ITEM } from '@/data/drops';
-import { getAutoDropsForMonster } from '@/utils/auto-drops';
+import { loadMonsters, loadMaps } from '@/lib/cdn-data-loader';
 
 // 임시 인터페이스
 interface MapInfo {
@@ -12,16 +10,6 @@ interface MapInfo {
   description?: string;
 }
 
-interface ItemInfo {
-  id: number;
-  name: string;
-  category: string;
-  subCategory?: string;
-  description?: string;
-  level?: number;
-  rarity?: string;
-  sellPrice?: number;
-}
 
 interface MonsterInfo {
   id: number;
@@ -39,7 +27,6 @@ interface MonsterInfo {
 
 // 데이터 캐시
 let cachedMonsters: any = null;
-let cachedItems: any = null;
 let cachedMaps: any = null;
 
 // 데이터 로더 함수
@@ -48,13 +35,6 @@ async function getMonsters() {
     cachedMonsters = await loadMonsters();
   }
   return cachedMonsters;
-}
-
-async function getItems() {
-  if (!cachedItems) {
-    cachedItems = await loadItems();
-  }
-  return cachedItems;
 }
 
 async function getMaps() {
@@ -67,18 +47,10 @@ async function getMaps() {
 // 통합 게임 데이터 인터페이스
 export interface GameData {
   monster: MonsterInfo;
-  drops: EnrichedDropInfo[];
   maps: MapInfo[];
 }
 
-export interface EnrichedDropInfo extends DropInfo {
-  item: ItemInfo;
-  displayRate: string;
-  color: string;
-  quantityText: string;
-}
-
-// 몬스터 상세 정보 (드롭, 맵 정보 포함)
+// 몬스터 상세 정보 (맵 정보 포함)
 export async function getMonsterDetails(monsterId: number): Promise<GameData | null> {
   // CDN에서 몬스터 데이터 로드
   const monsters = await getMonsters();
@@ -89,69 +61,18 @@ export async function getMonsterDetails(monsterId: number): Promise<GameData | n
   const monster: MonsterInfo = {
     id: monsterData.id,
     name: monsterData.name,
-    level: monsterData.level,
-    hp: monsterData.hp,
-    exp: monsterData.exp,
-    region: monsterData.region,
-    maps: monsterData.maps || [],
-    attackType: monsterData.attackType as 'melee' | 'ranged' | 'magic',
-    element: monsterData.element,
+    level: monsterData.level || 0,
+    hp: monsterData.hp || 0,
+    exp: monsterData.exp || 0,
+    region: monsterData.region || '알 수 없음',
+    maps: monsterData.foundAt || [],
+    attackType: monsterData.bodyAttack ? 'melee' : 'ranged',
+    element: monsterData.element || 'neutral',
     description: monsterData.description,
-    isBoss: monsterData.isBoss,
+    isBoss: monsterData.boss || false,
   };
   
   if (!monster) return null;
-
-  // 드롭 정보 조회 및 강화
-  let allDrops = DROPS[monsterId] || [];
-  
-  // 하드코딩된 드롭이 없으면 자동 드롭 생성
-  if (allDrops.length === 0) {
-    allDrops = await getAutoDropsForMonster(monsterId);
-  }
-  
-  const items = await getItems();
-  const drops = allDrops.map(drop => {
-    const itemData = items[drop.itemId];
-    let item: ItemInfo | undefined;
-    
-    if (itemData) {
-      item = {
-        id: itemData.id,
-        name: itemData.name,
-        category: itemData.typeInfo?.overallCategory || 'etc',
-        subCategory: itemData.typeInfo?.subCategory,
-        description: itemData.description,
-        level: itemData.level,
-        rarity: itemData.rarity,
-        sellPrice: itemData.sellPrice,
-      };
-    }
-    
-    const rateConfig = DROP_RATE_CONFIG[drop.dropRate];
-    
-    let quantityText = '1개';
-    if (drop.minQuantity && drop.maxQuantity) {
-      if (drop.minQuantity === drop.maxQuantity) {
-        quantityText = `${drop.minQuantity}개`;
-      } else {
-        quantityText = `${drop.minQuantity}-${drop.maxQuantity}개`;
-      }
-    }
-
-    return {
-      ...drop,
-      item: item || { 
-        id: drop.itemId, 
-        name: `알 수 없는 아이템 (${drop.itemId})`,
-        category: 'etc' as const,
-        description: '데이터가 없는 아이템입니다.'
-      },
-      displayRate: rateConfig.displayText || rateConfig.text,
-      color: rateConfig.color,
-      quantityText,
-    };
-  });
 
   // 맵 정보 조회
   let maps: MapInfo[] = [];
@@ -188,23 +109,16 @@ export async function getMonsterDetails(monsterId: number): Promise<GameData | n
 
   return {
     monster,
-    drops,
     maps,
   };
 }
 
-// 아이템을 드롭하는 몬스터 목록 조회
-export async function getMonstersByItem(itemId: number): Promise<MonsterInfo[]> {
-  const monsterIds = MONSTERS_BY_ITEM[itemId] || [];
-  const monsters = await getMonsters();
-  return monsterIds.map(id => monsters[id]).filter(Boolean);
-}
 
 // 특정 맵의 몬스터 목록 조회
 export async function getMonstersByMap(mapId: number): Promise<MonsterInfo[]> {
   const monsters = await getMonsters();
   return Object.values(monsters).filter((monster: any) => 
-    monster.maps && monster.maps.includes(mapId)
+    monster.foundAt && monster.foundAt.includes(mapId)
   ) as MonsterInfo[];
 }
 
@@ -230,60 +144,22 @@ export async function getBossMonsters(): Promise<MonsterInfo[]> {
   return Object.values(monsters).filter((monster: any) => monster.isBoss) as MonsterInfo[];
 }
 
-// 드롭률별 몬스터 조회
-export async function getMonstersByDropRate(dropRate: keyof typeof DROP_RATE_CONFIG): Promise<MonsterInfo[]> {
-  const monsters = await getMonsters();
-  const monsterIds: number[] = [];
-  
-  Object.entries(DROPS).forEach(([monsterId, drops]) => {
-    if (drops.some(drop => drop.dropRate === dropRate)) {
-      monsterIds.push(parseInt(monsterId));
-    }
-  });
-  
-  return monsterIds.map(id => monsters[id]).filter(Boolean) as MonsterInfo[];
-}
-
-// 특정 아이템 카테고리를 드롭하는 몬스터 조회
-export async function getMonstersByItemCategory(category: ItemInfo['category']): Promise<MonsterInfo[]> {
-  const monsters = await getMonsters();
-  const items = await getItems();
-  const monsterIds: number[] = [];
-  
-  Object.entries(DROPS).forEach(([monsterId, drops]) => {
-    const hasCategory = drops.some(drop => {
-      const item = items[drop.itemId];
-      return item && item.typeInfo?.overallCategory === category;
-    });
-    
-    if (hasCategory) {
-      monsterIds.push(parseInt(monsterId));
-    }
-  });
-  
-  return monsterIds.map(id => monsters[id]).filter(Boolean) as MonsterInfo[];
-}
 
 // 통계 함수들
 export async function getGameStats() {
   const monsters = await getMonsters();
-  const items = await getItems();
   const maps = await getMaps();
   
   const monsterCount = Object.keys(monsters).length;
-  const itemCount = Object.keys(items).length;
   const mapCount = Object.keys(maps).length;
-  const dropCount = Object.values(DROPS).reduce((sum, drops) => sum + drops.length, 0);
   
-  const bossCount = Object.values(monsters).filter((m: any) => m.isBoss).length;
+  const bossCount = Object.values(monsters).filter((m: any) => m.boss).length;
   const maxLevel = Math.max(...Object.values(monsters).map((m: any) => m.level));
   const minLevel = Math.min(...Object.values(monsters).map((m: any) => m.level));
   
   return {
     monsters: monsterCount,
-    items: itemCount,
     maps: mapCount,
-    drops: dropCount,
     bosses: bossCount,
     levelRange: { min: minLevel, max: maxLevel },
   };
@@ -300,16 +176,6 @@ export async function searchMonsters(query: string): Promise<MonsterInfo[]> {
   ) as MonsterInfo[];
 }
 
-export async function searchItems(query: string): Promise<ItemInfo[]> {
-  const items = await getItems();
-  const lowerQuery = query.toLowerCase();
-  return Object.values(items).filter((item: any) =>
-    item.name.toLowerCase().includes(lowerQuery) ||
-    item.typeInfo?.overallCategory?.toLowerCase().includes(lowerQuery) ||
-    item.typeInfo?.subCategory?.toLowerCase().includes(lowerQuery) ||
-    item.description?.toLowerCase().includes(lowerQuery)
-  ) as ItemInfo[];
-}
 
 export async function searchMaps(query: string): Promise<MapInfo[]> {
   const maps = await getMaps();
@@ -344,34 +210,3 @@ export async function getRecommendedMonsters(level: number, region?: string): Pr
   return monsterList.slice(0, 10) as MonsterInfo[]; // 상위 10개만 반환
 }
 
-// 아이템 획득 가이드
-export async function getItemAcquisitionGuide(itemId: number) {
-  const items = await getItems();
-  const item = items[itemId];
-  if (!item) return null;
-  
-  const monsters = await getMonstersByItem(itemId);
-  const maps = await getMaps();
-  
-  const dropInfos = monsters.map(monster => {
-    const drops = DROPS[monster.id] || [];
-    const drop = drops.find(d => d.itemId === itemId);
-    return {
-      monster,
-      drop,
-      maps: monster.maps.map(mapId => maps[mapId]).filter(Boolean),
-    };
-  });
-  
-  // 드롭률 높은 순으로 정렬
-  const rateOrder = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
-  dropInfos.sort((a, b) => {
-    if (!a.drop || !b.drop) return 0;
-    return rateOrder[b.drop.dropRate] - rateOrder[a.drop.dropRate];
-  });
-  
-  return {
-    item,
-    sources: dropInfos,
-  };
-}

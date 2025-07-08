@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { DataProvider } from '@/components/providers/data-provider';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +35,9 @@ export default function RootLayout({
         <QueryProvider>
           <AntdRegistry>
             <ThemeProvider>
-              {children}
+              <DataProvider>
+                {children}
+              </DataProvider>
             </ThemeProvider>
           </AntdRegistry>
         </QueryProvider>

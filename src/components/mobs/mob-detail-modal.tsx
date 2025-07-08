@@ -1,9 +1,9 @@
 'use client';
 
-import { Modal, Row, Col, Typography, Divider, Image, Spin, Tag, List } from 'antd';
+import { Modal, Row, Col, Typography, Divider, Image, Spin, Tag } from 'antd';
 import { MapleMob } from '@/types/maplestory';
 import { useState, useEffect } from 'react';
-import { mapleAPI } from '@/lib/api';
+import { loadMonsters } from '@/lib/cdn-data-loader';
 import { getMonsterDetails, GameData } from '@/utils/game-data';
 
 const { Title, Text, Paragraph } = Typography;
@@ -50,18 +50,45 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
     
     setLoading(true);
     try {
-      // API에서 기본 몬스터 정보 로드
-      const mobData = await mapleAPI.getMob(mobId);
-      setMob(mobData as DetailedMob);
+      // CDN에서 기본 몬스터 정보 로드
+      const monstersData = await loadMonsters();
+      const mobData = monstersData[mobId];
       
-      // 로컬 데이터에서 상세 정보 로드
-      const detailedData = await getMonsterDetails(mobId);
-      setGameData(detailedData);
+      if (mobData) {
+        const convertedMob: DetailedMob = {
+          id: mobData.id,
+          name: mobData.name,
+          level: mobData.level || 0,
+          hp: mobData.hp || 0,
+          mp: mobData.mp || 0,
+          exp: mobData.exp || 0,
+          description: mobData.description,
+          foundAt: mobData.foundAt || [],
+          meta: {
+            level: mobData.level,
+            maxHP: mobData.hp,
+            exp: mobData.exp,
+            isBodyAttack: mobData.bodyAttack,
+            speed: mobData.speed,
+            physicalDamage: mobData.pad,
+            magicDamage: mobData.mad,
+            accuracy: mobData.acc,
+            physicalDefenseRate: mobData.pdr,
+            magicDefenseRate: mobData.mdr,
+          }
+        };
+        setMob(convertedMob);
+      }
+      
+      // 로컬 데이터에서 상세 정보 로드 (지역 등)
+      try {
+        const detailedData = await getMonsterDetails(mobId);
+        setGameData(detailedData);
+      } catch (gameDataError) {
+        console.warn('게임 데이터 로딩 실패:', gameDataError);
+      }
     } catch (error) {
       console.error('몬스터 상세 정보 로딩 실패:', error);
-      // API 실패 시에도 로컬 데이터는 시도
-      const detailedData = await getMonsterDetails(mobId);
-      setGameData(detailedData);
     } finally {
       setLoading(false);
     }
@@ -71,14 +98,6 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
     return isBodyAttack ? '근접 공격' : '원거리 공격';
   };
 
-  const getLevelColor = (level?: number) => {
-    if (!level) return '#666';
-    if (level <= 10) return '#52c41a';
-    if (level <= 50) return '#1890ff';
-    if (level <= 100) return '#fa8c16';
-    if (level <= 200) return '#f5222d';
-    return '#722ed1';
-  };
 
   return (
     <Modal
@@ -229,53 +248,6 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
             </>
           )}
 
-          {/* 드롭 아이템 */}
-          {gameData && gameData.drops.length > 0 && (
-            <>
-              <Divider>드롭 아이템</Divider>
-              <List
-                dataSource={gameData.drops}
-                renderItem={(drop) => (
-                  <List.Item>
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={`https://maplestory.io/api/KMS/389/item/${drop.itemId}/icon`}
-                          alt={drop.item.name}
-                          style={{ width: '32px', height: '32px' }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                          }}
-                        />
-                        <div>
-                          <Text>{drop.item.name}</Text>
-                          <div>
-                            <Text type="secondary" style={{ fontSize: '12px' }}>
-                              {drop.quantityText}
-                            </Text>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Tag color={drop.color} style={{ margin: 0 }}>
-                          {drop.displayRate}
-                        </Tag>
-                        {drop.item.category && (
-                          <Tag style={{ margin: 0, fontSize: '10px' }}>
-                            {drop.item.category}
-                          </Tag>
-                        )}
-                      </div>
-                    </div>
-                  </List.Item>
-                )}
-              />
-              <Text type="secondary" style={{ fontSize: '12px', marginTop: '8px' }}>
-                * 드롭 정보는 실제와 다를 수 있습니다
-              </Text>
-            </>
-          )}
 
           {/* 출현 지역 */}
           {gameData && gameData.maps.length > 0 && (

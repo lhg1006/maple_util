@@ -21,6 +21,7 @@ npm run lint     # Run ESLint
 - Default region: KMS (Korea MapleStory)
 - Version: 284
 - Endpoints: items, NPCs, mobs, jobs, skills
+- data 는 maplestory.io 에서 가져온다.
 
 ### Key Directories
 - `src/app/` - Next.js App Router pages
@@ -65,3 +66,7 @@ Working on feature/issue-5-item-list branch implementing:
 
 ## Testing
 No test framework currently configured. Would need Jest/Vitest + React Testing Library for testing.
+
+## Development Notes
+- port 3000 번사용 
+- 서버는 내가 직접 켜

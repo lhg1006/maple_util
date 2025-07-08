@@ -140,6 +140,14 @@ export interface MapleNPC {
   description?: string;
   location?: string;
   scripts?: string[];
+  map?: {
+    id: number;
+    name: string;
+    category?: string;
+    region?: string;
+  };
+  func?: string;
+  sprites?: any[];
 }
 
 export interface MapleMob {
@@ -157,19 +165,31 @@ export interface MapleJob {
   id: number;
   name: string;
   description?: string;
-  branch?: string;
-  advancement?: number;
+  category: string;
+  advancement: number;
+  stats?: {
+    str: number;
+    dex: number;
+    int: number;
+    luk: number;
+    hp: number;
+    mp: number;
+  };
+  weapon?: string[];
   skills?: MapleSkill[];
 }
 
 export interface MapleSkill {
   id: number;
   name: string;
-  description?: string;
-  maxLevel: number;
+  description: string;
   jobId: number;
-  icon?: string;
-  type?: 'active' | 'passive' | 'buff';
+  jobName: string;
+  type: 'active' | 'passive' | 'buff' | 'debuff' | 'summon';
+  maxLevel: number;
+  preRequisite?: number | null;
+  element: string;
+  effect: string;
 }
 
 export interface MapleRegion {

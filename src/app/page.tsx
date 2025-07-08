@@ -1,12 +1,16 @@
 'use client';
 
-import { Card, Row, Col, Typography, Space, Statistic } from 'antd';
+import { Card, Row, Col, Typography, Space } from 'antd';
 import { ShoppingOutlined, UserOutlined, BugOutlined, TeamOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
+import { useRouter } from 'next/navigation';
+import { FlipCard } from '@/components/home/flip-card';
 
 const { Title, Paragraph } = Typography;
 
 export default function Home() {
+  const router = useRouter();
+  
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -19,59 +23,55 @@ export default function Home() {
 
         <Row gutter={[16, 16]} style={{ width: '100%', margin: 0 }}>
           <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <Card className="text-center hover:shadow-md transition-shadow">
-              <Statistic
+            <div style={{ height: '240px' }}>
+              <FlipCard
                 title="아이템 정보"
-                value="57,490"
-                prefix={<ShoppingOutlined />}
-                valueStyle={{ color: '#3f8600' }}
+                description="다양한 아이템의 상세 정보와 이미지를 확인할 수 있습니다."
+                icon={<ShoppingOutlined />}
+                color="#3f8600"
+                onClick={() => router.push('/items')}
+                type="item"
               />
-              <Paragraph className="mt-4">
-                다양한 아이템의 상세 정보와 이미지를 확인할 수 있습니다.
-              </Paragraph>
-            </Card>
+            </div>
           </Col>
           
           <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <Card className="text-center hover:shadow-md transition-shadow">
-              <Statistic
+            <div style={{ height: '240px' }}>
+              <FlipCard
                 title="NPC 정보"
-                value="5,000+"
-                prefix={<UserOutlined />}
-                valueStyle={{ color: '#cf1322' }}
+                description="게임 내 모든 NPC의 정보와 위치를 검색할 수 있습니다."
+                icon={<UserOutlined />}
+                color="#cf1322"
+                onClick={() => router.push('/npcs')}
+                type="npc"
               />
-              <Paragraph className="mt-4">
-                게임 내 모든 NPC의 정보와 위치를 검색할 수 있습니다.
-              </Paragraph>
-            </Card>
+            </div>
           </Col>
           
           <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <Card className="text-center hover:shadow-md transition-shadow">
-              <Statistic
+            <div style={{ height: '240px' }}>
+              <FlipCard
                 title="몬스터 정보"
-                value="3,000+"
-                prefix={<BugOutlined />}
-                valueStyle={{ color: '#722ed1' }}
+                description="몬스터의 능력치와 드롭 아이템 정보를 확인하세요."
+                icon={<BugOutlined />}
+                color="#722ed1"
+                onClick={() => router.push('/mobs')}
+                type="mob"
               />
-              <Paragraph className="mt-4">
-                몬스터의 능력치와 드롭 아이템 정보를 확인하세요.
-              </Paragraph>
-            </Card>
+            </div>
           </Col>
           
           <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <Card className="text-center hover:shadow-md transition-shadow">
-              <Statistic
+            <div style={{ height: '240px' }}>
+              <FlipCard
                 title="직업 & 스킬"
-                value="40+"
-                prefix={<TeamOutlined />}
-                valueStyle={{ color: '#1890ff' }}
+                description="모든 직업의 스킬 트리와 상세 정보를 살펴보세요."
+                icon={<TeamOutlined />}
+                color="#1890ff"
+                onClick={() => router.push('/jobs')}
+                type="job"
               />
-              <Paragraph className="mt-4">
-                모든 직업의 스킬 트리와 상세 정보를 살펴보세요.
-              </Paragraph>
-            </Card>
+            </div>
           </Col>
         </Row>
 

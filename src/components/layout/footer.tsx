@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
           </Text>
           <br />
           <Text type="secondary" style={{ fontSize: '12px', opacity: 0.45 }}>
-            모든 게임 데이터의 저작권은 넥슨(NEXON)에 있습니다.
+            본 서비스를 통해 제공되는 모든 미디어, 아이콘, 설명 및 캐릭터 정보는 넥슨의 독점 재산이며, 넥슨 서비스 약관이 적용됩니다.
           </Text>
         </div>
       </Space>

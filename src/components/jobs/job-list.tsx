@@ -1,0 +1,173 @@
+'use client';
+
+import { Row, Col, Card, Typography, Tag, Badge } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { MapleJob } from '@/types/maplestory';
+
+const { Title, Text, Paragraph } = Typography;
+
+interface JobListProps {
+  jobs: MapleJob[];
+  loading?: boolean;
+  onJobClick: (jobId: number) => void;
+}
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'beginner': return '#8c8c8c';
+    case 'warrior': return '#cf1322';
+    case 'magician': return '#1890ff';
+    case 'archer': return '#52c41a';
+    case 'thief': return '#722ed1';
+    default: return '#8c8c8c';
+  }
+};
+
+const getCategoryName = (category: string) => {
+  switch (category) {
+    case 'beginner': return '초보자';
+    case 'warrior': return '전사';
+    case 'magician': return '마법사';
+    case 'archer': return '궁수';
+    case 'thief': return '도적';
+    default: return '기타';
+  }
+};
+
+const getAdvancementName = (advancement: number) => {
+  switch (advancement) {
+    case 0: return '초보자';
+    case 1: return '1차 전직';
+    case 2: return '2차 전직';
+    case 3: return '3차 전직';
+    case 4: return '4차 전직';
+    default: return '기타';
+  }
+};
+
+export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobClick }) => {
+  if (loading) {
+    return (
+      <Row gutter={[16, 16]}>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Col key={index} xs={24} sm={12} md={8} lg={6} xl={6}>
+            <Card loading={true} />
+          </Col>
+        ))}
+      </Row>
+    );
+  }
+
+  if (jobs.length === 0) {
+    return (
+      <div style={{ 
+        textAlign: 'center', 
+        padding: '40px',
+        background: '#fafafa',
+        borderRadius: '8px',
+        border: '1px dashed #d9d9d9'
+      }}>
+        <TeamOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
+        <Title level={4} style={{ color: '#8c8c8c' }}>
+          직업 정보가 없습니다
+        </Title>
+        <Text style={{ color: '#8c8c8c' }}>
+          검색 조건을 변경해보세요.
+        </Text>
+      </div>
+    );
+  }
+
+  return (
+    <Row gutter={[16, 16]}>
+      {jobs.map((job) => (
+        <Col key={job.id} xs={24} sm={12} md={8} lg={6} xl={6}>
+          <Card
+            hoverable
+            onClick={() => onJobClick(job.id)}
+            style={{ 
+              height: '100%',
+              borderColor: getCategoryColor(job.category),
+              borderWidth: '2px'
+            }}
+            styles={{
+              body: { 
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%'
+              }
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+              <TeamOutlined 
+                style={{ 
+                  fontSize: '32px', 
+                  color: getCategoryColor(job.category),
+                  marginBottom: '8px'
+                }} 
+              />
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+              <Title level={5} style={{ margin: 0, marginBottom: '4px' }}>
+                {job.name}
+              </Title>
+              <div style={{ marginBottom: '8px' }}>
+                <Tag color={getCategoryColor(job.category)}>
+                  {getCategoryName(job.category)}
+                </Tag>
+                <Tag color="blue">
+                  {getAdvancementName(job.advancement)}
+                </Tag>
+              </div>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <Paragraph 
+                ellipsis={{ rows: 2 }} 
+                style={{ 
+                  fontSize: '12px', 
+                  color: '#666',
+                  margin: 0,
+                  marginBottom: '8px'
+                }}
+              >
+                {job.description}
+              </Paragraph>
+            </div>
+
+            {job.stats && (
+              <div style={{ 
+                marginTop: 'auto',
+                padding: '8px',
+                background: '#f5f5f5',
+                borderRadius: '4px',
+                fontSize: '11px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>STR: {job.stats.str}</span>
+                  <span>DEX: {job.stats.dex}</span>
+                  <span>INT: {job.stats.int}</span>
+                  <span>LUK: {job.stats.luk}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                  <span>HP: {job.stats.hp}</span>
+                  <span>MP: {job.stats.mp}</span>
+                </div>
+              </div>
+            )}
+
+            {job.weapon && job.weapon.length > 0 && (
+              <div style={{ marginTop: '8px', textAlign: 'center' }}>
+                <Text style={{ fontSize: '10px', color: '#999' }}>
+                  무기: {job.weapon.join(', ')}
+                </Text>
+              </div>
+            )}
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+};
