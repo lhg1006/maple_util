@@ -54,6 +54,48 @@ export const useMaps = (params: { startPosition?: number; count?: number } = {})
   });
 };
 
+// 전체 맵 데이터를 배치로 가져오는 훅
+export const useAllMaps = () => {
+  return useQuery({
+    queryKey: ['maps', 'all'],
+    queryFn: async () => {
+      console.log('🗺️ 전체 맵 데이터 로딩 시작...');
+      const allMaps = [];
+      let startPosition = 0;
+      const batchSize = 5000;
+      let batchCount = 0;
+      
+      while (true) {
+        batchCount++;
+        console.log(`📦 배치 ${batchCount} 로딩 중... (위치: ${startPosition})`);
+        
+        const batch = await mapleAPI.getMaps({ startPosition, count: batchSize });
+        allMaps.push(...batch);
+        
+        console.log(`✅ 배치 ${batchCount} 완료: ${batch.length}개 맵 (총 ${allMaps.length}개)`);
+        
+        // API에서 반환된 맵의 수가 요청한 수보다 적으면 마지막 배치
+        if (batch.length < batchSize) {
+          console.log(`🏁 전체 맵 로딩 완료: ${allMaps.length}개 맵`);
+          break;
+        }
+        
+        startPosition += batchSize;
+        
+        // 무한 루프 방지 (최대 50,000개 맵)
+        if (startPosition >= 50000) {
+          console.warn('⚠️ 맵 수 제한에 도달하여 로딩 중단');
+          break;
+        }
+      }
+      
+      return allMaps;
+    },
+    staleTime: 1000 * 60 * 60, // 1시간 캐시 (전체 데이터는 더 오래 캐시)
+    gcTime: 1000 * 60 * 120, // 2시간 가비지 컬렉션
+  });
+};
+
 export const useNPCsByMap = (mapId: number | null) => {
   return useQuery({
     queryKey: ['npcs', 'map', mapId],

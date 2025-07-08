@@ -205,11 +205,115 @@ export class MapleStoryAPI {
         name: map.name,
         streetName: map.streetName,
         displayName: map.streetName ? `${map.streetName} - ${map.name}` : map.name,
+        continent: this.getContinentByStreetName(map.streetName),
+        category: this.getMapCategory(map.streetName),
       }));
     } catch (error) {
       console.error('Failed to fetch maps:', error);
       throw error;
     }
+  }
+
+  // 대륙별 분류 함수
+  private getContinentByStreetName(streetName: string): string {
+    if (!streetName) return '기타';
+    
+    // 메이플 로드 (초보자 지역)
+    if (['메이플로드', '레인보우스트리트'].includes(streetName)) {
+      return '메이플 로드';
+    }
+    
+    // 빅토리아 아일랜드
+    if (['빅토리아로드', '헤네시스', '엘리니아', '페리온', '슬리피우드', '습지', '드레이크의 동굴'].includes(streetName)) {
+      return '빅토리아 아일랜드';
+    }
+    
+    // 루타비스
+    if (['루타비스', '루디브리엄성', '헬리오스 탑', '에오스 탑'].includes(streetName)) {
+      return '루타비스';
+    }
+    
+    // 아쿠아로드 (아쿠아리움)
+    if (['아쿠아로드', '미나르숲', '포트로드'].includes(streetName)) {
+      return '아쿠아로드';
+    }
+    
+    // 리프레 대륙
+    if (['리프레', '엘린숲', '아랫마을', '킹덤로드', '퀸스로드'].includes(streetName)) {
+      return '리프레';
+    }
+    
+    // 무릉 지역
+    if (['무릉도원', '백초마을', '상산'].includes(streetName)) {
+      return '무릉도원';
+    }
+    
+    // 아스완 지역
+    if (['아스완', '사자왕의 성'].includes(streetName)) {
+      return '아스완';
+    }
+    
+    // 천상 지역 (에델슈타인 포함)
+    if (['천상의 크리세', '시간의 신전', '타임로드', '기사단 요새'].includes(streetName)) {
+      return '천상계';
+    }
+    
+    // 스노우 아일랜드 (얼음 지역)
+    if (['스노우 아일랜드', '얼음왕국'].includes(streetName)) {
+      return '스노우 아일랜드';
+    }
+    
+    // 버섯 왕국
+    if (['버섯의 성', '버섯노래숲'].includes(streetName)) {
+      return '버섯 왕국';
+    }
+    
+    // 커닝시티
+    if (['커닝타워', '커닝시티', '커닝 스퀘어', '커닝시티지하철', '커닝스퀘어'].includes(streetName)) {
+      return '커닝시티';
+    }
+    
+    // 요정 지역
+    if (['요정의 숲', '요정학원 엘리넬', '엘리넬 호수', '엘로딘'].includes(streetName)) {
+      return '요정계';
+    }
+    
+    // 테마파크 및 이벤트
+    if (['판타스틱 테마파크', 'UFO 내부', '폐기지 잔해', '헌티드 맨션'].includes(streetName)) {
+      return '테마파크';
+    }
+    
+    // 던전 지역
+    if (['던전', '골렘사원', '발록의 신전', '저주받은신전', '타락한 세계수', '폐광'].includes(streetName)) {
+      return '던전';
+    }
+    
+    // 항해 지역
+    if (['항해중', '배틀 호라이즌', '노틸러스'].includes(streetName)) {
+      return '해상 지역';
+    }
+    
+    // 특수 지역
+    if (['히든스트리트', '히든 스트리트', '미니던전'].includes(streetName)) {
+      return '히든 지역';
+    }
+    
+    return '기타 지역';
+  }
+
+  // 맵 카테고리 분류
+  private getMapCategory(streetName: string): string {
+    if (!streetName) return 'other';
+    
+    if (['메이플로드', '레인보우스트리트'].includes(streetName)) return 'beginner';
+    if (['빅토리아로드', '헤네시스', '엘리니아', '페리온'].includes(streetName)) return 'victoria';
+    if (streetName === '루타비스') return 'ludibrium';
+    if (['버섯의 성', '버섯노래숲'].includes(streetName)) return 'mushroom';
+    if (streetName.includes('커닝')) return 'kerning';
+    if (['던전', '골렘사원', '발록의 신전', '저주받은신전'].includes(streetName)) return 'dungeon';
+    if (streetName.includes('히든')) return 'hidden';
+    
+    return 'other';
   }
 
   // 특정 맵의 NPC 목록 가져오기 (간단 버전)

@@ -1,17 +1,41 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Typography, Row, Col, Pagination, Input, Select, App, Spin } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Typography, Row, Col, Pagination, Input, Select, App, Spin, Badge } from 'antd';
+import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { NPCList } from '@/components/npcs/npc-list';
 import { NPCDetailModal } from '@/components/npcs/npc-detail-modal';
-import { useSearchNPCs, useNPCList, useMaps, useNPCsByMap } from '@/hooks/useMapleData';
+import { useSearchNPCs, useAllMaps, useNPCsByMap } from '@/hooks/useMapleData';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
 const { Option } = Select;
+
+// 대륙별 색상 함수
+const getContinentColor = (continent: string): string => {
+  switch (continent) {
+    case '메이플 로드': return '#52c41a';
+    case '빅토리아 아일랜드': return '#1890ff';
+    case '루타비스': return '#722ed1';
+    case '아쿠아로드': return '#13c2c2';
+    case '리프레': return '#52c41a';
+    case '무릉도원': return '#fa8c16';
+    case '아스완': return '#d4b106';
+    case '천상계': return '#722ed1';
+    case '스노우 아일랜드': return '#40a9ff';
+    case '버섯 왕국': return '#fa8c16';
+    case '커닝시티': return '#eb2f96';
+    case '요정계': return '#13c2c2';
+    case '테마파크': return '#f759ab';
+    case '던전': return '#f5222d';
+    case '해상 지역': return '#1890ff';
+    case '히든 지역': return '#8c8c8c';
+    case '기타 지역': return '#666666';
+    default: return '#666666';
+  }
+};
 
 export default function NPCsPage() {
   const { message } = App.useApp();
@@ -21,6 +45,7 @@ export default function NPCsPage() {
   const [selectedNPCId, setSelectedNPCId] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedMapId, setSelectedMapId] = useState<number | null>(null);
+  const [selectedContinent, setSelectedContinent] = useState<string>('all');
   const pageSize = 32;
 
   // NPC 검색 (React Query 훅 사용)
@@ -31,11 +56,65 @@ export default function NPCsPage() {
     isError: isSearchError 
   } = useSearchNPCs(searchQuery, searchQuery.length >= 2);
 
-  // 맵 목록
+  // 맵 목록 (전체 데이터)
   const { 
     data: maps = [], 
     isLoading: isMapsLoading 
-  } = useMaps({ startPosition: 0, count: 1000 });
+  } = useAllMaps();
+
+  // 대륙별 필터링된 맵 목록
+  const filteredMaps = useMemo(() => {
+    if (selectedContinent === 'all') {
+      return maps;
+    }
+    return maps.filter((map: any) => map.continent === selectedContinent);
+  }, [maps, selectedContinent]);
+
+  // 대륙별 통계 (정렬된)
+  const continentStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    maps.forEach((map: any) => {
+      const continent = map.continent || '기타';
+      stats[continent] = (stats[continent] || 0) + 1;
+    });
+    
+    // 대륙을 중요도 순으로 정렬
+    const continentOrder = [
+      '메이플 로드',
+      '빅토리아 아일랜드', 
+      '루타비스',
+      '아쿠아로드',
+      '리프레',
+      '무릉도원',
+      '아스완',
+      '천상계',
+      '스노우 아일랜드',
+      '버섯 왕국',
+      '커닝시티',
+      '요정계',
+      '테마파크',
+      '던전',
+      '해상 지역',
+      '히든 지역',
+      '기타 지역'
+    ];
+    
+    const sortedStats: Record<string, number> = {};
+    continentOrder.forEach(continent => {
+      if (stats[continent]) {
+        sortedStats[continent] = stats[continent];
+      }
+    });
+    
+    // 정렬에 없는 대륙들 추가
+    Object.entries(stats).forEach(([continent, count]) => {
+      if (!sortedStats[continent]) {
+        sortedStats[continent] = count;
+      }
+    });
+    
+    return sortedStats;
+  }, [maps]);
 
   // 선택된 맵의 NPC 목록
   const { 
@@ -111,6 +190,13 @@ export default function NPCsPage() {
     }
   }, []);
 
+  // 대륙 선택 핸들러
+  const handleContinentSelect = useCallback((continent: string) => {
+    setSelectedContinent(continent);
+    setSelectedMapId(null); // 대륙 변경 시 맵 선택 초기화
+    setCurrentPage(1);
+  }, []);
+
   // 정렬된 NPC 목록
   const sortedNPCs = [...npcs].sort((a, b) => {
     switch (sortBy) {
@@ -160,7 +246,13 @@ export default function NPCsPage() {
           <Paragraph>
             메이플스토리의 다양한 NPC 정보를 검색하고 확인할 수 있습니다.
             <br />
-            💡 검색어를 2글자 이상 입력하거나 맵을 선택하여 NPC를 찾을 수 있습니다.
+            💡 대륙을 선택한 후 맵을 선택하거나, 검색어를 2글자 이상 입력하여 NPC를 찾을 수 있습니다.
+            {isMapsLoading && (
+              <>
+                <br />
+                🔄 <strong>전체 맵 데이터를 로딩 중입니다...</strong> 전체 {maps.length > 0 ? `${maps.length}+` : '13,000+'} 개 맵을 배치로 가져오고 있습니다.
+              </>
+            )}
           </Paragraph>
         </div>
 
@@ -175,7 +267,7 @@ export default function NPCsPage() {
           <Row gutter={[16, 24]}>
             <Col span={24}>
               <Row gutter={[16, 16]} align="middle">
-                <Col xs={24} sm={16} md={12}>
+                <Col xs={24} sm={12} md={8}>
                   <div style={{ marginBottom: '8px', fontWeight: 500 }}>NPC 검색</div>
                   <Search
                     placeholder="NPC 이름을 입력하세요 (2글자 이상)"
@@ -185,6 +277,31 @@ export default function NPCsPage() {
                     onChange={(e) => handleSearch(e.target.value)}
                     onSearch={handleSearch}
                   />
+                </Col>
+                <Col xs={24} sm={12} md={4}>
+                  <div style={{ marginBottom: '8px', fontWeight: 500 }}>대륙 선택</div>
+                  <Select
+                    style={{ width: '100%' }}
+                    size="large"
+                    value={selectedContinent}
+                    onChange={handleContinentSelect}
+                    placeholder="대륙을 선택하세요"
+                  >
+                    <Option value="all">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <span>전체 대륙</span>
+                        <Badge count={Object.values(continentStats).reduce((a, b) => a + b, 0)} size="small" style={{ backgroundColor: '#52c41a' }} />
+                      </div>
+                    </Option>
+                    {Object.entries(continentStats).map(([continent, count]) => (
+                      <Option key={continent} value={continent}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                          <span style={{ color: getContinentColor(continent) }}>{continent}</span>
+                          <Badge count={count} size="small" style={{ backgroundColor: getContinentColor(continent) }} />
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
                 </Col>
                 <Col xs={24} sm={8} md={6}>
                   <div style={{ marginBottom: '8px', fontWeight: 500 }}>맵 선택</div>
@@ -207,9 +324,12 @@ export default function NPCsPage() {
                       }
                     }}
                   >
-                    {maps.slice(0, 200).map(map => (
+                    {filteredMaps.slice(0, 1000).map((map: any) => (
                       <Option key={map.id} value={map.id}>
-                        {map.displayName}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <EnvironmentOutlined style={{ color: getContinentColor(map.continent) }} />
+                          {map.displayName}
+                        </div>
                       </Option>
                     ))}
                   </Select>
@@ -233,6 +353,26 @@ export default function NPCsPage() {
           </Row>
 
         </div>
+
+        {/* 선택된 대륙 정보 */}
+        {selectedContinent !== 'all' && (
+          <div style={{ 
+            padding: '16px', 
+            background: '#f0f8ff', 
+            borderRadius: '8px',
+            marginBottom: '16px',
+            border: '1px solid #b7eb8f'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <EnvironmentOutlined style={{ color: getContinentColor(selectedContinent), fontSize: '18px' }} />
+              <span style={{ fontWeight: 'bold', color: getContinentColor(selectedContinent) }}>
+                선택된 대륙: {selectedContinent}
+              </span>
+              <span>· {filteredMaps.length}개 맵 존재</span>
+              {selectedMapId && <span>· 선택된 맵에서 {npcs.length}개 NPC 발견</span>}
+            </div>
+          </div>
+        )}
 
         {/* 검색 결과 정보 */}
         {searchQuery && (
