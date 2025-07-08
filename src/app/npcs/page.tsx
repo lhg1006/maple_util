@@ -250,7 +250,7 @@ export default function NPCsPage() {
             {isMapsLoading && (
               <>
                 <br />
-                🔄 <strong>전체 맵 데이터를 로딩 중입니다...</strong> 전체 {maps.length > 0 ? `${maps.length}+` : '13,000+'} 개 맵을 배치로 가져오고 있습니다.
+                📁 <strong>맵 데이터를 로딩 중입니다...</strong> 정적 파일에서 13,973개 맵 데이터를 불러오고 있습니다.
               </>
             )}
           </Paragraph>
