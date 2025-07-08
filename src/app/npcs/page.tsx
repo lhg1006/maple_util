@@ -7,31 +7,50 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { NPCList } from '@/components/npcs/npc-list';
 import { NPCDetailModal } from '@/components/npcs/npc-detail-modal';
 import { useSearchNPCs, useAllMaps, useNPCsByMap } from '@/hooks/useMapleData';
+import { ContinentStatsCards } from '@/components/npcs/continent-stats-cards';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
-// 대륙별 색상 함수
+// 대륙별 색상 함수 (확장)
 const getContinentColor = (continent: string): string => {
   switch (continent) {
     case '메이플 로드': return '#52c41a';
     case '빅토리아 아일랜드': return '#1890ff';
-    case '루타비스': return '#722ed1';
+    case '엘나스': return '#40a9ff';
+    case '오르비스': return '#722ed1';
+    case '루디브리엄': return '#722ed1';
     case '아쿠아로드': return '#13c2c2';
     case '리프레': return '#52c41a';
-    case '무릉도원': return '#fa8c16';
-    case '아스완': return '#d4b106';
-    case '천상계': return '#722ed1';
-    case '스노우 아일랜드': return '#40a9ff';
-    case '버섯 왕국': return '#fa8c16';
+    case '무릉 지역': return '#fa8c16';
+    case '니할사막': return '#d4b106';
+    case '마가티아': return '#fa541c';
+    case '에델슈타인': return '#f5222d';
+    case '아르카나': return '#722ed1';
+    case '모라스': return '#531dab';
+    case '에스페라': return '#9254de';
+    case '레헬른': return '#b37feb';
+    case '츄츄 아일랜드': return '#d3adf7';
+    case '얌얌 아일랜드': return '#efdbff';
+    case '세르니움': return '#f759ab';
+    case '호텔 아르크스': return '#ff85c0';
+    case '오디움': return '#ffadd2';
+    case '도원경': return '#ffd6e7';
+    case '카르시온': return '#fff0f6';
     case '커닝시티': return '#eb2f96';
+    case '에레브': return '#1890ff';
+    case '지구방위본부': return '#13c2c2';
+    case '크리티아스': return '#722ed1';
     case '요정계': return '#13c2c2';
-    case '테마파크': return '#f759ab';
-    case '던전': return '#f5222d';
+    case '버섯 왕국': return '#fa8c16';
+    case '테마파크 & 이벤트': return '#f759ab';
+    case '던전 & 미궁': return '#f5222d';
+    case '스토리 & 퀘스트': return '#722ed1';
+    case '도시 & 학교': return '#1890ff';
     case '해상 지역': return '#1890ff';
-    case '히든 지역': return '#8c8c8c';
+    case '히든 & 특수': return '#8c8c8c';
     case '기타 지역': return '#666666';
     default: return '#666666';
   }
@@ -78,24 +97,42 @@ export default function NPCsPage() {
       stats[continent] = (stats[continent] || 0) + 1;
     });
     
-    // 대륙을 중요도 순으로 정렬
+    // 대륙을 중요도 순으로 정렬 (업데이트)
     const continentOrder = [
       '메이플 로드',
-      '빅토리아 아일랜드', 
-      '루타비스',
+      '빅토리아 아일랜드',
+      '엘나스',
+      '오르비스',
+      '루디브리엄',
       '아쿠아로드',
       '리프레',
-      '무릉도원',
-      '아스완',
-      '천상계',
-      '스노우 아일랜드',
-      '버섯 왕국',
+      '무릉 지역',
+      '니할사막',
+      '마가티아',
+      '에델슈타인',
+      '츄츄 아일랜드',
+      '얌얌 아일랜드',
+      '레헬른',
+      '아르카나',
+      '모라스',
+      '에스페라',
+      '세르니움',
+      '호텔 아르크스',
+      '오디움',
+      '도원경',
+      '카르시온',
       '커닝시티',
+      '에레브',
+      '지구방위본부',
+      '크리티아스',
       '요정계',
-      '테마파크',
-      '던전',
+      '버섯 왕국',
+      '테마파크 & 이벤트',
+      '던전 & 미궁',
+      '스토리 & 퀘스트',
+      '도시 & 학교',
       '해상 지역',
-      '히든 지역',
+      '히든 & 특수',
       '기타 지역'
     ];
     
@@ -255,6 +292,14 @@ export default function NPCsPage() {
             )}
           </Paragraph>
         </div>
+
+        {/* 대륙별 통계 카드 */}
+        {!searchQuery && !selectedMapId && (
+          <ContinentStatsCards 
+            onContinentSelect={handleContinentSelect}
+            selectedContinent={selectedContinent !== 'all' ? selectedContinent : undefined}
+          />
+        )}
 
         <div style={{ 
           border: '1px solid #e5e7eb', 

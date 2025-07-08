@@ -6,11 +6,13 @@ const API_BASE_URL = 'https://maplestory.io/api';
 const DEFAULT_REGION = 'KMS';
 const DEFAULT_VERSION = '389';
 
-// 대륙별 분류 함수
-function getContinentByStreetName(streetName) {
-  if (!streetName) return '기타 지역';
+// 대륙별 분류 함수 (대폭 개선)
+function getContinentByStreetName(streetName, mapName = '') {
+  if (!streetName && !mapName) return '기타 지역';
   
-  // 메이플 로드 (초보자 지역)
+  const fullText = `${streetName || ''} ${mapName || ''}`.toLowerCase();
+  
+  // 초보자 지역
   if (['메이플로드', '레인보우스트리트'].includes(streetName)) {
     return '메이플 로드';
   }
@@ -20,44 +22,124 @@ function getContinentByStreetName(streetName) {
     return '빅토리아 아일랜드';
   }
   
-  // 루타비스
-  if (['루타비스', '루디브리엄성', '헬리오스 탑', '에오스 탑'].includes(streetName)) {
-    return '루타비스';
+  // 엘나스 (눈 지역)
+  if (streetName === '엘나스' || streetName === '엘나스산맥' || fullText.includes('엘나스')) {
+    return '엘나스';
   }
   
-  // 아쿠아로드 (아쿠아리움)
+  // 오르비스 (하늘 도시)
+  if (['오르비스', '스카이로드'].includes(streetName) || fullText.includes('오르비스')) {
+    return '오르비스';
+  }
+  
+  // 루디브리엄 (시계탑)
+  if (['루타비스', '루디브리엄', '루디브리엄성', '헬리오스 탑', '에오스 탑'].includes(streetName) || 
+      fullText.includes('루디브리엄') || fullText.includes('루타비스')) {
+    return '루디브리엄';
+  }
+  
+  // 아쿠아로드 (바다)
   if (['아쿠아로드', '미나르숲', '포트로드'].includes(streetName)) {
     return '아쿠아로드';
   }
   
-  // 리프레 대륙
+  // 리프레 (용의 대륙)
   if (['리프레', '엘린숲', '아랫마을', '킹덤로드', '퀸스로드'].includes(streetName)) {
     return '리프레';
   }
   
-  // 무릉 지역
-  if (['무릉도원', '백초마을', '상산'].includes(streetName)) {
-    return '무릉도원';
+  // 무릉도원 & 무릉도장
+  if (['무릉도원', '무릉도장', '무릉', '백초마을', '상산'].includes(streetName) || 
+      fullText.includes('무릉')) {
+    return '무릉 지역';
   }
   
-  // 아스완 지역
-  if (['아스완', '사자왕의 성'].includes(streetName)) {
-    return '아스완';
+  // 니할사막 & 아리안트
+  if (streetName === '아리안트' || streetName === '버닝로드' || 
+      fullText.includes('아리안트') || fullText.includes('니할') || fullText.includes('사막')) {
+    return '니할사막';
   }
   
-  // 천상 지역 (에델슈타인 포함)
-  if (['천상의 크리세', '시간의 신전', '타임로드', '기사단 요새'].includes(streetName)) {
-    return '천상계';
+  // 마가티아 (연금술의 도시)
+  if (streetName === '마가티아' || streetName === '선셋로드' || fullText.includes('마가티아')) {
+    return '마가티아';
   }
   
-  // 스노우 아일랜드 (얼음 지역)
-  if (['스노우 아일랜드', '얼음왕국'].includes(streetName)) {
-    return '스노우 아일랜드';
+  // 에델슈타인 (저항군 본거지)
+  if (streetName === '에델슈타인' || fullText.includes('에델슈타인')) {
+    return '에델슈타인';
   }
   
-  // 버섯 왕국
-  if (['버섯의 성', '버섯노래숲'].includes(streetName)) {
-    return '버섯 왕국';
+  // 아르카나 (고레벨 사냥터)
+  if (streetName === '아르카나' || fullText.includes('아르카나')) {
+    return '아르카나';
+  }
+  
+  // 모라스 (고레벨 사냥터)
+  if (streetName === '모라스' || fullText.includes('모라스')) {
+    return '모라스';
+  }
+  
+  // 에스페라 (고레벨 사냥터)
+  if (streetName === '에스페라' || fullText.includes('에스페라')) {
+    return '에스페라';
+  }
+  
+  // 레헬른 (고레벨 사냥터)
+  if (streetName === '레헬른' || fullText.includes('레헬른')) {
+    return '레헬른';
+  }
+  
+  // 츄츄아일랜드 (고레벨 사냥터)
+  if (streetName === '츄츄 아일랜드' || streetName === '츄츄아일랜드' || 
+      streetName === '에르밸리' || streetName === '외로운 츄츄섬' ||
+      fullText.includes('츄츄')) {
+    return '츄츄 아일랜드';
+  }
+  
+  // 얌얌아일랜드 (고레벨 사냥터)
+  if (streetName === '얌얌 아일랜드' || fullText.includes('얌얌')) {
+    return '얌얌 아일랜드';
+  }
+  
+  // 세르니움 (최신 고레벨)
+  if (streetName === '세르니움' || fullText.includes('세르니움')) {
+    return '세르니움';
+  }
+  
+  // 호텔 아르크스 (최신 고레벨)
+  if (streetName === '호텔 아르크스' || fullText.includes('호텔') && fullText.includes('아르크스')) {
+    return '호텔 아르크스';
+  }
+  
+  // 오디움 (최신 고레벨)
+  if (streetName === '오디움' || fullText.includes('오디움')) {
+    return '오디움';
+  }
+  
+  // 도원경 (최신 고레벨)
+  if (streetName === '도원경' || fullText.includes('도원경')) {
+    return '도원경';
+  }
+  
+  // 카르시온 (최신 고레벨)
+  if (streetName === '카르시온' || fullText.includes('카르시온')) {
+    return '카르시온';
+  }
+  
+  // 크리티아스 (특별 지역)
+  if (streetName === '크리티아스' || fullText.includes('크리티아스')) {
+    return '크리티아스';
+  }
+  
+  // 지구방위본부 (특별 지역)
+  if (streetName === '리에나 해협' || fullText.includes('지구방위') || fullText.includes('본부')) {
+    return '지구방위본부';
+  }
+  
+  // 에레브 (시그너스 기사단)
+  if (streetName === '에레브' || fullText.includes('에레브')) {
+    return '에레브';
   }
   
   // 커닝시티
@@ -70,14 +152,23 @@ function getContinentByStreetName(streetName) {
     return '요정계';
   }
   
+  // 버섯 왕국
+  if (['버섯의 성', '버섯노래숲'].includes(streetName)) {
+    return '버섯 왕국';
+  }
+  
   // 테마파크 및 이벤트
-  if (['판타스틱 테마파크', 'UFO 내부', '폐기지 잔해', '헌티드 맨션'].includes(streetName)) {
-    return '테마파크';
+  if (['판타스틱 테마파크', 'UFO 내부', '폐기지 잔해', '헌티드 맨션', '스타플래닛', 
+       '메이플 크로니클', '몬스터 카니발'].includes(streetName) ||
+      fullText.includes('테마파크') || fullText.includes('크로니클')) {
+    return '테마파크 & 이벤트';
   }
   
   // 던전 지역
-  if (['던전', '골렘사원', '발록의 신전', '저주받은신전', '타락한 세계수', '폐광'].includes(streetName)) {
-    return '던전';
+  if (['던전', '골렘사원', '발록의 신전', '저주받은신전', '타락한 세계수', '폐광',
+       '고통의 미궁', '샤레니안의 지하 수로', '샤레니안 어딘가', '기계무덤'].includes(streetName) ||
+      fullText.includes('던전') || fullText.includes('미궁') || fullText.includes('샤레니안')) {
+    return '던전 & 미궁';
   }
   
   // 항해 지역
@@ -85,9 +176,23 @@ function getContinentByStreetName(streetName) {
     return '해상 지역';
   }
   
+  // 스토리 & 퀘스트
+  if (['히어로즈 오브 메이플', '블랙헤븐', '블랙헤븐 내부', '갓 오브 컨트롤', 
+       '스토리 월드공유', '직업 갈무리'].includes(streetName) ||
+      fullText.includes('히어로즈') || fullText.includes('블랙헤븐')) {
+    return '스토리 & 퀘스트';
+  }
+  
   // 특수 지역
-  if (['히든스트리트', '히든 스트리트', '미니던전'].includes(streetName)) {
-    return '히든 지역';
+  if (['히든스트리트', '히든 스트리트', '미니던전', '해저의 탑 "더 시드"'].includes(streetName) ||
+      fullText.includes('히든') || fullText.includes('시드')) {
+    return '히든 & 특수';
+  }
+  
+  // 학교 & 도시
+  if (['신수국제학교', '신수국제학교대로', '툴렌시티', '리버스 시티'].includes(streetName) ||
+      fullText.includes('학교') || fullText.includes('시티')) {
+    return '도시 & 학교';
   }
   
   return '기타 지역';
@@ -146,7 +251,7 @@ async function generateMapsData() {
         name: map.name || `맵 ${map.id}`,
         streetName: map.streetName || '',
         displayName: map.streetName ? `${map.streetName} - ${map.name}` : (map.name || `맵 ${map.id}`),
-        continent: getContinentByStreetName(map.streetName),
+        continent: getContinentByStreetName(map.streetName, map.name),
         category: getMapCategory(map.streetName),
         // NPC 수 정보 (성능을 위해 개수만 저장)
         npcCount: Array.isArray(map.npcs) ? map.npcs.length : 0,
