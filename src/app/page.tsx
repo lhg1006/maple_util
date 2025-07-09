@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Row, Col, Typography, Space } from 'antd';
-import { ShoppingOutlined, UserOutlined, BugOutlined, TeamOutlined } from '@ant-design/icons';
+import { ShoppingOutlined, UserOutlined, BugOutlined, TeamOutlined, SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { useRouter } from 'next/navigation';
 import { FlipCard } from '@/components/home/flip-card';
@@ -99,9 +99,9 @@ export default function Home() {
             <Card title="빠른 시작" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>
-                  <Title level={5}>1. 카테고리 선택</Title>
+                  <Title level={5}>1. 통합 검색 활용</Title>
                   <Paragraph>
-                    왼쪽 메뉴에서 원하는 카테고리(아이템, NPC, 몬스터 등)를 선택하세요.
+                    <SearchOutlined /> 통합 검색에서 아이템, NPC, 몬스터를 한번에 검색할 수 있습니다.
                   </Paragraph>
                 </div>
                 <div>
