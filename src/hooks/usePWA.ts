@@ -29,30 +29,30 @@ export function usePWA() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
-  // Service Worker 등록
+  // Service Worker 등록 (임시 비활성화)
   useEffect(() => {
+    console.log('Service Worker registration disabled for debugging');
+    
+    // 기존 서비스 워커 제거
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => {
-          console.log('Service Worker registered:', reg);
-          setRegistration(reg);
-
-          // 업데이트 확인
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  setState(prev => ({ ...prev, isUpdateAvailable: true }));
-                }
-              });
-            }
-          });
-        })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const registration of registrations) {
+          console.log('Unregistering service worker:', registration);
+          registration.unregister();
+        }
+      });
+    }
+    
+    // 브라우저 캐시 지우기
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            console.log('Deleting cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+      });
     }
   }, []);
 
