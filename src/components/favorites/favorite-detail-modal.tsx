@@ -1,20 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Modal, Spin, Card, Typography, Tag, Space, Image, Row, Col, Descriptions } from 'antd';
+import { Modal, Spin, Card, Typography, Tag, Space, Row, Col, Descriptions } from 'antd';
 import { 
   ShoppingOutlined, 
   UserOutlined, 
   BugOutlined, 
   TeamOutlined, 
   ThunderboltOutlined,
-  EnvironmentOutlined,
-  StarOutlined
+  EnvironmentOutlined
 } from '@ant-design/icons';
 import { FavoriteItem } from '@/hooks/useFavorites';
 import { getItemById, getNPCById, getMobById, getJobById, getSkillById } from '@/lib/api';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 interface FavoriteDetailModalProps {
   favorite: FavoriteItem | null;
@@ -87,6 +86,8 @@ export function FavoriteDetailModal({ favorite, open, onClose }: FavoriteDetailM
       setDetailData(data);
     } catch (err: any) {
       console.error('Failed to fetch detail:', err);
+      console.error('Error stack:', err?.stack);
+      console.error('Favorite:', favorite);
       const errorMessage = err?.message || '상세 정보를 불러오는데 실패했습니다.';
       setError(errorMessage);
     } finally {

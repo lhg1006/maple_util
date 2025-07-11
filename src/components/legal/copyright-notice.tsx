@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal, Typography, Space, Button } from 'antd';
 import { ExclamationCircleOutlined, CopyrightOutlined } from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface CopyrightNoticeProps {
   isVisible: boolean;
