@@ -1,7 +1,7 @@
 {
-  "name": "메이플스토리 유틸리티",
-  "short_name": "메이플유틸",
-  "description": "메이플스토리의 모든 정보를 한 곳에서 확인하세요",
+  "name": "게임 데이터 뷰어 - 정보 검색 도구",
+  "short_name": "게임데이터뷰어",
+  "description": "게임 데이터 조회 및 검색 도구입니다. 공개 API를 통해 게임 정보를 제공합니다.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

@@ -18,9 +18,12 @@ export default function Home() {
       <div className="space-y-6">
         <InstallPrompt />
         <div className="text-center mb-8">
-          <Title level={1}>메이플스토리 유틸리티에 오신 것을 환영합니다!</Title>
+          <Title level={1}>게임 정보 유틸리티 - 비공식 팬 사이트</Title>
           <Paragraph className="text-lg">
-            메이플스토리의 모든 정보를 한 곳에서 확인하세요.
+            비공식 팬 사이트입니다. 게임 정보를 검색하고 즐겨찾기할 수 있습니다.
+          </Paragraph>
+          <Paragraph className="text-sm" style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+            ⚠️ 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 팬 사이트입니다.
           </Paragraph>
         </div>
 

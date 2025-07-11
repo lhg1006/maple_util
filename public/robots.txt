@@ -1,0 +1,27 @@
+# robots.txt for Fan Site
+
+User-agent: *
+Disallow: /api/
+Disallow: /_next/
+Disallow: /public/
+
+# Allow access to main pages
+Allow: /
+Allow: /items
+Allow: /npcs
+Allow: /mobs
+Allow: /jobs
+Allow: /skills
+Allow: /search
+Allow: /favorites
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://maple-util.vercel.app/sitemap.xml
+
+# Copyright notice
+# This is an unofficial fan site
+# All game data and images are property of their respective owners
+# No commercial use intended
