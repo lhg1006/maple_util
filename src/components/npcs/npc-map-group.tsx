@@ -1,9 +1,8 @@
 'use client';
 
 import { Card, Row, Col, Typography, Collapse, Badge, Space } from 'antd';
-import { EnvironmentOutlined, UserOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined } from '@ant-design/icons';
 import { MapleNPC } from '@/types/maplestory';
-import { NPCList } from './npc-list';
 import { useState } from 'react';
 
 const { Title, Text } = Typography;

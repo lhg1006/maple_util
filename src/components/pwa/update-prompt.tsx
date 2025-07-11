@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button, notification, Space } from 'antd';
-import { ReloadOutlined, CloseOutlined } from '@ant-design/icons';
+import { ReloadOutlined } from '@ant-design/icons';
 import { usePWA } from '@/hooks/usePWA';
 
 export function UpdatePrompt() {

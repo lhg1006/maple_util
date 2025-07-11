@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Alert, Space, Typography } from 'antd';
-import { WifiOutlined, DisconnectOutlined } from '@ant-design/icons';
+import { DisconnectOutlined } from '@ant-design/icons';
 import { usePWA } from '@/hooks/usePWA';
 
 const { Text } = Typography;

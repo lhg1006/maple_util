@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, Row, Col, Typography, Spin, Empty } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
 import { MapleNPC } from '@/types/maplestory';
 import Image from 'next/image';
 import { useState } from 'react';

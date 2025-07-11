@@ -1,6 +1,6 @@
 'use client';
 
-import { Row, Col, Card, Typography, Tag, Badge } from 'antd';
+import { Row, Col, Card, Typography, Tag } from 'antd';
 import { 
   ThunderboltOutlined, 
   FireOutlined, 

@@ -3,7 +3,6 @@
 import { Modal, Typography, Descriptions, Tag, Divider, Spin } from 'antd';
 import { TeamOutlined } from '@ant-design/icons';
 import { useMapleJob } from '@/hooks/useMapleData';
-import { MapleJob } from '@/types/maplestory';
 
 const { Title, Text, Paragraph } = Typography;
 

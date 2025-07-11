@@ -1,5 +1,4 @@
 // Ant Design 설정 및 경고 억제
-import { ConfigProvider } from 'antd';
 
 // React 19 경고 억제
 if (typeof window !== 'undefined') {

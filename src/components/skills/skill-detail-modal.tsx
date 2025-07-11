@@ -10,7 +10,6 @@ import {
   SendOutlined
 } from '@ant-design/icons';
 import { useMapleSkill } from '@/hooks/useMapleData';
-import { MapleSkill } from '@/types/maplestory';
 
 const { Title, Text, Paragraph } = Typography;
 

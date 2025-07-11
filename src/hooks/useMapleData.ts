@@ -1,8 +1,7 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { mapleAPI } from '@/lib/api';
-import { MapleItem, MapleNPC, MapleMob, MapleJob, MapleSkill } from '@/types/maplestory';
 
 export const useMapleItem = (id: number) => {
   return useQuery({

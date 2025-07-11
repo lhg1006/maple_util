@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Modal, Spin, Card, Typography, Tag, Space, Row, Col, Descriptions } from 'antd';
+import { Modal, Spin, Card, Typography, Tag, Space, Row, Col, Descriptions, Button } from 'antd';
 import { 
   ShoppingOutlined, 
   UserOutlined, 
@@ -45,9 +45,20 @@ const typeColors = {
   skill: '#eb2f96',
 };
 
+interface DetailData {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  level?: number;
+  location?: string;
+  category?: string;
+  [key: string]: any;
+}
+
 export function FavoriteDetailModal({ favorite, open, onClose }: FavoriteDetailModalProps) {
   const [loading, setLoading] = useState(false);
-  const [detailData, setDetailData] = useState<any>(null);
+  const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // API 호출 함수
@@ -59,36 +70,61 @@ export function FavoriteDetailModal({ favorite, open, onClose }: FavoriteDetailM
     
     try {
       let data;
+      
+      // 각 타입별 API 호출 with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('API 호출 시간 초과')), 10000)
+      );
+      
       switch (favorite.type) {
         case 'item':
-          data = await getItemById(favorite.id);
+          data = await Promise.race([getItemById(favorite.id), timeoutPromise]);
           break;
         case 'npc':
-          data = await getNPCById(favorite.id);
+          data = await Promise.race([getNPCById(favorite.id), timeoutPromise]);
           break;
         case 'mob':
-          data = await getMobById(favorite.id);
+          data = await Promise.race([getMobById(favorite.id), timeoutPromise]);
           break;
         case 'job':
-          data = await getJobById(favorite.id);
+          data = await Promise.race([getJobById(favorite.id), timeoutPromise]);
           break;
         case 'skill':
-          data = await getSkillById(favorite.id);
+          data = await Promise.race([getSkillById(favorite.id), timeoutPromise]);
           break;
         default:
-          throw new Error(`Unknown favorite type: ${favorite.type}`);
+          throw new Error(`알 수 없는 타입: ${favorite.type}`);
       }
       
       if (!data) {
-        throw new Error('No data received from API');
+        throw new Error('API에서 데이터를 받지 못했습니다');
       }
       
-      setDetailData(data);
-    } catch (err: any) {
+      setDetailData(data as DetailData);
+    } catch (err: unknown) {
       console.error('Failed to fetch detail:', err);
-      console.error('Error stack:', err?.stack);
-      console.error('Favorite:', favorite);
-      const errorMessage = err?.message || '상세 정보를 불러오는데 실패했습니다.';
+      
+      const error = err as Error;
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        favorite: favorite,
+        timestamp: new Date().toISOString()
+      });
+      
+      // 사용자 친화적인 오류 메시지
+      let errorMessage = '상세 정보를 불러오는데 실패했습니다.';
+      
+      if (error?.message?.includes('시간 초과')) {
+        errorMessage = '서버 응답이 너무 늦어 요청을 취소했습니다.';
+      } else if (error?.message?.includes('404')) {
+        errorMessage = '해당 데이터를 찾을 수 없습니다.';
+      } else if (error?.message?.includes('Network')) {
+        errorMessage = '네트워크 연결에 문제가 있습니다.';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -121,7 +157,17 @@ export function FavoriteDetailModal({ favorite, open, onClose }: FavoriteDetailM
     if (error) {
       return (
         <div style={{ textAlign: 'center', padding: '60px' }}>
-          <Text type="danger">{error}</Text>
+          <Space direction="vertical" align="center">
+            <div style={{ fontSize: '48px', color: '#ff4d4f' }}>⚠️</div>
+            <Text type="danger" style={{ fontSize: '16px' }}>{error}</Text>
+            <Button 
+              onClick={() => favorite && fetchDetail(favorite)} 
+              type="primary" 
+              size="small"
+            >
+              다시 시도
+            </Button>
+          </Space>
         </div>
       );
     }
