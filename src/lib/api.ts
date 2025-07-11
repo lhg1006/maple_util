@@ -610,3 +610,10 @@ export class MapleStoryAPI {
 }
 
 export const mapleAPI = new MapleStoryAPI();
+
+// Individual API functions for easier use
+export const getItemById = (id: number) => mapleAPI.getItem(id);
+export const getNPCById = (id: number) => mapleAPI.getNPC(id);
+export const getMobById = (id: number) => mapleAPI.getMob(id);
+export const getJobById = (id: number) => mapleAPI.getJob(id);
+export const getSkillById = (id: number) => mapleAPI.getSkill(id);

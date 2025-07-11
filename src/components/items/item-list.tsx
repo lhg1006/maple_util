@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Row, Col, Card, Tag, Empty, Skeleton } from 'antd';
 import { MapleItem } from '@/types/maplestory';
+import { FavoriteButton } from '@/components/favorites/favorite-button';
 
 interface ItemListProps {
   items: MapleItem[];
@@ -189,6 +190,27 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
                     <div className="text-xs">이미지 없음</div>
                   </div>
                 )}
+                {/* 즐겨찾기 버튼 */}
+                <div className="absolute top-1 left-1">
+                  <FavoriteButton
+                    item={{
+                      id: item.id,
+                      type: 'item',
+                      name: item.name,
+                      icon: item.icon || getItemImage(item.id),
+                      meta: {
+                        category: item.category,
+                        subcategory: item.subcategory,
+                        description: item.description,
+                        cash: item.cash,
+                        price: item.price,
+                      }
+                    }}
+                    size="small"
+                    type="text"
+                  />
+                </div>
+                
                 {/* 배지들 */}
                 <div className="absolute top-1 right-1" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   {/* Cash 배지 */}

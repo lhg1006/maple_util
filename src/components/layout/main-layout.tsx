@@ -11,7 +11,8 @@ import {
   TeamOutlined,
   ThunderboltOutlined,
   MenuOutlined,
-  SearchOutlined
+  SearchOutlined,
+  HeartOutlined
 } from '@ant-design/icons';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from '../providers/theme-provider';
@@ -34,6 +35,11 @@ const menuItems = [
     key: '/search',
     icon: <SearchOutlined />,
     label: '통합 검색',
+  },
+  {
+    key: '/favorites',
+    icon: <HeartOutlined />,
+    label: '즐겨찾기',
   },
   {
     key: '/items',
@@ -168,6 +174,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             >
               {pathname === '/' ? '홈' : 
                pathname === '/search' ? '통합 검색' :
+               pathname === '/favorites' ? '즐겨찾기' :
                pathname === '/items' ? '아이템' :
                pathname === '/npcs' ? 'NPC' :
                pathname === '/mobs' ? '몬스터' :

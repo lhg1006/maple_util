@@ -5,6 +5,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { MapleNPC } from '@/types/maplestory';
 import Image from 'next/image';
 import { useState } from 'react';
+import { FavoriteButton } from '@/components/favorites/favorite-button';
 
 const { Text, Title } = Typography;
 
@@ -110,19 +111,36 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
 
             {/* NPC 정보 */}
             <div style={{ flex: 1, width: '100%' }}>
-              <Title 
-                level={5} 
-                style={{ 
-                  margin: '0 0 12px 0', 
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: '#333',
-                  lineHeight: '1.3'
-                }}
-                ellipsis={{ tooltip: npc.name }}
-              >
-                {npc.name}
-              </Title>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <Title 
+                  level={5} 
+                  style={{ 
+                    margin: '0', 
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#333',
+                    lineHeight: '1.3',
+                    flex: 1
+                  }}
+                  ellipsis={{ tooltip: npc.name }}
+                >
+                  {npc.name}
+                </Title>
+                <FavoriteButton
+                  item={{
+                    id: npc.id,
+                    type: 'npc',
+                    name: npc.name,
+                    icon: `https://maplestory.io/api/KMS/389/npc/${npc.id}/render/stand`,
+                    meta: {
+                      location: npc.location,
+                      description: npc.description,
+                    }
+                  }}
+                  size="small"
+                  type="text"
+                />
+              </div>
 
               {npc.location && (
                 <Text 

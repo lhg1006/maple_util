@@ -3,6 +3,7 @@
 import { Row, Col, Card, Typography, Tag, Badge } from 'antd';
 import { TeamOutlined } from '@ant-design/icons';
 import { MapleJob } from '@/types/maplestory';
+import { FavoriteButton } from '@/components/favorites/favorite-button';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -110,9 +111,26 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-              <Title level={5} style={{ margin: 0, marginBottom: '4px' }}>
-                {job.name}
-              </Title>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <Title level={5} style={{ margin: 0, flex: 1 }}>
+                  {job.name}
+                </Title>
+                <FavoriteButton
+                  item={{
+                    id: job.id,
+                    type: 'job',
+                    name: job.name,
+                    icon: 'job',
+                    meta: {
+                      category: job.category,
+                      advancement: job.advancement,
+                      description: job.description,
+                    }
+                  }}
+                  size="small"
+                  type="text"
+                />
+              </div>
               <div style={{ marginBottom: '8px' }}>
                 <Tag color={getCategoryColor(job.category)}>
                   {getCategoryName(job.category)}

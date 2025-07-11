@@ -2,6 +2,7 @@
 
 import { Card, Row, Col, Skeleton, Empty, Typography } from 'antd';
 import { MapleMob } from '@/types/maplestory';
+import { FavoriteButton } from '@/components/favorites/favorite-button';
 
 const { Text } = Typography;
 
@@ -81,10 +82,25 @@ export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobCl
             style={{ height: '240px' }}
           >
             <div className="space-y-2 text-center">
-              <div>
-                <Text strong className="text-sm" title={mob.name}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text strong className="text-sm" title={mob.name} style={{ flex: 1 }}>
                   {mob.name.length > 15 ? `${mob.name.substring(0, 15)}...` : mob.name}
                 </Text>
+                <FavoriteButton
+                  item={{
+                    id: mob.id,
+                    type: 'mob',
+                    name: mob.name,
+                    icon: `https://maplestory.io/api/KMS/389/mob/${mob.id}/render/stand`,
+                    meta: {
+                      level: mob.level,
+                      hp: mob.hp,
+                      exp: mob.exp,
+                    }
+                  }}
+                  size="small"
+                  type="text"
+                />
               </div>
               
               <div className="space-y-1">

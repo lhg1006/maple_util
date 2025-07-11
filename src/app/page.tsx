@@ -5,6 +5,8 @@ import { ShoppingOutlined, UserOutlined, BugOutlined, TeamOutlined, SearchOutlin
 import { MainLayout } from '@/components/layout/main-layout';
 import { useRouter } from 'next/navigation';
 import { FlipCard } from '@/components/home/flip-card';
+import { FavoritesList } from '@/components/favorites/favorites-list';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 const { Title, Paragraph } = Typography;
 
@@ -14,6 +16,7 @@ export default function Home() {
   return (
     <MainLayout>
       <div className="space-y-6">
+        <InstallPrompt />
         <div className="text-center mb-8">
           <Title level={1}>메이플스토리 유틸리티에 오신 것을 환영합니다!</Title>
           <Paragraph className="text-lg">
@@ -76,7 +79,11 @@ export default function Home() {
         </Row>
 
         <Row gutter={[16, 16]} className="mt-8" style={{ width: '100%', margin: '32px 0 0 0' }}>
-          <Col xs={24} md={24} lg={12} xl={12}>
+          <Col xs={24} md={24} lg={8} xl={8}>
+            <FavoritesList maxItems={5} />
+          </Col>
+          
+          <Col xs={24} md={24} lg={8} xl={8}>
             <Card title="최근 업데이트" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>
@@ -95,7 +102,7 @@ export default function Home() {
             </Card>
           </Col>
           
-          <Col xs={24} md={24} lg={12} xl={12}>
+          <Col xs={24} md={24} lg={8} xl={8}>
             <Card title="빠른 시작" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>

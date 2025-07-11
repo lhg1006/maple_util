@@ -10,6 +10,7 @@ import {
   SendOutlined
 } from '@ant-design/icons';
 import { MapleSkill } from '@/types/maplestory';
+import { FavoriteButton } from '@/components/favorites/favorite-button';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -148,9 +149,28 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-              <Title level={5} style={{ margin: 0, marginBottom: '4px' }}>
-                {skill.name}
-              </Title>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <Title level={5} style={{ margin: 0, flex: 1 }}>
+                  {skill.name}
+                </Title>
+                <FavoriteButton
+                  item={{
+                    id: skill.id,
+                    type: 'skill',
+                    name: skill.name,
+                    icon: 'skill',
+                    meta: {
+                      jobName: skill.jobName,
+                      type: skill.type,
+                      element: skill.element,
+                      maxLevel: skill.maxLevel,
+                      description: skill.description,
+                    }
+                  }}
+                  size="small"
+                  type="text"
+                />
+              </div>
               <div style={{ marginBottom: '8px' }}>
                 <Tag color={getTypeColor(skill.type)}>
                   {getTypeName(skill.type)}

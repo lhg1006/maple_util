@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Typography, Row, Col, Pagination, Input, Select, App, Spin, Badge } from 'antd';
 import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -58,6 +58,7 @@ const getContinentColor = (continent: string): string => {
 
 export default function NPCsPage() {
   const { message } = App.useApp();
+  const searchSectionRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('name');
@@ -232,6 +233,17 @@ export default function NPCsPage() {
     setSelectedContinent(continent);
     setSelectedMapId(null); // 대륙 변경 시 맵 선택 초기화
     setCurrentPage(1);
+    
+    // 검색 영역으로 부드럽게 스크롤
+    setTimeout(() => {
+      if (searchSectionRef.current) {
+        searchSectionRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 100); // 상태 업데이트 후 스크롤
   }, []);
 
   // 정렬된 NPC 목록
@@ -301,14 +313,18 @@ export default function NPCsPage() {
           />
         )}
 
-        <div style={{ 
-          border: '1px solid #e5e7eb', 
-          borderRadius: '8px', 
-          padding: '24px',
-          marginTop: '32px',
-          marginBottom: '32px',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-        }}>
+        <div 
+          ref={searchSectionRef}
+          style={{ 
+            border: '1px solid #e5e7eb', 
+            borderRadius: '8px', 
+            padding: '24px',
+            marginTop: '32px',
+            marginBottom: '32px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            scrollMarginTop: '80px' // 헤더 높이만큼 여백 추가
+          }}
+        >
           <Row gutter={[16, 24]}>
             <Col span={24}>
               <Row gutter={[16, 16]} align="middle">
