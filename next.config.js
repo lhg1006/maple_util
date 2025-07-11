@@ -1,18 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  experimental: {
-    // React 19와 Ant Design 5 호환성 경고 억제
-    serverComponentsExternalPackages: ['antd'],
-  },
-  // 콘솔 경고 필터링
-  onWarning: (warning) => {
-    if (warning.code === 'ANTD_COMPATIBLE_WARNING') {
-      return;
-    }
-    console.warn(warning);
-  },
   // 정적 파일 최적화
   compress: true,
   // 이미지 최적화 설정
