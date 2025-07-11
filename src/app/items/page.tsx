@@ -7,7 +7,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { ItemDetailModal } from '@/components/items/item-detail-modal';
 import { MapleItem } from '@/types/maplestory';
-import { loadItems } from '@/lib/cdn-data-loader';
+import { mapleAPI } from '@/lib/api';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -140,7 +140,6 @@ const ITEM_CATEGORIES = {
 
 export default function ItemsPage() {
   const { message } = App.useApp();
-  const [allItems, setAllItems] = useState<any>({});
   const [items, setItems] = useState<MapleItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MapleItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -155,148 +154,66 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const pageSize = 24;
 
-  // CDN에서 아이템 데이터 로드
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setDataLoading(true);
-        console.log('🚀 CDN 아이템 데이터 로딩 시작...');
-        
-        const itemsData = await loadItems();
-        console.log('✅ CDN 아이템 데이터 로드 완료:', Object.keys(itemsData).length);
-        
-        setAllItems(itemsData);
-        message.success(`${Object.keys(itemsData).length.toLocaleString()}개 아이템 데이터를 성공적으로 로드했습니다.`);
-      } catch (error) {
-        console.error('❌ CDN 아이템 데이터 로드 실패:', error);
-        message.error('아이템 데이터 로드에 실패했습니다. 페이지를 새로고침해주세요.');
-        setAllItems({});
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    loadData();
-  }, [message]);
-
-  // 카테고리별 필터링
-  useEffect(() => {
-    if (dataLoading || Object.keys(allItems).length === 0) return;
-
-    setLoading(true);
+  // API에서 아이템 데이터 로드
+  const loadItemsFromAPI = async (overallCat: string, cat: string, subCat: string) => {
     try {
-      console.log(`🔍 ${overallCategory} 카테고리 필터링 중...`);
+      setLoading(true);
+      console.log('🚀 API 아이템 데이터 로딩 시작...', { overallCat, cat, subCat });
       
-      // 전체 데이터에서 해당 카테고리만 필터링
-      const filteredData = Object.values(allItems).filter((item: any) => {
-        const typeInfo = item.originalData?.typeInfo || item.typeInfo;
-        return typeInfo?.overallCategory === overallCategory;
-      });
-
-      console.log(`📊 ${overallCategory}: ${filteredData.length}개 아이템 발견`);
-
-      // 테스트: 이터널 원더러 아이템들 찾기
-      const eternalItems = filteredData.filter((item: any) => 
-        item.name?.includes('이터널 원더러')
-      );
-      if (eternalItems.length > 0) {
-        console.log('🗡️ 발견된 이터널 원더러 아이템들:', eternalItems.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          hasRequirements: item.requirements?.level > 0,
-          hasAttack: item.combat?.attack > 0,
-          requirements: item.requirements,
-          combat: item.combat
-        })));
+      const params = {
+        overallCategory: overallCat,
+        category: cat !== '전체' ? cat : undefined,
+        subCategory: subCat !== '전체' ? subCat : undefined,
+        count: 100 // 한 번에 100개씩 로드
+      };
+      
+      const itemsData = await mapleAPI.getItemsByCategory(params);
+      console.log('✅ API 아이템 데이터 로드 완료:', itemsData.length);
+      
+      if (itemsData.length === 0) {
+        message.info(`${overallCat} 카테고리에 아이템이 없습니다.`);
+      } else {
+        message.success(`${itemsData.length}개의 아이템을 불러왔습니다.`);
       }
-
-      // 특별히 1232053 확인
-      const item1232053 = filteredData.find((item: any) => item.id === 1232053);
-      if (item1232053) {
-        console.log('🔍 1232053 상세 데이터:', {
-          id: (item1232053 as any).id,
-          name: (item1232053 as any).name,
-          requirements: (item1232053 as any).requirements,
-          combat: (item1232053 as any).combat,
-          stats: (item1232053 as any).stats
-        });
-      }
-
-      // MapleItem 형식으로 변환
-      const convertedItems = filteredData.map((item: any) => {
-        const typeInfo = item.originalData?.typeInfo || item.typeInfo;
-        
-        // 아이템 스탯 유무 확인
-        const hasStats = item.requirements && (
-          item.requirements.level > 0 ||
-          item.requirements.str > 0 ||
-          item.requirements.dex > 0 ||
-          item.requirements.int > 0 ||
-          item.requirements.luk > 0
-        );
-        
-        const hasCombat = item.combat && (
-          item.combat.attack > 0 ||
-          item.combat.magicAttack > 0 ||
-          item.combat.defense > 0 ||
-          item.combat.accuracy > 0
-        );
-        
-        const mappedItem = {
-          id: item.id,
-          name: item.name,
-          category: typeInfo?.category || item.category || '',
-          subcategory: typeInfo?.subCategory || item.subCategory || '',
-          description: item.description || '',
-          icon: `https://maplestory.io/api/KMS/389/item/${item.id}/icon`,
-          cash: item.isCash || item.originalData?.isCash || false,
-          price: item.sellPrice || 0,
-          level: item.level || 0,
-          rarity: item.rarity || 'common',
-          // 상세 장비 정보 추가
-          requirements: item.requirements,
-          combat: item.combat,
-          stats: item.stats,
-          enhancement: item.enhancement,
-          setInfo: item.setInfo,
-          special: item.special,
-          weapon: item.weapon,
-          armor: item.armor,
-          accessory: item.accessory,
-          // 스탯 유무 정보 추가 (정렬에 사용)
-          _hasValidStats: hasStats || hasCombat,
-        };
-        
-        // 카테고리 디버깅
-        if (['Setup', 'Etc', 'Cash'].includes(overallCategory) && Math.random() < 0.1) {
-          console.log(`${overallCategory} 아이템 매핑:`, {
-            name: item.name,
-            category: mappedItem.category,
-            subcategory: mappedItem.subcategory,
-            originalData: typeInfo
-          });
-        }
-        
-        return mappedItem;
-      }) as MapleItem[];
-
-      // 카테고리 값들 확인용 로깅
-      if (['Setup', 'Etc', 'Cash'].includes(overallCategory)) {
-        const uniqueSubcategories = [...new Set(convertedItems.map(item => item.subcategory))].filter(Boolean);
-        console.log(`📋 ${overallCategory} 고유 서브카테고리:`, uniqueSubcategories);
-      }
-
-      setItems(convertedItems);
-      setFilteredItems(convertedItems);
+      
+      return itemsData;
     } catch (error) {
-      console.error('❌ 필터링 실패:', error);
-      message.error('데이터 필터링에 실패했습니다.');
+      console.error('❌ API 아이템 데이터 로드 실패:', error);
+      message.error('아이템 데이터를 불러오는데 실패했습니다. 다시 시도해주세요.');
+      return [];
     } finally {
       setLoading(false);
     }
-  }, [allItems, overallCategory, dataLoading, message]);
+  };
 
-  // 검색 및 세부 필터링
+  // 초기 데이터 로드
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setDataLoading(true);
+      const initialItems = await loadItemsFromAPI(overallCategory, category, subCategory);
+      setItems(initialItems);
+      setFilteredItems(initialItems);
+      setDataLoading(false);
+    };
+    
+    loadInitialData();
+  }, [message]);
+
+  // 카테고리 변경 시 API에서 데이터 다시 로드
+  useEffect(() => {
+    const loadCategoryData = async () => {
+      if (dataLoading) return;
+      
+      const categoryItems = await loadItemsFromAPI(overallCategory, category, subCategory);
+      setItems(categoryItems);
+      setFilteredItems(categoryItems);
+      setCurrentPage(1); // 페이지 초기화
+    };
+    
+    loadCategoryData();
+  }, [overallCategory, category, subCategory]);
+
+  // 검색 필터링
   useEffect(() => {
     let filtered = [...items];
 
@@ -307,64 +224,8 @@ export default function ItemsPage() {
       );
     }
 
-    // 장비 카테고리 필터
-    if (overallCategory === 'Equip') {
-      // 2차 카테고리 필터 ('전체'가 아닐 때만 필터링)
-      if (category && category !== '전체') {
-        filtered = filtered.filter(item => item.category === category);
-      }
-      
-      // 3차 카테고리 필터 ('전체'가 아닐 때만 필터링)
-      if (subCategory && subCategory !== '전체') {
-        filtered = filtered.filter(item => item.subcategory === subCategory);
-      }
-    }
-    
-    // 소비아이템 카테고리 필터 (2차와 3차가 동일하므로 한 번만 적용)
-    if (overallCategory === 'Use') {
-      if (category && category !== '전체') {
-        filtered = filtered.filter(item => item.category === category);
-      }
-    }
-    
-    // 설치아이템 카테고리 필터 (subCategory 기반)
-    if (overallCategory === 'Setup') {
-      if (category && category !== '전체') {
-        console.log(`🔍 설치 아이템 필터: ${category}, 전체 아이템: ${filtered.length}`);
-        filtered = filtered.filter(item => item.subcategory === category);
-        console.log(`✅ 설치 아이템 필터 후: ${filtered.length}`);
-      }
-    }
-    
-    // 기타아이템 카테고리 필터 (subCategory 기반)
-    if (overallCategory === 'Etc') {
-      if (category && category !== '전체') {
-        console.log(`🔍 기타 아이템 필터: ${category}, 전체 아이템: ${filtered.length}`);
-        filtered = filtered.filter(item => item.subcategory === category);
-        console.log(`✅ 기타 아이템 필터 후: ${filtered.length}`);
-      }
-    }
-    
-    // 캐시아이템 카테고리 필터 (subCategory 기반)
-    if (overallCategory === 'Cash') {
-      if (category && category !== '전체') {
-        console.log(`🔍 캐시 아이템 필터: ${category}, 전체 아이템: ${filtered.length}`);
-        filtered = filtered.filter(item => item.subcategory === category);
-        console.log(`✅ 캐시 아이템 필터 후: ${filtered.length}`);
-      }
-    }
-
-    // 정렬 (스탯이 있는 아이템 우선)
+    // 정렬
     filtered.sort((a, b) => {
-      // 먼저 스탯 유무로 정렬 (스탯 있는 것이 우선)
-      const aHasStats = (a as any)._hasValidStats || false;
-      const bHasStats = (b as any)._hasValidStats || false;
-      
-      if (aHasStats !== bHasStats) {
-        return bHasStats ? 1 : -1;
-      }
-      
-      // 그 다음 선택된 정렬 기준 적용
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name, 'ko');
@@ -446,7 +307,7 @@ export default function ItemsPage() {
           <Paragraph>
             메이플스토리의 다양한 아이템을 검색하고 확인할 수 있습니다.
             <br />
-            📊 총 {Object.keys(allItems).length?.toLocaleString()}개 아이템 로드됨
+            📊 총 {items.length?.toLocaleString()}개 아이템 로드됨
           </Paragraph>
         </div>
 

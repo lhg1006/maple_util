@@ -121,29 +121,32 @@ async function fetchMonsters(): Promise<Record<number, Monster>> {
 
 async function fetchItems(): Promise<Record<number, Item>> {
   try {
-    // 아이템 인덱스 파일 로드
-    const indexResponse = await fetch('https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@latest/items-index.json');
-    if (!indexResponse.ok) throw new Error('인덱스 로드 실패');
+    // API에서 직접 아이템 데이터 로드
+    console.log('🚀 API에서 아이템 데이터 로드 시작...');
     
-    const index = await indexResponse.json();
-    console.log(`📋 아이템 인덱스: ${index.totalItems}개, ${index.chunks.length}개 청크`);
+    const response = await fetch('/api/data/items');
+    if (!response.ok) throw new Error('아이템 API 호출 실패');
     
-    // 모든 청크를 병렬로 로드
-    const chunkPromises = index.chunks.map(async (chunk: any) => {
-      const response = await fetch(`https://cdn.jsdelivr.net/gh/lhg1006/maple-util-data@latest/${chunk.file}`);
-      if (!response.ok) throw new Error(`청크 로드 실패: ${chunk.file}`);
-      return response.json();
+    const items = await response.json();
+    console.log(`✅ API 아이템 데이터 로드: ${items.length}개`);
+    
+    // 배열을 Record 형태로 변환
+    const itemsRecord: Record<number, Item> = {};
+    items.forEach((item: any) => {
+      itemsRecord[item.id] = {
+        id: item.id,
+        name: item.name,
+        category: item.category || '',
+        description: item.description || '',
+        level: item.level || 0,
+        sellPrice: item.sellPrice || 0,
+        isCash: item.isCash || false,
+        icon: item.icon || '',
+        rarity: item.rarity || 'common'
+      };
     });
     
-    const chunks = await Promise.all(chunkPromises);
-    
-    // 모든 청크를 하나로 병합
-    const allItems = chunks.reduce((acc, chunk) => {
-      return { ...acc, ...chunk };
-    }, {});
-    
-    console.log(`✅ 아이템 데이터 로드: ${Object.keys(allItems).length}개`);
-    return allItems;
+    return itemsRecord;
   } catch (error) {
     console.error('아이템 데이터 로드 실패:', error);
     return {};
