@@ -332,7 +332,7 @@ export function FavoriteDetailModal({ favorite, open, onClose }: FavoriteDetailM
                         <Tag color={
                           detailData.level <= 10 ? 'green' : 
                           detailData.level <= 50 ? 'blue' : 
-                          detailData.level <= 100 ? 'orange' : 
+                          detailData.level <= 100 ? 'gold' : 
                           detailData.level <= 200 ? 'red' : 'purple'
                         }>
                           Lv. {detailData.level}

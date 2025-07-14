@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Row, Col, Card, Tag, Empty, Skeleton } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { useTheme } from '@/components/providers/theme-provider';
 
 interface ItemListProps {
   items: MapleItem[];
@@ -12,6 +13,7 @@ interface ItemListProps {
 }
 
 export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick }) => {
+  const { theme: currentTheme } = useTheme();
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [imageVersions, setImageVersions] = useState<Record<number, string>>({});
 
@@ -82,7 +84,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
         return 'purple';
       case 'etc':
       case '기타': 
-        return 'orange';
+        return 'gold';
       case 'cash':
       case '캐시': 
         return 'red';
@@ -147,7 +149,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
         <Col key={item.id} xs={12} sm={8} md={6} lg={3} xl={3}>
           <Card
             hoverable
-            className="h-full overflow-hidden"
+            className="h-full overflow-hidden border-gray-200 dark:border-gray-600"
             styles={{ body: { padding: '4px' } }}
             style={{
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -163,7 +165,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
                 className="relative overflow-hidden"
                 style={{ 
                   aspectRatio: '1 / 1',
-                  background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
+                  background: 'linear-gradient(135deg, #f5f5f5 0%, #737373 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -185,9 +187,9 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
                     onError={() => handleImageError(item.id)}
                   />
                 ) : (
-                  <div className="text-gray-400 text-center">
+                  <div className="text-gray-400 dark:text-gray-500 text-center">
                     <div className="text-5xl mb-2">📦</div>
-                    <div className="text-xs">이미지 없음</div>
+                    <div className="text-xs dark:text-gray-400">이미지 없음</div>
                   </div>
                 )}
                 {/* 즐겨찾기 버튼 */}
@@ -273,7 +275,13 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
             <Card.Meta
               title={
                 <div className="text-center mb-2">
-                  <div className="font-medium text-sm truncate" title={item.name}>
+                  <div 
+                    className="font-medium text-sm truncate" 
+                    style={{ 
+                      color: currentTheme === 'dark' ? '#ffffff' : '#111827' 
+                    }}
+                    title={item.name}
+                  >
                     {item.name}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
@@ -299,11 +307,11 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
               description={
                 <div className="text-center">
                   {item.price ? (
-                    <div className="text-xs text-yellow-600 font-semibold">
+                    <div className="text-xs text-yellow-600 dark:text-yellow-400 font-semibold">
                       {item.price.toLocaleString()} 메소
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
                       ID: {item.id}
                     </div>
                   )}

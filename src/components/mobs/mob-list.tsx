@@ -3,6 +3,7 @@
 import { Card, Row, Col, Skeleton, Empty, Typography } from 'antd';
 import { MapleMob } from '@/types/maplestory';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { useTheme } from '@/components/providers/theme-provider';
 
 const { Text } = Typography;
 
@@ -13,6 +14,7 @@ interface MobListProps {
 }
 
 export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobClick }) => {
+  const { theme: currentTheme } = useTheme();
   if (loading) {
     return (
       <Row gutter={[16, 16]}>
@@ -44,13 +46,13 @@ export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobCl
         <Col key={mob.id} xs={24} sm={12} md={8} lg={6} xl={4}>
           <Card
             hoverable
-            className="h-full cursor-pointer"
+            className="h-full cursor-pointer border-gray-200 dark:border-gray-600"
             onClick={() => onMobClick?.(mob.id)}
             cover={
               <div 
-                className="bg-gray-50 dark:bg-gray-800" 
                 style={{ 
                   height: '150px',
+                  background: 'linear-gradient(135deg, #f5f5f5 0%, #737373 100%)',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center'
@@ -83,7 +85,15 @@ export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobCl
           >
             <div className="space-y-2 text-center">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text strong className="text-sm" title={mob.name} style={{ flex: 1 }}>
+                <Text 
+                  strong 
+                  className="text-sm" 
+                  title={mob.name} 
+                  style={{ 
+                    flex: 1,
+                    color: currentTheme === 'dark' ? '#ffffff' : '#111827'
+                  }}
+                >
                   {mob.name.length > 15 ? `${mob.name.substring(0, 15)}...` : mob.name}
                 </Text>
                 <FavoriteButton

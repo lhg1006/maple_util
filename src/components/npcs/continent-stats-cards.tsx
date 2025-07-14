@@ -9,7 +9,7 @@ import {
   CrownOutlined,
   ThunderboltOutlined
 } from '@ant-design/icons';
-import { useMapsSummary } from '@/hooks/useMapleData';
+import { useAllMaps } from '@/hooks/useMapleData';
 
 const { Title, Text } = Typography;
 
@@ -67,7 +67,7 @@ const getContinentInfo = (continent: string) => {
       icon: <TrophyOutlined />, 
       description: '무릉도원 & 도장', 
       level: 'Lv.120+', 
-      color: '#fa8c16' 
+      color: '#faad14' 
     },
     '니할사막': { 
       icon: <EnvironmentOutlined />, 
@@ -167,15 +167,22 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
   onContinentSelect, 
   selectedContinent 
 }) => {
-  const { data: summary, isLoading } = useMapsSummary();
+  const { data: maps = [], isLoading } = useAllMaps();
 
-  if (isLoading || !summary) {
+  if (isLoading || !maps) {
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
         <div>대륙 통계를 불러오는 중...</div>
       </div>
     );
   }
+
+  // 맵 데이터에서 대륙별 통계 계산
+  const continentStats: Record<string, number> = {};
+  maps.forEach((map: any) => {
+    const continent = map.continent || '기타 지역';
+    continentStats[continent] = (continentStats[continent] || 0) + 1;
+  });
 
   // 대륙을 종류별로 분류
   const continentCategories = {
@@ -187,7 +194,7 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
     '컨텐츠': ['테마파크 & 이벤트', '던전 & 미궁', '스토리 & 퀘스트', '도시 & 학교', '히든 & 특수']
   };
 
-  const totalMaps = summary.totalMaps;
+  const totalMaps = maps.length;
 
   const renderContinentCard = (continent: string, count: number) => {
     const info = getContinentInfo(continent);
@@ -199,10 +206,11 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
         <Card
           hoverable
           onClick={() => onContinentSelect(continent)}
+          className={isSelected ? 'border-2' : 'border border-gray-200 dark:border-gray-700'}
           style={{
             cursor: 'pointer',
-            border: isSelected ? `2px solid ${info.color}` : '1px solid #e8e8e8',
-            backgroundColor: isSelected ? `${info.color}10` : 'white',
+            borderColor: isSelected ? info.color : undefined,
+            backgroundColor: isSelected ? `${info.color}10` : undefined,
             transition: 'all 0.3s ease'
           }}
           styles={{
@@ -233,9 +241,9 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
           </Title>
           
           <Text 
+            className="text-gray-600 dark:text-gray-400"
             style={{ 
               fontSize: '12px', 
-              color: '#666',
               display: 'block',
               marginBottom: '8px'
             }}
@@ -271,7 +279,7 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
               style={{ marginTop: '8px' }}
             />
             
-            <Text style={{ fontSize: '11px', color: '#999' }}>
+            <Text className="text-gray-500 dark:text-gray-500" style={{ fontSize: '11px' }}>
               전체의 {percentage}%
             </Text>
           </div>
@@ -293,14 +301,14 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
 
       {Object.entries(continentCategories).map(([category, continents]) => {
         const categoryMaps = continents
-          .filter(continent => summary.continentStats[continent])
-          .map(continent => ({ continent, count: summary.continentStats[continent] }));
+          .filter(continent => continentStats[continent])
+          .map(continent => ({ continent, count: continentStats[continent] }));
         
         if (categoryMaps.length === 0) return null;
 
         return (
           <div key={category} style={{ marginBottom: '32px' }}>
-            <Title level={4} style={{ margin: '0 0 16px 0', color: '#333' }}>
+            <Title level={4} className="text-gray-900 dark:text-white" style={{ margin: '0 0 16px 0' }}>
               {category}
             </Title>
             <Row gutter={[16, 16]}>
@@ -313,13 +321,13 @@ export const ContinentStatsCards: React.FC<ContinentStatsCardsProps> = ({
       })}
 
       {/* 기타 지역은 별도로 표시 */}
-      {summary.continentStats['기타 지역'] && (
+      {continentStats['기타 지역'] && (
         <div style={{ marginTop: '32px' }}>
-          <Title level={4} style={{ margin: '0 0 16px 0', color: '#999' }}>
+          <Title level={4} className="text-gray-500 dark:text-gray-400" style={{ margin: '0 0 16px 0' }}>
             기타
           </Title>
           <Row gutter={[16, 16]}>
-            {renderContinentCard('기타 지역', summary.continentStats['기타 지역'])}
+            {renderContinentCard('기타 지역', continentStats['기타 지역'])}
           </Row>
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, List, Typography, Empty, Button, Space, Tag, Avatar, Tooltip } from 'antd';
 import { 
   HeartOutlined, 
@@ -54,6 +54,12 @@ export function FavoritesList({ type, showHeader = true, maxItems }: FavoritesLi
   const [loading, setLoading] = useState(false);
   const [selectedFavorite, setSelectedFavorite] = useState<FavoriteItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 클라이언트에서만 실행되도록 하여 hydration 에러 방지
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 타입별 필터링
   const filteredFavorites = type 
@@ -183,13 +189,13 @@ export function FavoritesList({ type, showHeader = true, maxItems }: FavoritesLi
               }
               description={
                 <Text type="secondary" style={{ fontSize: '12px' }}>
-                  {new Date(favorite.addedAt).toLocaleDateString('ko-KR', {
+                  {isMounted ? new Date(favorite.addedAt).toLocaleDateString('ko-KR', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                  })}
+                  }) : '로딩 중...'}
                 </Text>
               }
             />

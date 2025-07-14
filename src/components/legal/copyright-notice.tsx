@@ -28,7 +28,14 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
           확인
         </Button>,
       ]}
-      width={600}
+      width={700}
+      centered
+      styles={{
+        body: {
+          maxHeight: '70vh',
+          overflowY: 'auto'
+        }
+      }}
     >
       <div style={{ padding: '16px 0' }}>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -37,13 +44,13 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
               <CopyrightOutlined /> 중요한 저작권 안내
             </Title>
             <Paragraph>
-              이 웹사이트를 이용하기 전에 다음 내용을 반드시 읽고 동의해주세요.
+              이 웹사이트 이용 시 다음 내용을 숙지해주시기 바랍니다.
             </Paragraph>
           </div>
 
-          <div style={{ background: '#fff2f0', padding: '16px', borderRadius: '6px', border: '1px solid #ffccc7' }}>
+          <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800">
             <Title level={5} style={{ color: '#cf1322', margin: '0 0 8px 0' }}>
-              📋 이용약관 및 저작권 안내
+              📋 서비스 정보 및 저작권 안내
             </Title>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
               <li><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
@@ -56,25 +63,13 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
 
           <div style={{ background: '#f6ffed', padding: '16px', borderRadius: '6px', border: '1px solid #b7eb8f' }}>
             <Title level={5} style={{ color: '#389e0d', margin: '0 0 8px 0' }}>
-              🤝 이용자 의무사항
+              ℹ️ 이용 시 참고사항
             </Title>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
-              <li>본 사이트의 데이터를 상업적 목적으로 사용하지 않습니다.</li>
-              <li>넥슨코리아의 지적재산권을 존중합니다.</li>
-              <li>본 사이트가 공식 서비스가 아닌 데이터 뷰어 도구임을 인지하고 있습니다.</li>
-              <li>저작권 문제 발생 시 즉시 신고하여 해결에 협조합니다.</li>
-            </ul>
-          </div>
-
-          <div style={{ background: '#fff7e6', padding: '16px', borderRadius: '6px', border: '1px solid #ffd591' }}>
-            <Title level={5} style={{ color: '#d46b08', margin: '0 0 8px 0' }}>
-              🗂️ CDN 데이터 정책
-            </Title>
-            <ul style={{ margin: 0, paddingLeft: '20px' }}>
-              <li>CDN 데이터는 검색 최적화를 위한 메타데이터만 저장합니다.</li>
-              <li>게임 이미지는 직접 저장하지 않고 원본 API 링크로 참조합니다.</li>
-              <li>모든 CDN 데이터는 비상업적 교육 목적으로만 사용됩니다.</li>
-              <li>원본 데이터의 저작권은 넥슨코리아에 있습니다.</li>
+              <li>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
+              <li>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
+              <li>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
+              <li>데이터는 maplestory.io API를 통해 제공받습니다.</li>
             </ul>
           </div>
 

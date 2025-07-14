@@ -57,7 +57,7 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
       <Collapse
         accordion={false}
         defaultActiveKey={sortedMapNames.slice(0, 3)} // 처음 3개 맵만 기본으로 열기
-        style={{ background: '#fff' }}
+        className="dark:bg-gray-800"
       >
         {sortedMapNames.map(mapName => {
           const mapNPCs = npcsByMap[mapName];
@@ -76,9 +76,8 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
               }
               style={{ marginBottom: '8px' }}
             >
-              <div style={{ 
+              <div className="bg-gray-50 dark:bg-gray-700" style={{ 
                 padding: '16px',
-                background: '#fafafa',
                 borderRadius: '6px',
                 margin: '-12px'
               }}>
@@ -89,10 +88,10 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
                         size="small"
                         hoverable
                         onClick={() => onNPCClick(npc.id)}
+                        className="border-gray-200 dark:border-gray-600"
                         style={{
                           cursor: 'pointer',
-                          transition: 'all 0.3s ease',
-                          border: '1px solid #e8e8e8'
+                          transition: 'all 0.3s ease'
                         }}
                         styles={{
                           body: {
@@ -112,7 +111,7 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: '#f5f5f5',
+                          backgroundColor: 'transparent',
                           borderRadius: '6px',
                           overflow: 'hidden'
                         }}>
@@ -147,9 +146,9 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
                         <div style={{ width: '100%' }}>
                           <Text 
                             strong 
+                            className="text-gray-900 dark:text-white"
                             style={{ 
                               fontSize: '12px',
-                              color: '#333',
                               display: 'block',
                               marginBottom: '4px'
                             }}
@@ -159,9 +158,9 @@ export const NPCMapGroup: React.FC<NPCMapGroupProps> = ({ npcs, loading, onNPCCl
                           </Text>
                           
                           <Text 
+                            className="text-gray-600 dark:text-gray-400"
                             style={{ 
-                              fontSize: '10px', 
-                              color: '#666'
+                              fontSize: '10px'
                             }}
                           >
                             ID: {npc.id}

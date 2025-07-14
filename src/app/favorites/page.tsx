@@ -107,7 +107,7 @@ export default function FavoritesPage() {
               <Card size="small">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">{stats.all}</div>
-                  <div className="text-sm text-gray-500">전체</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">전체</div>
                 </div>
               </Card>
             </Col>
@@ -115,7 +115,7 @@ export default function FavoritesPage() {
               <Card size="small">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">{stats.item}</div>
-                  <div className="text-sm text-gray-500">아이템</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">아이템</div>
                 </div>
               </Card>
             </Col>
@@ -123,7 +123,7 @@ export default function FavoritesPage() {
               <Card size="small">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">{stats.npc}</div>
-                  <div className="text-sm text-gray-500">NPC</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">NPC</div>
                 </div>
               </Card>
             </Col>
@@ -131,15 +131,15 @@ export default function FavoritesPage() {
               <Card size="small">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">{stats.mob}</div>
-                  <div className="text-sm text-gray-500">몬스터</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">몬스터</div>
                 </div>
               </Card>
             </Col>
             <Col xs={12} sm={8} md={6} lg={4}>
               <Card size="small">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">{stats.job}</div>
-                  <div className="text-sm text-gray-500">직업</div>
+                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.job}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">직업</div>
                 </div>
               </Card>
             </Col>
@@ -147,7 +147,7 @@ export default function FavoritesPage() {
               <Card size="small">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-pink-600">{stats.skill}</div>
-                  <div className="text-sm text-gray-500">스킬</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">스킬</div>
                 </div>
               </Card>
             </Col>

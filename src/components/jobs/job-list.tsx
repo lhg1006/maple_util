@@ -4,6 +4,7 @@ import { Row, Col, Card, Typography, Tag } from 'antd';
 import { TeamOutlined } from '@ant-design/icons';
 import { MapleJob } from '@/types/maplestory';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { useTheme } from '@/components/providers/theme-provider';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -47,6 +48,7 @@ const getAdvancementName = (advancement: number) => {
 };
 
 export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobClick }) => {
+  const { theme: currentTheme } = useTheme();
   if (loading) {
     return (
       <Row gutter={[16, 16]}>
@@ -61,18 +63,17 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
 
   if (jobs.length === 0) {
     return (
-      <div style={{ 
+      <div className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600" style={{ 
         textAlign: 'center', 
         padding: '40px',
-        background: '#fafafa',
         borderRadius: '8px',
-        border: '1px dashed #d9d9d9'
+        border: '1px dashed'
       }}>
         <TeamOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
-        <Title level={4} style={{ color: '#8c8c8c' }}>
+        <Title level={4} className="text-gray-500 dark:text-gray-400">
           직업 정보가 없습니다
         </Title>
-        <Text style={{ color: '#8c8c8c' }}>
+        <Text className="text-gray-500 dark:text-gray-400">
           검색 조건을 변경해보세요.
         </Text>
       </div>
@@ -112,7 +113,14 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
 
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <Title level={5} style={{ margin: 0, flex: 1 }}>
+                <Title 
+                  level={5} 
+                  style={{ 
+                    margin: 0, 
+                    flex: 1, 
+                    color: currentTheme === 'dark' ? '#ffffff' : '#262626' 
+                  }}
+                >
                   {job.name}
                 </Title>
                 <FavoriteButton
@@ -144,9 +152,9 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
             <div style={{ flex: 1 }}>
               <Paragraph 
                 ellipsis={{ rows: 2 }} 
+                className="text-gray-600 dark:text-gray-400"
                 style={{ 
                   fontSize: '12px', 
-                  color: '#666',
                   margin: 0,
                   marginBottom: '8px'
                 }}
@@ -156,13 +164,16 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
             </div>
 
             {job.stats && (
-              <div style={{ 
-                marginTop: 'auto',
-                padding: '8px',
-                background: '#f5f5f5',
-                borderRadius: '4px',
-                fontSize: '11px'
-              }}>
+              <div 
+                style={{ 
+                  marginTop: 'auto',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  backgroundColor: currentTheme === 'dark' ? '#374151' : '#f3f4f6',
+                  color: currentTheme === 'dark' ? '#ffffff' : '#374151'
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>STR: {job.stats.str}</span>
                   <span>DEX: {job.stats.dex}</span>
@@ -178,7 +189,7 @@ export const JobList: React.FC<JobListProps> = ({ jobs, loading = false, onJobCl
 
             {job.weapon && job.weapon.length > 0 && (
               <div style={{ marginTop: '8px', textAlign: 'center' }}>
-                <Text style={{ fontSize: '10px', color: '#999' }}>
+                <Text className="text-gray-500 dark:text-gray-400" style={{ fontSize: '10px' }}>
                   무기: {job.weapon.join(', ')}
                 </Text>
               </div>

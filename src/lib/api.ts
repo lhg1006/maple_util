@@ -26,6 +26,7 @@ export interface ItemQueryParams {
   page?: number;
   startPosition?: number;
   count?: number;
+  searchFor?: string;
 }
 
 
@@ -463,17 +464,27 @@ export class MapleStoryAPI {
     try {
       const queryParams = new URLSearchParams();
       
-      if (params.overallCategory) queryParams.append('overallCategory', params.overallCategory);
-      if (params.category) queryParams.append('category', params.category);
-      if (params.subCategory) queryParams.append('subCategory', params.subCategory);
+      if (params.overallCategory) queryParams.append('overallCategoryFilter', params.overallCategory);
+      if (params.category) queryParams.append('categoryFilter', params.category);
+      if (params.subCategory) queryParams.append('subCategoryFilter', params.subCategory);
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.startPosition) queryParams.append('startPosition', params.startPosition.toString());
       if (params.count) queryParams.append('count', params.count.toString());
+      if (params.searchFor) queryParams.append('searchFor', params.searchFor);
       
       const url = `${this.getEndpoint('/item')}?${queryParams.toString()}`;
-      console.log('API 호출 URL:', `${API_BASE_URL}${url}`);
+      const fullUrl = `${API_BASE_URL}${url}`;
+      console.log('🔍 API 호출 매개변수:', params);
+      console.log('🌐 API 호출 URL:', fullUrl);
+      
       const response = await apiClient.get(url);
       const items = response.data;
+      
+      console.log('📦 API 응답 데이터:', {
+        totalItems: items?.length || 0,
+        firstItem: items?.[0] || null,
+        lastItem: items?.[items?.length - 1] || null
+      });
       
       if (!Array.isArray(items)) {
         return [];
@@ -507,58 +518,46 @@ export class MapleStoryAPI {
   }
 
 
-  // Job API (static data)
+  // Job API
   async getJob(id: number): Promise<MapleJob> {
     try {
-      const response = await fetch('/jobs.json');
-      const jobs = await response.json();
-      const job = jobs.find((j: any) => j.id === id);
-      if (!job) {
-        throw new Error(`Job ${id} not found`);
-      }
-      return job;
+      const response = await apiClient.get(this.getEndpoint(`/job/${id}`));
+      return response.data;
     } catch (error) {
-      console.warn('Failed to fetch job from static data:', error);
+      console.warn('Failed to fetch job from API:', error);
       throw error;
     }
   }
 
-  // Jobs List API (static data)
+  // Jobs List API
   async getJobs(): Promise<MapleJob[]> {
     try {
-      const response = await fetch('/jobs.json');
-      const jobs = await response.json();
-      return jobs;
+      const response = await apiClient.get(this.getEndpoint('/job'));
+      return response.data;
     } catch (error) {
-      console.warn('Failed to fetch jobs from static data:', error);
+      console.warn('Failed to fetch jobs from API:', error);
       throw error;
     }
   }
 
-  // Skill API (static data)
+  // Skill API
   async getSkill(id: number): Promise<MapleSkill> {
     try {
-      const response = await fetch('/skills.json');
-      const skills = await response.json();
-      const skill = skills.find((s: any) => s.id === id);
-      if (!skill) {
-        throw new Error(`Skill ${id} not found`);
-      }
-      return skill;
+      const response = await apiClient.get(this.getEndpoint(`/skill/${id}`));
+      return response.data;
     } catch (error) {
-      console.warn('Failed to fetch skill from static data:', error);
+      console.warn('Failed to fetch skill from API:', error);
       throw error;
     }
   }
 
-  // Skills List API (static data)
+  // Skills List API
   async getSkills(): Promise<MapleSkill[]> {
     try {
-      const response = await fetch('/skills.json');
-      const skills = await response.json();
-      return skills;
+      const response = await apiClient.get(this.getEndpoint('/skill'));
+      return response.data;
     } catch (error) {
-      console.warn('Failed to fetch skills from static data:', error);
+      console.warn('Failed to fetch skills from API:', error);
       throw error;
     }
   }

@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import { MapleSkill } from '@/types/maplestory';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { useTheme } from '@/components/providers/theme-provider';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -24,7 +25,7 @@ const getTypeColor = (type: string) => {
   switch (type) {
     case 'active': return '#52c41a';
     case 'passive': return '#1890ff';
-    case 'buff': return '#fa8c16';
+    case 'buff': return '#faad14';
     case 'debuff': return '#f5222d';
     case 'summon': return '#722ed1';
     default: return '#8c8c8c';
@@ -83,6 +84,7 @@ const getTypeIcon = (type: string) => {
 };
 
 export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, onSkillClick }) => {
+  const { theme: currentTheme } = useTheme();
   if (loading) {
     return (
       <Row gutter={[16, 16]}>
@@ -97,18 +99,17 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
 
   if (skills.length === 0) {
     return (
-      <div style={{ 
+      <div className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600" style={{ 
         textAlign: 'center', 
         padding: '40px',
-        background: '#fafafa',
         borderRadius: '8px',
-        border: '1px dashed #d9d9d9'
+        border: '1px dashed'
       }}>
         <ThunderboltOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
-        <Title level={4} style={{ color: '#8c8c8c' }}>
+        <Title level={4} className="text-gray-500 dark:text-gray-400">
           스킬 정보가 없습니다
         </Title>
-        <Text style={{ color: '#8c8c8c' }}>
+        <Text className="text-gray-500 dark:text-gray-400">
           검색 조건을 변경해보세요.
         </Text>
       </div>
@@ -150,7 +151,14 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
 
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <Title level={5} style={{ margin: 0, flex: 1 }}>
+                <Title 
+                  level={5} 
+                  style={{ 
+                    margin: 0, 
+                    flex: 1, 
+                    color: currentTheme === 'dark' ? '#ffffff' : '#262626' 
+                  }}
+                >
                   {skill.name}
                 </Title>
                 <FavoriteButton
@@ -186,9 +194,9 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
             <div style={{ flex: 1 }}>
               <Paragraph 
                 ellipsis={{ rows: 2 }} 
+                className="text-gray-600 dark:text-gray-400"
                 style={{ 
                   fontSize: '12px', 
-                  color: '#666',
                   margin: 0,
                   marginBottom: '8px'
                 }}
@@ -197,19 +205,27 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
               </Paragraph>
             </div>
 
-            <div style={{ 
-              marginTop: 'auto',
-              padding: '8px',
-              background: '#f5f5f5',
-              borderRadius: '4px',
-              fontSize: '11px'
-            }}>
+            <div 
+              style={{ 
+                marginTop: 'auto',
+                padding: '8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                backgroundColor: currentTheme === 'dark' ? '#374151' : '#f3f4f6',
+                color: currentTheme === 'dark' ? '#ffffff' : '#374151'
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                 <span>직업: {skill.jobName}</span>
                 <span>최대 레벨: {skill.maxLevel}</span>
               </div>
               {skill.preRequisite && (
-                <div style={{ fontSize: '10px', color: '#999' }}>
+                <div 
+                  style={{ 
+                    fontSize: '10px',
+                    color: currentTheme === 'dark' ? '#9ca3af' : '#6b7280'
+                  }}
+                >
                   선행 스킬: {skill.preRequisite}
                 </div>
               )}
@@ -217,7 +233,7 @@ export const SkillList: React.FC<SkillListProps> = ({ skills, loading = false, o
 
             {skill.effect && (
               <div style={{ marginTop: '8px', textAlign: 'center' }}>
-                <Text style={{ fontSize: '10px', color: '#666', fontStyle: 'italic' }}>
+                <Text className="text-gray-600 dark:text-gray-400" style={{ fontSize: '10px', fontStyle: 'italic' }}>
                   {skill.effect.length > 50 ? `${skill.effect.substring(0, 50)}...` : skill.effect}
                 </Text>
               </div>

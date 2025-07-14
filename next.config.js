@@ -36,6 +36,21 @@ const nextConfig = {
       },
     ];
   },
+  // 존재하지 않는 PWA 아이콘 파일들을 기존 파비콘으로 리다이렉트
+  async redirects() {
+    return [
+      {
+        source: '/icon-:size.png',
+        destination: '/favicon/android-chrome-192x192.png',
+        permanent: true,
+      },
+      {
+        source: '/screenshot-:type.png',
+        destination: '/favicon/android-chrome-512x512.png',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

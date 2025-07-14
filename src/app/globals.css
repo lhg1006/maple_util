@@ -222,6 +222,7 @@ body {
 .stat-negative { color: #ff0000; } /* 빨간색 - 부정적 효과 */
 .stat-epic { color: #ff00ff; } /* 보라색 - 에픽 등급 */
 .stat-unique { color: #ff8800; } /* 주황색 - 유니크 등급 */
+.dark .stat-unique { color: #fbbf24; } /* 다크모드: 밝은 앰버 */
 .stat-legendary { color: #00ff00; } /* 연두색 - 레전더리 등급 */
 
 /* 업그레이드 정보 */
@@ -268,4 +269,42 @@ body {
   padding: 10px 12px;
   border-top: 1px solid #555;
   background: #2A2A4A;
+}
+
+/* 주황색 사이드바 메뉴 스타일 */
+.ant-layout-sider .ant-menu-light {
+  background: transparent !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item {
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  margin: 4px 8px !important;
+  padding-left: 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item .anticon {
+  color: #ffffff !important;
+  font-size: 16px !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
 }

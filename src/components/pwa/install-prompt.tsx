@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Card, Space, Typography } from 'antd';
 import { DownloadOutlined, MobileOutlined, CloseOutlined } from '@ant-design/icons';
 import { usePWA } from '@/hooks/usePWA';
@@ -14,8 +14,13 @@ interface InstallPromptProps {
 
 export function InstallPrompt({ onClose, compact = false }: InstallPromptProps) {
   const { canInstall, install } = usePWA();
+  const [isClient, setIsClient] = useState(false);
 
-  if (!canInstall) return null;
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient || !canInstall) return null;
 
   const handleInstall = async () => {
     const success = await install();

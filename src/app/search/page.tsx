@@ -70,7 +70,7 @@ export default function SearchPage() {
 
   // Save search history
   useEffect(() => {
-    if (debouncedQuery && searchStats.total > 0) {
+    if (debouncedQuery && searchStats.total > 0 && typeof window !== 'undefined') {
       const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
       const newHistory = [debouncedQuery, ...history.filter((h: string) => h !== debouncedQuery)].slice(0, 10);
       localStorage.setItem('searchHistory', JSON.stringify(newHistory));
@@ -228,7 +228,7 @@ export default function SearchPage() {
               <Text type="secondary">최근 검색어</Text>
             </div>
             <div className="flex flex-wrap gap-2">
-              {JSON.parse(localStorage.getItem('searchHistory') || '[]').map((query: string, index: number) => (
+              {(typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('searchHistory') || '[]') : []).map((query: string, index: number) => (
                 <Tag 
                   key={index}
                   className="cursor-pointer"

@@ -23,25 +23,31 @@ export function useFavorites() {
 
   // 즐겨찾기 목록 로드
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(FAVORITES_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setFavorites(parsed);
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setFavorites(parsed);
+        }
+      } catch (error) {
+        console.warn('Failed to load favorites:', error);
+        setFavorites([]);
       }
-    } catch (error) {
-      console.warn('Failed to load favorites:', error);
-      setFavorites([]);
     }
   }, []);
 
   // localStorage에 저장
   const saveFavorites = useCallback((newFavorites: FavoriteItem[]) => {
-    try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+        setFavorites(newFavorites);
+      } catch (error) {
+        console.warn('Failed to save favorites:', error);
+      }
+    } else {
       setFavorites(newFavorites);
-    } catch (error) {
-      console.warn('Failed to save favorites:', error);
     }
   }, []);
 

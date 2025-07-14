@@ -88,18 +88,26 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           setIsMobile(broken);
         }}
         width={240}
-        theme="dark"
+        theme="light"
         style={{ 
           height: '100vh', 
           overflowX: 'hidden',
           overflowY: 'auto',
-          boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)'
+          boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
+          background: currentTheme === 'dark' 
+            ? 'linear-gradient(180deg, #1a365d 0%, #2d3748 50%, #4a5568 100%)' 
+            : 'linear-gradient(180deg, #ff8c00 0%, #ff7300 50%, #ff6600 100%)'
         }}
       >
         <div style={{ 
           padding: '20px 16px',
           textAlign: 'center',
-          background: 'rgba(255,255,255,0.025)'
+          background: currentTheme === 'dark' 
+            ? 'rgba(255,255,255,0.08)' 
+            : 'rgba(255,255,255,0.15)',
+          borderBottom: currentTheme === 'dark' 
+            ? '1px solid rgba(255,255,255,0.1)' 
+            : '1px solid rgba(255,255,255,0.2)'
         }}>
           <Title 
             level={collapsed ? 2 : 4} 
@@ -110,13 +118,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               fontSize: collapsed ? '24px' : '20px',
-              fontWeight: 600
+              fontWeight: 600,
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
             }}
           >
             {collapsed ? 'MS' : '메이플스토리'}
           </Title>
           {!collapsed && (
-            <p style={{ margin: '4px 0 0', color: '#ffffff73', fontSize: '12px' }}>
+            <p style={{ margin: '4px 0 0', color: '#ffffff', fontSize: '12px', opacity: 0.9 }}>
               유틸리티
             </p>
           )}
@@ -125,11 +134,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           mode="inline"
           selectedKeys={[pathname]}
           items={menuItems}
-          theme="dark"
+          theme="light"
           style={{ 
             border: 'none', 
             flex: 1,
-            background: 'transparent'
+            background: 'transparent',
+            color: '#ffffff'
           }}
           onClick={({ key }) => router.push(key)}
         />

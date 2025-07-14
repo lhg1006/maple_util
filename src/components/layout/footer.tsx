@@ -17,46 +17,28 @@ export const Footer: React.FC = () => {
       background: 'transparent'
     }}>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Space split={<Divider type="vertical" />} wrap>
-          <Space>
-            <DatabaseOutlined />
-            <Text>데이터 출처:</Text>
-            <Link 
-              href="https://maplestory.io" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              maplestory.io
-            </Link>
-          </Space>
-          
-          <Space>
-            <LinkOutlined />
-            <Text>CDN:</Text>
-            <Link 
-              href="https://github.com/lhg1006/maple-util-data" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              title="비상업적 교육 목적으로만 사용됩니다"
-            >
-              GitHub Repository
-            </Link>
-            <Text type="secondary" style={{ fontSize: '10px' }}>
-              (교육용)
-            </Text>
-          </Space>
+        <Space>
+          <DatabaseOutlined />
+          <Text>데이터 출처:</Text>
+          <Link 
+            href="https://maplestory.io" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            maplestory.io API
+          </Link>
         </Space>
         
         <div style={{ marginTop: '16px' }}>
           <Space>
             <ExclamationCircleOutlined style={{ color: '#faad14' }} />
             <Text strong style={{ fontSize: '13px', color: '#faad14' }}>
-              비공식 팬 사이트
+              개인 운영 사이트
             </Text>
           </Space>
           <br />
           <Text type="secondary" style={{ fontSize: '12px', opacity: 0.65, marginTop: '8px', display: 'block' }}>
-            이 사이트는 <strong>넥슨코리아와 무관한 개인 개발자가 운영하는 비공식 팬 사이트</strong>입니다.
+            이 사이트는 <strong>넥슨코리아와 무관한 개인 개발자가 운영하는 서비스</strong>입니다.
           </Text>
           <Text type="secondary" style={{ fontSize: '12px', opacity: 0.65, display: 'block' }}>
             모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 <strong>넥슨코리아(Nexon Korea)</strong>에 있습니다.

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Space, Typography } from 'antd';
 import { DisconnectOutlined } from '@ant-design/icons';
 import { usePWA } from '@/hooks/usePWA';
@@ -9,6 +9,14 @@ const { Text } = Typography;
 
 export function OfflineStatus() {
   const { isOnline, getOfflineCapabilities } = usePWA();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
+
   const capabilities = getOfflineCapabilities();
 
   if (isOnline) return null;

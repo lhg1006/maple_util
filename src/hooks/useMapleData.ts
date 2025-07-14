@@ -21,10 +21,11 @@ export const useMapleNPC = (id: number, enabled: boolean = true) => {
   });
 };
 
-export const useNPCList = (params: { startPosition?: number; count?: number }) => {
+export const useNPCList = (params: { startPosition?: number; count?: number }, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['npcs', params],
     queryFn: () => mapleAPI.getNPCsByCategory(params),
+    enabled: enabled,
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -53,39 +54,35 @@ export const useMaps = (params: { startPosition?: number; count?: number } = {})
   });
 };
 
-// 정적 JSON 파일에서 전체 맵 데이터를 가져오는 훅 (API 호출 최소화)
+// API에서 전체 맵 데이터를 가져오는 훅
 export const useAllMaps = () => {
   return useQuery({
-    queryKey: ['maps', 'static'],
+    queryKey: ['maps', 'all'],
     queryFn: async () => {
-      console.log('📁 정적 맵 데이터 로딩...');
-      const response = await fetch('/maps.json');
-      if (!response.ok) {
-        throw new Error('맵 데이터를 불러올 수 없습니다');
-      }
-      const maps = await response.json();
-      console.log(`✅ 정적 맵 데이터 로딩 완료: ${maps.length}개 맵`);
+      console.log('🌐 API에서 맵 데이터 로딩...');
+      const maps = await mapleAPI.getMaps({ startPosition: 0, count: 5000 });
+      console.log(`✅ API 맵 데이터 로딩 완료: ${maps.length}개 맵`);
       return maps;
     },
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터는 더 오래 캐시)
-    gcTime: 1000 * 60 * 60 * 48, // 48시간 가비지 컬렉션
+    staleTime: 1000 * 60 * 30, // 30분 캐시
+    gcTime: 1000 * 60 * 60, // 1시간 가비지 컬렉션
   });
 };
 
-// 맵 요약 통계를 가져오는 훅
-export const useMapsSummary = () => {
-  return useQuery({
-    queryKey: ['maps', 'summary'],
-    queryFn: async () => {
-      const response = await fetch('/maps-summary.json');
-      if (!response.ok) {
-        throw new Error('맵 요약 데이터를 불러올 수 없습니다');
-      }
-      return response.json();
-    },
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시
-  });
-};
+// 맵 요약 통계를 가져오는 훅 (제거됨 - useAllMaps 사용)
+// export const useMapsSummary = () => {
+//   return useQuery({
+//     queryKey: ['maps', 'summary'],
+//     queryFn: async () => {
+//       const response = await fetch('/maps-summary.json');
+//       if (!response.ok) {
+//         throw new Error('맵 요약 데이터를 불러올 수 없습니다');
+//       }
+//       return response.json();
+//     },
+//     staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시
+//   });
+// };
 
 export const useNPCsByMap = (mapId: number | null) => {
   return useQuery({
@@ -116,18 +113,40 @@ export const useMapleMob = (id: number) => {
 export const useMapleJob = (id: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['job', id],
-    queryFn: () => mapleAPI.getJob(id),
+    queryFn: async () => {
+      const response = await fetch('/jobs.json');
+      if (!response.ok) {
+        throw new Error('직업 데이터를 불러올 수 없습니다');
+      }
+      const jobs = await response.json();
+      const job = jobs.find((j: any) => j.id === id);
+      if (!job) {
+        throw new Error(`직업 ID ${id}를 찾을 수 없습니다`);
+      }
+      return job;
+    },
     enabled: enabled && !!id,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
   });
 };
 
 export const useMapleSkill = (id: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['skill', id],
-    queryFn: () => mapleAPI.getSkill(id),
+    queryFn: async () => {
+      const response = await fetch('/skills.json');
+      if (!response.ok) {
+        throw new Error('스킬 데이터를 불러올 수 없습니다');
+      }
+      const skills = await response.json();
+      const skill = skills.find((s: any) => s.id === id);
+      if (!skill) {
+        throw new Error(`스킬 ID ${id}를 찾을 수 없습니다`);
+      }
+      return skill;
+    },
     enabled: enabled && !!id,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
   });
 };
 
@@ -163,8 +182,17 @@ export const useSearchMobs = (query: string, enabled: boolean = true) => {
 export const useJobs = () => {
   return useQuery({
     queryKey: ['jobs'],
-    queryFn: () => mapleAPI.getJobs(),
-    staleTime: 1000 * 60 * 30, // 30분 캐시 (정적 데이터)
+    queryFn: async () => {
+      console.log('🎯 정적 직업 데이터 로딩...');
+      const response = await fetch('/jobs.json');
+      if (!response.ok) {
+        throw new Error('직업 데이터를 불러올 수 없습니다');
+      }
+      const jobs = await response.json();
+      console.log(`✅ 정적 직업 데이터 로딩 완료: ${jobs.length}개 직업`);
+      return jobs;
+    },
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
   });
 };
 
@@ -172,7 +200,16 @@ export const useJobs = () => {
 export const useSkills = () => {
   return useQuery({
     queryKey: ['skills'],
-    queryFn: () => mapleAPI.getSkills(),
-    staleTime: 1000 * 60 * 30, // 30분 캐시 (정적 데이터)
+    queryFn: async () => {
+      console.log('🎯 정적 스킬 데이터 로딩...');
+      const response = await fetch('/skills.json');
+      if (!response.ok) {
+        throw new Error('스킬 데이터를 불러올 수 없습니다');
+      }
+      const skills = await response.json();
+      console.log(`✅ 정적 스킬 데이터 로딩 완료: ${skills.length}개 스킬`);
+      return skills;
+    },
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
   });
 };

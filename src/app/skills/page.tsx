@@ -7,6 +7,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { SkillList } from '@/components/skills/skill-list';
 import { SkillDetailModal } from '@/components/skills/skill-detail-modal';
 import { useJobs, useSkills } from '@/hooks/useMapleData';
+import { useTheme } from '@/components/providers/theme-provider';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -14,6 +15,7 @@ const { Search } = Input;
 const { Option } = Select;
 
 export default function SkillsPage() {
+  const { theme: currentTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -243,16 +245,24 @@ export default function SkillsPage() {
           <div style={{ 
             padding: '40px', 
             textAlign: 'center',
-            background: '#fafafa',
+            background: currentTheme === 'dark' ? '#1f2937' : '#fafafa',
             borderRadius: '8px',
-            border: '1px dashed #d9d9d9',
+            border: currentTheme === 'dark' ? '1px dashed #4b5563' : '1px dashed #d9d9d9',
             marginBottom: '24px'
           }}>
-            <ThunderboltOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
-            <Title level={4} style={{ color: '#8c8c8c' }}>
+            <ThunderboltOutlined style={{ 
+              fontSize: '48px', 
+              color: currentTheme === 'dark' ? '#6b7280' : '#bfbfbf', 
+              marginBottom: '16px' 
+            }} />
+            <Title level={4} style={{ 
+              color: currentTheme === 'dark' ? '#9ca3af' : '#8c8c8c' 
+            }}>
               직업을 선택해주세요
             </Title>
-            <Paragraph style={{ color: '#8c8c8c' }}>
+            <Paragraph style={{ 
+              color: currentTheme === 'dark' ? '#9ca3af' : '#8c8c8c' 
+            }}>
               스킬을 보려면 먼저 직업을 선택해야 합니다.
             </Paragraph>
           </div>
@@ -269,13 +279,7 @@ export default function SkillsPage() {
 
         {/* 에러 상태 */}
         {error && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '40px',
-            background: '#fff2f0',
-            borderRadius: '8px',
-            border: '1px dashed #ffccc7'
-          }}>
+          <div className="text-center p-10 bg-red-50 dark:bg-red-950/20 rounded-lg border-2 border-dashed border-red-200 dark:border-red-800">
             <ThunderboltOutlined style={{ fontSize: '48px', color: '#ff7875', marginBottom: '16px' }} />
             <Title level={4} style={{ color: '#cf1322' }}>
               스킬 정보를 불러올 수 없습니다

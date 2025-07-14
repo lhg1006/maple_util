@@ -202,13 +202,7 @@ export default function JobsPage() {
 
         {/* 에러 상태 */}
         {error && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '40px',
-            background: '#fff2f0',
-            borderRadius: '8px',
-            border: '1px dashed #ffccc7'
-          }}>
+          <div className="text-center p-10 bg-red-50 dark:bg-red-950/20 rounded-lg border-2 border-dashed border-red-200 dark:border-red-800">
             <TeamOutlined style={{ fontSize: '48px', color: '#ff7875', marginBottom: '16px' }} />
             <Title level={4} style={{ color: '#cf1322' }}>
               직업 정보를 불러올 수 없습니다

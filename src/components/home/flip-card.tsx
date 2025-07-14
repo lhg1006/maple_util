@@ -36,6 +36,12 @@ export const FlipCard: React.FC<FlipCardProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [randomData, setRandomData] = useState<RandomData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 클라이언트에서만 실행되도록 하여 hydration 에러 방지
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 고정된 데이터 가져오기
   const fetchFixedData = async () => {
@@ -118,10 +124,32 @@ export const FlipCard: React.FC<FlipCardProps> = ({
 
   // 호버 시 데이터 가져오기
   useEffect(() => {
-    if (isFlipped && !randomData && !isLoading) {
+    if (isFlipped && !randomData && !isLoading && isMounted) {
       fetchFixedData();
     }
-  }, [isFlipped]);
+  }, [isFlipped, isMounted]);
+
+  // 서버 렌더링 중에는 기본 상태만 표시
+  if (!isMounted) {
+    return (
+      <Card 
+        className="flip-card-front text-center hover:shadow-md"
+        style={{ 
+          height: '100%',
+          cursor: 'pointer',
+        }}
+        onClick={onClick}
+      >
+        <div style={{ fontSize: '48px', color, marginBottom: '16px' }}>
+          {icon}
+        </div>
+        <Title level={4}>{title}</Title>
+        <Paragraph style={{ marginTop: '16px' }}>
+          {description}
+        </Paragraph>
+      </Card>
+    );
+  }
 
   return (
     <div 

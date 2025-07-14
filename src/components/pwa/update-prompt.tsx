@@ -1,14 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, notification, Space } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { usePWA } from '@/hooks/usePWA';
 
 export function UpdatePrompt() {
   const { isUpdateAvailable, updateServiceWorker } = usePWA();
+  const [isClient, setIsClient] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     if (isUpdateAvailable) {
       const key = 'update-available';
       
@@ -43,7 +49,7 @@ export function UpdatePrompt() {
         ),
       });
     }
-  }, [isUpdateAvailable, updateServiceWorker]);
+  }, [isClient, isUpdateAvailable, updateServiceWorker]);
 
   return null;
 }

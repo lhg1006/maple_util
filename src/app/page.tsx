@@ -18,12 +18,12 @@ export default function Home() {
       <div className="space-y-6">
         <InstallPrompt />
         <div className="text-center mb-8">
-          <Title level={1}>게임 정보 유틸리티 - 비공식 팬 사이트</Title>
+          <Title level={1}>게임 정보 유틸리티</Title>
           <Paragraph className="text-lg">
-            비공식 팬 사이트입니다. 게임 정보를 검색하고 즐겨찾기할 수 있습니다.
+            게임 정보를 검색하고 즐겨찾기할 수 있습니다.
           </Paragraph>
           <Paragraph className="text-sm" style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
-            ⚠️ 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 팬 사이트입니다.
+            ⚠️ 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 서비스입니다.
           </Paragraph>
         </div>
 

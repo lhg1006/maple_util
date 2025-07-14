@@ -5,6 +5,7 @@ import { MapleNPC } from '@/types/maplestory';
 import Image from 'next/image';
 import { useState } from 'react';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { useTheme } from '@/components/providers/theme-provider';
 
 const { Text, Title } = Typography;
 
@@ -15,6 +16,7 @@ interface NPCListProps {
 }
 
 export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) => {
+  const { theme: currentTheme } = useTheme();
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   if (loading) {
     return (
@@ -51,11 +53,11 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
           <Card
             hoverable
             onClick={() => onNPCClick(npc.id)}
+            className="border-gray-200 dark:border-gray-600"
             style={{
               height: '100%',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              border: '1px solid #e8e8e8'
+              transition: 'all 0.3s ease'
             }}
             styles={{
               body: {
@@ -75,7 +77,7 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#f5f5f5',
+              background: 'linear-gradient(135deg, #f5f5f5 0%, #737373 100%)',
               borderRadius: '8px',
               overflow: 'hidden'
             }}>
@@ -117,7 +119,7 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
                     margin: '0', 
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#333',
+                    color: currentTheme === 'dark' ? '#ffffff' : '#333',
                     lineHeight: '1.3',
                     flex: 1
                   }}
@@ -145,7 +147,7 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
                 <Text 
                   style={{ 
                     fontSize: '12px', 
-                    color: '#1890ff',
+                    color: currentTheme === 'dark' ? '#4fc3f7' : '#1890ff',
                     display: 'block'
                   }}
                   ellipsis={{ tooltip: npc.location }}

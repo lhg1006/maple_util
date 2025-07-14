@@ -88,7 +88,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
       case 'hp': return <HeartOutlined style={{ color: '#ef4444' }} />;
       case 'mp': return <ThunderboltOutlined style={{ color: '#3b82f6' }} />;
       case 'exp': return <StarOutlined style={{ color: '#10b981' }} />;
-      case 'level': return <TrophyOutlined style={{ color: '#f59e0b' }} />;
+      case 'level': return <TrophyOutlined style={{ color: '#faad14' }} />;
       case 'pad': case 'mad': return <FireOutlined style={{ color: '#dc2626' }} />;
       case 'pdd': case 'mdd': return <SafetyOutlined style={{ color: '#6b7280' }} />;
       case 'acc': case 'eva': return <EyeOutlined style={{ color: '#8b5cf6' }} />;
@@ -109,14 +109,16 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
       open={open}
       onCancel={onClose}
       footer={null}
-      width={900}
+      width="90%"
+      style={{ maxWidth: '900px' }}
       centered
       styles={{
         body: { 
           padding: 0,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           maxHeight: '85vh',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          overflowX: 'hidden'
         }
       }}
       className="monster-detail-modal"
@@ -127,7 +129,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
         </div>
       ) : mob ? (
         <div className="relative">
-          {/* 헤더 섹션 */}
+          {/* 헤더 섹션 - 상단 1/2 영역 */}
           <div 
             className="relative p-4 text-white"
             style={{
@@ -135,142 +137,138 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
               borderRadius: '8px 8px 0 0'
             }}
           >
-            <Row gutter={16} align="top">
-              <Col xs={24} sm={6} md={6}>
-                <div className="text-center h-full">
+            <div className="w-full">
+              <Row gutter={[16, 16]} className="w-full">
+                {/* 좌측상단 1/2 - 몬스터 이미지 */}
+                <Col xs={24} sm={24} md={12} className="flex items-center justify-center">
                   <div 
-                    className="inline-block p-3 rounded-xl shadow-xl h-full flex items-center justify-center"
+                    className="flex items-center justify-center rounded-xl shadow-xl w-full"
                     style={{ 
                       background: 'rgba(255, 255, 255, 0.15)',
                       backdropFilter: 'blur(15px)',
                       border: '2px solid rgba(255, 255, 255, 0.2)',
-                      minHeight: '200px'
+                      minHeight: '320px',
+                      padding: '30px',
+                      maxWidth: '100%'
                     }}
                   >
                     <Image
                       src={`https://maplestory.io/api/KMS/389/mob/${mob.id}/render/stand`}
                       alt={mob.name}
                       style={{ 
-                        maxHeight: '180px', 
-                        maxWidth: '180px',
-                        width: 'auto',
-                        height: 'auto',
+                        minHeight: '250px',
+                        minWidth: '250px',
+                        maxHeight: '300px', 
+                        maxWidth: '300px',
+                        width: '280px',
+                        height: '280px',
+                        objectFit: 'contain',
                         filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.4))'
                       }}
                       fallback="/placeholder-monster.png"
                       preview={false}
                     />
                   </div>
-                </div>
-              </Col>
-              <Col xs={24} sm={18} md={18}>
-                <div className="space-y-2">
-                  <div>
-                    <Title 
-                      level={3} 
-                      className="!text-white !mb-1"
-                      style={{ 
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                        fontSize: '1.8rem'
-                      }}
-                    >
-                      {mob.name}
-                    </Title>
-                    <div className="space-y-1">
-                      <Text className="text-gray-200 text-sm">ID: {mob.id}</Text>
-                      {mob.linksTo && (
-                        <Text className="text-gray-200 text-xs">
-                          연결된 몬스터: {mob.linksTo}
-                        </Text>
+                </Col>
+                
+                {/* 우측상단 1/2 - 기본 정보 */}
+                <Col xs={24} sm={24} md={12}>
+                  <div className="h-full flex flex-col justify-center px-4" style={{ minHeight: '200px' }}>
+                    {/* 몬스터 이름 및 기본 정보 */}
+                    <div className="mb-4">
+                      <Title 
+                        level={2} 
+                        className="!text-white !mb-2"
+                        style={{ 
+                          textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                          fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+                          lineHeight: '1.2',
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {mob.name}
+                      </Title>
+                      <div className="space-y-1">
+                        <Text className="text-gray-200 text-base block font-medium">ID: {mob.id}</Text>
+                        {mob.linksTo && (
+                          <Text className="text-gray-200 text-sm block">
+                            연결된 몬스터: {mob.linksTo}
+                          </Text>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* 기본 능력치 카드들 */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {[
+                        { key: 'level', label: '레벨', value: mob.level || 'N/A', color: '#faad14', icon: <TrophyOutlined /> },
+                        { key: 'maxHP', label: '최대 HP', value: mob.maxHP ? mob.maxHP.toLocaleString() : 'N/A', color: '#ef4444', icon: <HeartOutlined /> },
+                        { key: 'exp', label: '경험치', value: mob.exp ? mob.exp.toLocaleString() : 'N/A', color: '#10b981', icon: <StarOutlined /> },
+                        { key: 'attackType', label: '공격 타입', value: mob.isBodyAttack !== undefined ? (mob.isBodyAttack ? '근접' : '원거리') : 'N/A', color: '#8b5cf6', icon: <FireOutlined /> }
+                      ].map(stat => (
+                        <div 
+                          key={stat.key}
+                          className="text-center p-2 rounded-lg"
+                          style={{ 
+                            background: 'rgba(255, 255, 255, 0.12)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.25)'
+                          }}
+                        >
+                          <div style={{ color: stat.color, fontSize: '14px', marginBottom: '4px' }}>
+                            {stat.icon}
+                          </div>
+                          <div 
+                            className="text-xs font-bold text-white"
+                            style={{ marginBottom: '2px', wordBreak: 'break-word' }}
+                          >
+                            {stat.value}
+                          </div>
+                          <div className="text-xs text-gray-300 dark:text-gray-400" style={{ fontSize: '10px' }}>
+                            {stat.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* 특성 태그들 */}
+                    <div className="flex flex-wrap gap-1">
+                      {(mob.bodyAttack !== undefined || mob.isBodyAttack !== undefined) && (
+                        <Tag 
+                          icon={<FireOutlined />}
+                          color="volcano"
+                          style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px', fontWeight: '500' }}
+                        >
+                          {getAttackTypeText(mob.isBodyAttack ?? mob.bodyAttack)}
+                        </Tag>
+                      )}
+                      {mob.boss && (
+                        <Tag 
+                          icon={<FireOutlined />}
+                          color="red"
+                          style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px', fontWeight: '500' }}
+                        >
+                          보스
+                        </Tag>
+                      )}
+                      {mob.undead && (
+                        <Tag 
+                          icon={<StarOutlined />}
+                          color="purple"
+                          style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px', fontWeight: '500' }}
+                        >
+                          언데드
+                        </Tag>
                       )}
                     </div>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Tag 
-                      icon={<TrophyOutlined />}
-                      color={mob.level && mob.level <= 50 ? 'green' : 
-                             mob.level && mob.level <= 100 ? 'blue' : 
-                             mob.level && mob.level <= 200 ? 'orange' : 'red'}
-                      style={{ 
-                        fontSize: '12px', 
-                        padding: '4px 8px', 
-                        borderRadius: '12px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      Lv. {mob.level || 'N/A'}
-                    </Tag>
-                    {(mob.bodyAttack !== undefined || mob.isBodyAttack !== undefined) && (
-                      <Tag 
-                        icon={<FireOutlined />}
-                        color="volcano"
-                        style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px' }}
-                      >
-                        {getAttackTypeText(mob.isBodyAttack ?? mob.bodyAttack)}
-                      </Tag>
-                    )}
-                    {mob.boss && (
-                      <Tag 
-                        icon={<FireOutlined />}
-                        color="red"
-                        style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px' }}
-                      >
-                        보스
-                      </Tag>
-                    )}
-                    {mob.undead && (
-                      <Tag 
-                        icon={<StarOutlined />}
-                        color="purple"
-                        style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '8px' }}
-                      >
-                        언데드
-                      </Tag>
-                    )}
-                  </div>
-                </div>
-              </Col>
-            </Row>
+                </Col>
+              </Row>
+            </div>
           </div>
 
-          {/* 메인 콘텐츠 */}
-          <div className="p-4 bg-white">
-            {/* 핵심 스탯 카드 (meta 데이터 기반) */}
-            <Row gutter={[12, 12]} className="mb-4">
-              {[
-                { key: 'level', label: '레벨', value: mob.level, color: '#f59e0b', icon: <TrophyOutlined /> },
-                { key: 'maxHP', label: '최대 HP', value: mob.maxHP, color: '#ef4444', icon: <HeartOutlined /> },
-                { key: 'exp', label: '경험치', value: mob.exp, color: '#10b981', icon: <StarOutlined /> },
-                { key: 'isBodyAttack', label: '공격 타입', value: mob.isBodyAttack ? '근접 공격' : '원거리 공격', color: '#8b5cf6', icon: <FireOutlined /> }
-              ].filter(stat => stat.value !== null && stat.value !== undefined).map(stat => (
-                <Col xs={12} sm={6} key={stat.key}>
-                  <div 
-                    className="text-center p-3 rounded-lg"
-                    style={{ 
-                      background: `${stat.color}10`,
-                      border: `1px solid ${stat.color}30`,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    <div className="space-y-1">
-                      <div style={{ color: stat.color, fontSize: '16px' }}>
-                        {stat.icon}
-                      </div>
-                      <div 
-                        className="text-lg font-bold"
-                        style={{ color: stat.color }}
-                      >
-                        {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
-                      </div>
-                      <div className="text-xs text-gray-600 font-medium">
-                        {stat.label}
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-              ))}
-            </Row>
+          {/* 메인 콘텐츠 - 아래 영역의 상세 정보들 */}
+          <div className="p-4 dark:bg-gray-900">
 
             {/* 전투 능력치 섹션 */}
             <Card 
@@ -287,7 +285,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                 {[
                   { key: 'physicalDamage', label: '물리 공격력', value: mob.physicalDamage, color: '#dc2626' },
                   { key: 'magicDamage', label: '마법 공격력', value: mob.magicDamage, color: '#7c3aed' },
-                  { key: 'accuracy', label: '명중률', value: mob.accuracy, color: '#f59e0b' },
+                  { key: 'accuracy', label: '명중률', value: mob.accuracy, color: '#faad14' },
                   { key: 'speed', label: '이동속도', value: mob.speed, color: '#10b981' },
                   { key: 'minimumPushDamage', label: '최소 밀림 데미지', value: mob.minimumPushDamage, color: '#ef4444' }
                 ].filter(stat => stat.value !== null && stat.value !== undefined).map(stat => (
@@ -308,7 +306,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       >
                         {stat.value}
                       </div>
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {stat.label}
                       </div>
                     </div>
@@ -350,7 +348,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       >
                         {stat.value}{stat.unit || ''}
                       </div>
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {stat.label}
                       </div>
                     </div>
@@ -393,7 +391,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       >
                         {stat.value}
                       </div>
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {stat.label}
                       </div>
                     </div>
@@ -482,7 +480,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   )}
                   {mob.firstAttack && (
                     <Tag 
-                      color="orange" 
+                      color="gold" 
                       style={{ 
                         padding: '6px 12px', 
                         borderRadius: '20px', 
@@ -520,14 +518,14 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                     
                     return (
                       <Col xs={12} sm={6} key={key}>
-                        <div className="p-3 bg-green-50 rounded-lg text-center border border-green-200">
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center border border-green-200 dark:border-green-800">
                           <div className="mb-1 text-green-600" style={{ fontSize: '14px' }}>
                             <RocketOutlined />
                           </div>
-                          <div className="text-sm font-bold text-green-700">
+                          <div className="text-sm font-bold text-green-700 dark:text-green-400">
                             {value} 프레임
                           </div>
-                          <div className="text-xs text-gray-600 mt-1">
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                             {labels[key] || key}
                           </div>
                         </div>
@@ -543,7 +541,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
               <Card 
                 title={
                   <span>
-                    <EyeOutlined className="mr-2" style={{ color: '#f59e0b' }} />
+                    <EyeOutlined className="mr-2" style={{ color: '#faad14' }} />
                     출현 위치 ({mob.foundAt.length}개 맵)
                   </span>
                 }
@@ -554,7 +552,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   {mob.foundAt.map((mapId, index) => (
                     <Tag 
                       key={index}
-                      color="orange"
+                      color="gold"
                       style={{ 
                         padding: '2px 6px', 
                         borderRadius: '8px',
@@ -576,12 +574,13 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                 className="mb-3"
                 style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
               >
-                <Paragraph 
+                <div 
                   className="text-gray-700 leading-relaxed"
                   style={{ fontSize: '14px' }}
-                >
-                  {mob.description}
-                </Paragraph>
+                  dangerouslySetInnerHTML={{ 
+                    __html: mob.description.replace(/\\n/g, '<br/>') 
+                  }}
+                />
               </Card>
             )}
 
@@ -630,11 +629,11 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
 
                       return (
                         <Col xs={12} sm={8} md={6} key={key}>
-                          <div className="p-3 bg-gray-50 rounded-lg text-center">
-                            <div className="text-sm font-medium text-gray-900 mb-1">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                               {displayValue}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
                               {key.replace(/([A-Z])/g, ' $1').trim()}
                             </div>
                           </div>

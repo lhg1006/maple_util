@@ -7,7 +7,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { NPCList } from '@/components/npcs/npc-list';
 import { NPCDetailModal } from '@/components/npcs/npc-detail-modal';
 import { useSearchNPCs, useAllMaps, useNPCsByMap } from '@/hooks/useMapleData';
-import { ContinentStatsCards } from '@/components/npcs/continent-stats-cards';
+import { useTheme } from '@/components/providers/theme-provider';
 import debounce from 'lodash.debounce';
 
 const { Title, Paragraph } = Typography;
@@ -24,7 +24,7 @@ const getContinentColor = (continent: string): string => {
     case '루디브리엄': return '#722ed1';
     case '아쿠아로드': return '#13c2c2';
     case '리프레': return '#52c41a';
-    case '무릉 지역': return '#fa8c16';
+    case '무릉 지역': return '#faad14';
     case '니할사막': return '#d4b106';
     case '마가티아': return '#fa541c';
     case '에델슈타인': return '#f5222d';
@@ -44,7 +44,7 @@ const getContinentColor = (continent: string): string => {
     case '지구방위본부': return '#13c2c2';
     case '크리티아스': return '#722ed1';
     case '요정계': return '#13c2c2';
-    case '버섯 왕국': return '#fa8c16';
+    case '버섯 왕국': return '#faad14';
     case '테마파크 & 이벤트': return '#f759ab';
     case '던전 & 미궁': return '#f5222d';
     case '스토리 & 퀘스트': return '#722ed1';
@@ -58,6 +58,7 @@ const getContinentColor = (continent: string): string => {
 
 export default function NPCsPage() {
   const { message } = App.useApp();
+  const { theme: currentTheme } = useTheme();
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -299,19 +300,12 @@ export default function NPCsPage() {
             {isMapsLoading && (
               <>
                 <br />
-                📁 <strong>맵 데이터를 로딩 중입니다...</strong> 정적 파일에서 13,973개 맵 데이터를 불러오고 있습니다.
+                🌐 <strong>맵 데이터를 로딩 중입니다...</strong> API 서버에서 맵 데이터를 불러오고 있습니다.
               </>
             )}
           </Paragraph>
         </div>
 
-        {/* 대륙별 통계 카드 */}
-        {!searchQuery && !selectedMapId && (
-          <ContinentStatsCards 
-            onContinentSelect={handleContinentSelect}
-            selectedContinent={selectedContinent !== 'all' ? selectedContinent : undefined}
-          />
-        )}
 
         <div 
           ref={searchSectionRef}
@@ -417,12 +411,10 @@ export default function NPCsPage() {
 
         {/* 선택된 대륙 정보 */}
         {selectedContinent !== 'all' && (
-          <div style={{ 
+          <div className="bg-blue-50 dark:bg-blue-900/20 border-green-300 dark:border-green-600" style={{ 
             padding: '16px', 
-            background: '#f0f8ff', 
             borderRadius: '8px',
-            marginBottom: '16px',
-            border: '1px solid #b7eb8f'
+            marginBottom: '16px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <EnvironmentOutlined style={{ color: getContinentColor(selectedContinent), fontSize: '18px' }} />
@@ -437,13 +429,18 @@ export default function NPCsPage() {
 
         {/* 검색 결과 정보 */}
         {searchQuery && (
-          <div style={{ 
-            padding: '12px 16px', 
-            background: '#f5f5f5', 
-            borderRadius: '6px',
-            marginBottom: '16px' 
-          }}>
-            <span>
+          <div 
+            className="p-5 rounded-lg mb-6"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#000000' : '#f3f4f6'
+            }}
+          >
+            <span 
+              className="font-semibold text-lg"
+              style={{
+                color: currentTheme === 'dark' ? '#d1d5db' : '#111827'
+              }}
+            >
               검색어: &quot;{searchQuery}&quot; · {sortedNPCs.length.toLocaleString()}개 NPC 발견
             </span>
           </div>
@@ -451,13 +448,11 @@ export default function NPCsPage() {
 
         {/* 맵 NPC 로딩 상태 */}
         {selectedMapId && isMapNPCsLoading && (
-          <div style={{ 
+          <div className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-600" style={{ 
             padding: '24px', 
             textAlign: 'center',
-            background: '#f0f8ff',
             borderRadius: '8px',
-            marginBottom: '24px',
-            border: '1px solid #d6f4ff'
+            marginBottom: '24px'
           }}>
             <Spin size="large" />
             <div style={{ marginTop: '16px', color: '#1890ff' }}>
@@ -473,14 +468,19 @@ export default function NPCsPage() {
 
         {/* 맵 NPC 결과 정보 */}
         {selectedMapId && !isMapNPCsLoading && mapNPCs.length > 0 && (
-          <div style={{ 
-            padding: '12px 16px', 
-            background: '#f6ffed', 
-            borderRadius: '6px',
-            marginBottom: '16px',
-            border: '1px solid #b7eb8f'
-          }}>
-            <span style={{ color: '#52c41a', fontWeight: 500 }}>
+          <div 
+            className="p-5 rounded-lg mb-6 border"
+            style={{
+              backgroundColor: currentTheme === 'dark' ? '#0f1d1a' : '#f6ffed',
+              borderColor: currentTheme === 'dark' ? '#2a6a3a' : '#52c41a'
+            }}
+          >
+            <span 
+              className="font-semibold text-lg"
+              style={{ 
+                color: currentTheme === 'dark' ? '#67d97a' : '#52c41a' 
+              }}
+            >
               📍 선택한 맵에서 {mapNPCs.length.toLocaleString()}개의 NPC를 찾았습니다
             </span>
           </div>
@@ -488,18 +488,28 @@ export default function NPCsPage() {
 
         {/* 안내 메시지 */}
         {!searchQuery && !selectedMapId && npcs.length === 0 && !isLoading && (
-          <div style={{ 
-            padding: '40px', 
-            textAlign: 'center',
-            background: '#fafafa',
-            borderRadius: '8px',
-            border: '1px dashed #d9d9d9'
-          }}>
+          <div 
+            style={{ 
+              padding: '40px', 
+              textAlign: 'center',
+              borderRadius: '8px',
+              border: '1px dashed',
+              backgroundColor: currentTheme === 'dark' ? '#1f2937' : '#f9fafb',
+              borderColor: currentTheme === 'dark' ? '#4b5563' : '#d1d5db'
+            }}
+          >
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
-            <Title level={4} style={{ color: '#666' }}>
+            <Title 
+              level={4} 
+              style={{ 
+                color: currentTheme === 'dark' ? '#9ca3af' : '#6b7280' 
+              }}
+            >
               맵을 선택하거나 NPC를 검색해보세요
             </Title>
-            <Paragraph style={{ color: '#999' }}>
+            <Paragraph style={{ 
+              color: currentTheme === 'dark' ? '#9ca3af' : '#999' 
+            }}>
               • 맵 선택: 특정 맵의 모든 NPC 보기<br/>
               • 검색: 2글자 이상 입력하여 NPC 찾기
             </Paragraph>
@@ -508,13 +518,7 @@ export default function NPCsPage() {
 
         {/* 선택한 맵 에러 처리 */}
         {selectedMapId && !isMapNPCsLoading && isMapNPCsError && (
-          <div style={{ 
-            padding: '40px', 
-            textAlign: 'center',
-            background: '#fff2f0',
-            borderRadius: '8px',
-            border: '1px dashed #ffccc7'
-          }}>
+          <div className="p-10 text-center bg-red-50 dark:bg-red-950/20 rounded-lg border-2 border-dashed border-red-200 dark:border-red-800">
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
             <Title level={4} style={{ color: '#cf1322' }}>
               맵 정보를 불러올 수 없습니다
@@ -528,13 +532,7 @@ export default function NPCsPage() {
 
         {/* 선택한 맵에 NPC가 없는 경우 */}
         {selectedMapId && !isMapNPCsLoading && !isMapNPCsError && mapNPCs.length === 0 && (
-          <div style={{ 
-            padding: '40px', 
-            textAlign: 'center',
-            background: '#fff7e6',
-            borderRadius: '8px',
-            border: '1px dashed #ffd591'
-          }}>
+          <div className="p-10 text-center bg-orange-50 dark:bg-orange-950/20 rounded-lg border-2 border-dashed border-orange-200 dark:border-orange-800">
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏗️</div>
             <Title level={4} style={{ color: '#d46b08' }}>
               이 맵에는 NPC가 없습니다

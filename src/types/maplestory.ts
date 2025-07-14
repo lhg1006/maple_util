@@ -153,12 +153,61 @@ export interface MapleNPC {
 export interface MapleMob {
   id: number;
   name: string;
-  level: number;
-  hp: number;
-  mp: number;
-  exp: number;
+  // API 최상위 필드들
+  linksTo?: number;
+  foundAt?: number[];
+  framebooks?: {
+    die1?: number;
+    hit1?: number;
+    move?: number;
+    stand?: number;
+  };
+  // meta 객체에서 나오는 필드들
+  level?: number;
+  maxHP?: number;
+  exp?: number;
+  isBodyAttack?: boolean;
+  speed?: number;
+  physicalDamage?: number;
+  magicDamage?: number;
+  accuracy?: number;
+  minimumPushDamage?: number;
+  summonType?: number;
+  revivesMonsterId?: number[];
+  linksToOtherMob?: number;
+  physicalDefenseRate?: number;
+  magicDefenseRate?: number;
+  // 기존 호환성 필드들
+  hp?: number;
+  mp?: number;
   location?: string;
   drops?: MapleItem[];
+  description?: string;
+  category?: string;
+  boss?: boolean;
+  undead?: boolean;
+  bodyAttack?: boolean;
+  firstAttack?: boolean;
+  explosive?: boolean;
+  publicReward?: boolean;
+  pad?: number; // 물리 공격력
+  mad?: number; // 마법 공격력
+  pdd?: number; // 물리 방어력
+  mdd?: number; // 마법 방어력
+  acc?: number; // 명중률
+  eva?: number; // 회피율
+  pdr?: number; // 물리 데미지 감소
+  mdr?: number; // 마법 데미지 감소
+  hpRecovery?: number;
+  mpRecovery?: number;
+  link?: number;
+  fs?: number;
+  buff?: any;
+  skill?: any;
+  revive?: any;
+  meta?: {
+    [key: string]: any;
+  };
 }
 
 export interface MapleJob {

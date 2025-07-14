@@ -3,6 +3,7 @@
 import { Modal, Typography, Spin, Alert, Divider, Space, Tag } from 'antd';
 import { UserOutlined, EnvironmentOutlined, MessageOutlined } from '@ant-design/icons';
 import { useMapleNPC } from '@/hooks/useMapleData';
+import { useTheme } from '@/components/providers/theme-provider';
 import Image from 'next/image';
 
 const { Title, Text, Paragraph } = Typography;
@@ -14,6 +15,7 @@ interface NPCDetailModalProps {
 }
 
 export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onClose }) => {
+  const { theme: currentTheme } = useTheme();
   const { data: npc, isLoading, isError, error } = useMapleNPC(npcId || 0, !!npcId);
 
   const handleClose = () => {
@@ -69,7 +71,7 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
             <div style={{
               width: '120px',
               height: '120px',
-              backgroundColor: '#f5f5f5',
+              background: 'linear-gradient(135deg, #f5f5f5 0%, #737373 100%)',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
@@ -104,7 +106,13 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
 
             {/* NPC 정보 */}
             <div style={{ flex: 1 }}>
-              <Title level={3} style={{ margin: '0 0 16px 0', color: '#1890ff' }}>
+              <Title 
+                level={3} 
+                style={{ 
+                  margin: '0 0 16px 0', 
+                  color: currentTheme === 'dark' ? '#4fc3f7' : '#1890ff' 
+                }}
+              >
                 {npc.name}
               </Title>
               
@@ -116,7 +124,7 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
                 
                 {npc.location && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <EnvironmentOutlined style={{ color: '#1890ff' }} />
+                    <EnvironmentOutlined style={{ color: currentTheme === 'dark' ? '#4fc3f7' : '#1890ff' }} />
                     <Text>{npc.location}</Text>
                   </div>
                 )}
@@ -134,10 +142,10 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
                 설명
               </Title>
               <div style={{
-                backgroundColor: '#f8f9fa',
+                backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f8f9fa',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #e9ecef'
+                border: currentTheme === 'dark' ? '1px solid #404040' : '1px solid #e9ecef'
               }}>
                 <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
                   {npc.description}
@@ -154,10 +162,10 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
                 대화 내용
               </Title>
               <div style={{
-                backgroundColor: '#f8f9fa',
+                backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f8f9fa',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #e9ecef',
+                border: currentTheme === 'dark' ? '1px solid #404040' : '1px solid #e9ecef',
                 maxHeight: '200px',
                 overflowY: 'auto'
               }}>
@@ -177,12 +185,15 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
 
           {/* 추가 정보 */}
           <div style={{
-            backgroundColor: '#f0f2f5',
+            backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f0f2f5',
             padding: '16px',
             borderRadius: '8px',
             textAlign: 'center'
           }}>
-            <Text style={{ fontSize: '12px', color: '#666' }}>
+            <Text style={{ 
+              fontSize: '12px', 
+              color: currentTheme === 'dark' ? '#9ca3af' : '#666' 
+            }}>
               본 정보는 maplestory.io API에서 제공됩니다.
             </Text>
           </div>
