@@ -466,20 +466,17 @@ export default function ItemsPage() {
   }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
 
 
-  // 더 로드 버튼 클릭 핸들러
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      console.log('🔄 사용자 요청으로 다음 500개 아이템 로드');
-      fetchNextPage();
-    }
-  };
-
-  // 페이지 끝에 도달했을 때 더 로드할 데이터가 있는지 확인
-  const needsMoreData = () => {
+  // 페이지 변경 시 필요하면 자동으로 다음 배치 로드
+  useEffect(() => {
     const requiredItems = currentPage * pageSize;
     const currentItems = filteredItems.length;
-    return requiredItems > currentItems && hasNextPage;
-  };
+    
+    // 현재 페이지에 표시할 데이터가 부족하고, 더 로드할 수 있는 데이터가 있다면 한 번만 로드
+    if (requiredItems > currentItems && hasNextPage && !isFetchingNextPage) {
+      console.log(`🔄 페이지 ${currentPage}: ${requiredItems}개 필요, ${currentItems}개 보유 - 다음 500개 로드`);
+      fetchNextPage();
+    }
+  }, [currentPage, filteredItems.length, hasNextPage, isFetchingNextPage, fetchNextPage, pageSize]);
 
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
@@ -1310,7 +1307,7 @@ export default function ItemsPage() {
                 <div>
                   <Pagination
                     current={currentPage}
-                    total={hasNextPage ? filteredItems.length + 1000 : filteredItems.length} // 더 많은 데이터가 있으면 임시로 +1000
+                    total={filteredItems.length} // 현재 로드된 데이터만큼만 페이지네이션
                     pageSize={pageSize}
                     onChange={(page) => {
                       console.log(`🎯 페이지 변경 요청: ${currentPage} → ${page}`);
@@ -1319,10 +1316,9 @@ export default function ItemsPage() {
                     }}
                     showSizeChanger={false}
                     showTotal={(total, range) => {
-                      const actualTotal = filteredItems.length;
                       const displayText = hasNextPage 
-                        ? `${range[0]}-${range[1]} / ${actualTotal}개 (더 많은 데이터 로드 가능)`
-                        : `${range[0]}-${range[1]} / 총 ${actualTotal}개`;
+                        ? `${range[0]}-${range[1]} / ${total}개 (더 많은 데이터 로드 가능)`
+                        : `${range[0]}-${range[1]} / 총 ${total}개`;
                       return displayText;
                     }}
                     disabled={isFetchingNextPage || isSearchMode}
@@ -1339,39 +1335,6 @@ export default function ItemsPage() {
                   </div>
                 )}
 
-                {/* 더 로드 버튼 - 페이지 끝에 도달했고 더 데이터가 있을 때 */}
-                {needsMoreData() && !isFetchingNextPage && (
-                  <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                    <button 
-                      onClick={handleLoadMore}
-                      style={{
-                        padding: '12px 24px',
-                        backgroundColor: '#1890ff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = '#40a9ff';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = '#1890ff';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      📦 다음 500개 아이템 로드하기
-                    </button>
-                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                      현재 페이지에 표시할 데이터가 부족합니다. 클릭하여 더 로드하세요.
-                    </div>
-                  </div>
-                )}
-                
               </>
             )}
             
