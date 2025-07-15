@@ -493,6 +493,18 @@ export default function ItemsPage() {
     setCurrentPage(1);
   }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
 
+  // 페이지 변경 시 필요하면 추가 데이터 로드
+  useEffect(() => {
+    const requiredItems = currentPage * pageSize;
+    const currentItems = filteredItems.length;
+    
+    // 현재 페이지에 표시할 데이터가 부족하고, 더 로드할 수 있는 데이터가 있다면
+    if (requiredItems > currentItems && hasNextPage && !isFetchingNextPage) {
+      console.log(`🔄 페이지 ${currentPage}: ${requiredItems}개 필요, ${currentItems}개 보유 - 추가 로드`);
+      fetchNextPage();
+    }
+  }, [currentPage, filteredItems.length, hasNextPage, isFetchingNextPage, fetchNextPage, pageSize]);
+
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
     // 대분류별로 기본 카테고리 설정 (일괄 처리)
@@ -1322,7 +1334,7 @@ export default function ItemsPage() {
                 <div style={{ opacity: pageJumpLoading ? 0.5 : 1 }}>
                   <Pagination
                     current={currentPage}
-                    total={filteredItems.length}
+                    total={hasNextPage ? filteredItems.length + 1000 : filteredItems.length} // 더 많은 데이터가 있으면 임시로 +1000
                     pageSize={pageSize}
                     onChange={async (page) => {
                       console.log(`🎯 페이지 변경 요청: ${currentPage} → ${page}`);
@@ -1338,8 +1350,11 @@ export default function ItemsPage() {
                     }}
                     showSizeChanger={false}
                     showTotal={(total, range) => {
-                      // React Query는 정확한 총 개수를 제공하므로 '+' 표시 불필요
-                      return `${range[0]}-${range[1]} / 총 ${total}개`;
+                      const actualTotal = filteredItems.length;
+                      const displayText = hasNextPage 
+                        ? `${range[0]}-${range[1]} / ${actualTotal}개 (더 많은 데이터 로드 가능)`
+                        : `${range[0]}-${range[1]} / 총 ${actualTotal}개`;
+                      return displayText;
                     }}
                     disabled={pageJumpLoading || isFetchingNextPage || isSearchMode}
                   />
