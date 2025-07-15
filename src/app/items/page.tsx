@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Typography, Row, Col, Pagination, Input, Select, Spin } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -8,7 +8,7 @@ import { ItemList } from '@/components/items/item-list';
 import { ItemDetailModal } from '@/components/items/item-detail-modal';
 import { MapleItem } from '@/types/maplestory';
 import { useTheme } from '@/components/providers/theme-provider';
-import { useItemsByCategory, useSearchItemsInCategory } from '@/hooks/useMapleData';
+import { useInfiniteItemsByCategory, useSearchItemsInCategory } from '@/hooks/useMapleData';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -363,6 +363,7 @@ const ITEM_CATEGORIES = {
 
 export default function ItemsPage() {
   const { theme: currentTheme } = useTheme();
+  const [filteredItems, setFilteredItems] = useState<MapleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('category');
@@ -373,19 +374,22 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchInput, setSearchInput] = useState(''); // 검색 입력값
+  const [pageJumpLoading, setPageJumpLoading] = useState(false);
   const pageSize = 24;
   const batchSize = 500;
 
-  // React Query로 아이템 데이터 가져오기 (단순 버전)
+  // React Query 무한 스크롤로 아이템 데이터 가져오기
   const {
-    data: categoryItems = [],
-    isLoading
-  } = useItemsByCategory(
+    data: infiniteData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteItemsByCategory(
     overallCategory,
     category,
     subCategory,
-    0, // startPosition
-    batchSize, // count
+    batchSize,
     !!(overallCategory && category && subCategory) && !isSearchMode // 검색 모드가 아닐 때만 활성화
   );
 
@@ -401,13 +405,77 @@ export default function ItemsPage() {
     isSearchMode && !!searchQuery.trim() // 검색 모드일 때만 활성화
   );
 
-  // 현재 표시할 아이템 결정 (React Query가 자동으로 정렬 및 필터링)
-  const items = isSearchMode ? searchResults : categoryItems;
+  // 무한 스크롤 데이터를 하나의 배열로 합치기
+  const items = useMemo(() => {
+    if (isSearchMode && searchResults.length > 0) {
+      return searchResults;
+    }
+    if (!infiniteData?.pages) return [];
+    return infiniteData.pages.flat();
+  }, [infiniteData?.pages, isSearchMode, searchResults]);
 
-  // 정렬 적용 (클라이언트 사이드)
-  const sortedItems = useMemo(() => {
-    const sorted = [...items];
-    sorted.sort((a, b) => {
+  // 페이지 점프 시 필요한 데이터 로드
+  const loadDataForPage = async (targetPage: number) => {
+    const requiredItems = targetPage * pageSize;
+    let currentItems = items.length;
+    
+    if (requiredItems <= currentItems) {
+      // 이미 충분한 데이터가 있으면 바로 페이지 변경
+      return true;
+    }
+    
+    if (!hasNextPage) {
+      // 더 이상 로드할 데이터가 없으면 현재 데이터로 처리
+      console.log('📄 더 이상 로드할 데이터가 없습니다.');
+      return true;
+    }
+    
+    try {
+      setPageJumpLoading(true);
+      console.log(`🚀 페이지 ${targetPage} 점프를 위한 데이터 로드 시작...`);
+      console.log(`필요한 아이템: ${requiredItems}개, 현재 아이템: ${currentItems}개`);
+      
+      // 필요한 만큼 데이터를 배치로 로드 (최대 10회 시도로 무한 루프 방지)
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (currentItems < requiredItems && hasNextPage && attempts < maxAttempts) {
+        console.log(`📦 다음 배치 로드 중... (현재: ${currentItems}개, 시도: ${attempts + 1}/${maxAttempts})`);
+        await fetchNextPage();
+        attempts++;
+        
+        // 로딩 후 잠시 대기하고 현재 아이템 수 다시 확인
+        await new Promise(resolve => setTimeout(resolve, 200));
+        currentItems = items.length; // 최신 아이템 수로 업데이트
+      }
+      
+      setPageJumpLoading(false);
+      console.log(`✅ 페이지 ${targetPage} 데이터 로드 완료: ${items.length}개`);
+      return true;
+      
+    } catch (error) {
+      console.error('❌ 페이지 점프 데이터 로드 실패:', error);
+      setPageJumpLoading(false);
+      return false;
+    }
+  };
+
+  // 필터링 함수
+  const applyFilters = useCallback((pageReset = false) => {
+    let filtered = [...items];
+
+    // 검색 모드가 아닐 때만 클라이언트 필터링 적용
+    if (!isSearchMode) {
+      // 검색 필터 (검색 모드가 아닐 때는 로컬 필터링)
+      if (searchQuery.trim()) {
+        filtered = filtered.filter(item =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+    }
+
+    // 정렬
+    filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name, 'ko');
@@ -417,16 +485,32 @@ export default function ItemsPage() {
           return 0;
       }
     });
-    return sorted;
-  }, [items, sortBy]);
 
-  // 카테고리나 검색 모드 변경 시 페이지 리셋
+    setFilteredItems(filtered);
+    
+    // 페이지 리셋이 필요한 경우에만 (검색어나 카테고리 변경 시)
+    if (pageReset) {
+      setCurrentPage(1);
+    }
+  }, [items, isSearchMode, searchQuery, sortBy]);
+
+  // 정렬 및 카테고리 변경 시 필터링 (페이지 리셋 포함)
   useEffect(() => {
-    setCurrentPage(1);
-  }, [overallCategory, category, subCategory, isSearchMode]);
+    applyFilters(true);
+  }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
+  
+  // 아이템 데이터 변경 시 필터링 (페이지 리셋 없음)
+  useEffect(() => {
+    if (items.length > 0) {
+      applyFilters(false);
+    }
+  }, [items, searchQuery]);
 
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
+    // 필터링된 아이템 리스트 초기화
+    setFilteredItems([]);
+    
     // 대분류별로 기본 카테고리 설정 (일괄 처리)
     const updateCategories = () => {
       if (overallCategory === 'Equip') {
@@ -524,7 +608,7 @@ export default function ItemsPage() {
 
   // 페이지네이션
   const startIndex = (currentPage - 1) * pageSize;
-  const paginatedItems = sortedItems.slice(startIndex, startIndex + pageSize);
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + pageSize);
 
   return (
     <MainLayout>
@@ -534,7 +618,7 @@ export default function ItemsPage() {
           <Paragraph>
             메이플스토리의 다양한 아이템을 검색하고 확인할 수 있습니다.
             <br />
-            📊 총 {items.length.toLocaleString()}개 아이템 로드됨
+            📊 총 {items.length.toLocaleString()}개 아이템 로드됨 {hasNextPage && '(더 많은 데이터 로드 가능)'}
           </Paragraph>
         </div>
 
@@ -1224,20 +1308,20 @@ export default function ItemsPage() {
                 )}
               </>
             )}
-            : {sortedItems.length.toLocaleString()}개
+            : {filteredItems.length.toLocaleString()}개
             {searchQuery && ` (검색어: &ldquo;${searchQuery}&rdquo;)`}
           </span>
         </div>
 
         {/* 아이템 리스트 */}
         <div style={{ marginBottom: '4px' }}>
-          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading} onItemClick={handleItemClick} />
+          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading || pageJumpLoading || isFetchingNextPage} onItemClick={handleItemClick} />
           
           
         </div>
 
         {/* 페이지네이션 및 더 불러오기 */}
-        {!isLoading && !isSearchLoading && sortedItems.length > 0 && (
+        {!isLoading && !isSearchLoading && filteredItems.length > 0 && (
           <div style={{ marginTop: '4px' }}>
             {/* 검색 모드일 때 안내 메시지 */}
             {isSearchMode && (
@@ -1251,31 +1335,51 @@ export default function ItemsPage() {
             {/* 검색 모드가 아닐 때만 페이지네이션 표시 */}
             {!isSearchMode && (
               <>
-                <div>
+                <div style={{ opacity: pageJumpLoading ? 0.5 : 1 }}>
                   <Pagination
                     current={currentPage}
-                    total={sortedItems.length}
+                    total={filteredItems.length}
                     pageSize={pageSize}
-                    onChange={(page) => {
-                      console.log(`🎯 페이지 변경: ${currentPage} → ${page}`);
-                      setCurrentPage(page);
+                    onChange={async (page) => {
+                      console.log(`🎯 페이지 변경 요청: ${currentPage} → ${page}`);
+                      
+                      // 페이지 점프가 필요한지 확인하고 데이터 로드
+                      const success = await loadDataForPage(page);
+                      if (success) {
+                        setCurrentPage(page);
+                        console.log(`✅ 페이지 ${page} 변경 완료`);
+                      } else {
+                        console.log(`❌ 페이지 ${page} 변경 실패`);
+                      }
                     }}
                     showSizeChanger={false}
                     showTotal={(total, range) => {
+                      // React Query는 정확한 총 개수를 제공하므로 '+' 표시 불필요
                       return `${range[0]}-${range[1]} / 총 ${total}개`;
                     }}
+                    disabled={pageJumpLoading || isFetchingNextPage || isSearchMode}
                   />
                 </div>
+                
+                {/* 페이지 점프 로딩 인디케이터 */}
+                {(pageJumpLoading || isFetchingNextPage) && (
+                  <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                    <Spin size="small" /> 
+                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '12px' }}>
+                      {pageJumpLoading ? '페이지 데이터 로딩 중...' : '추가 데이터 로딩 중...'}
+                    </span>
+                  </div>
+                )}
                 
               </>
             )}
             
             {/* 검색 모드일 때 간단한 페이지네이션 */}
-            {isSearchMode && sortedItems.length > pageSize && (
+            {isSearchMode && filteredItems.length > pageSize && (
               <div style={{ textAlign: 'center' }}>
                 <Pagination
                   current={currentPage}
-                  total={sortedItems.length}
+                  total={filteredItems.length}
                   pageSize={pageSize}
                   onChange={setCurrentPage}
                   showSizeChanger={false}
