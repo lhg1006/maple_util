@@ -373,7 +373,6 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchInput, setSearchInput] = useState(''); // 검색 입력값
-  const [pageJumpLoading, setPageJumpLoading] = useState(false);
   const pageSize = 24;
   const batchSize = 500;
 
@@ -429,53 +428,8 @@ export default function ItemsPage() {
       firstPage: infiniteData.pages[0]?.length || 0
     });
     return flattened;
-  }, [infiniteData?.pages, isSearchMode, searchResults]);
+  }, [infiniteData, isSearchMode, searchResults]);
 
-  // 페이지 점프 시 필요한 데이터 로드
-  const loadDataForPage = async (targetPage: number) => {
-    const requiredItems = targetPage * pageSize;
-    let currentItems = items.length;
-    
-    if (requiredItems <= currentItems) {
-      // 이미 충분한 데이터가 있으면 바로 페이지 변경
-      return true;
-    }
-    
-    if (!hasNextPage) {
-      // 더 이상 로드할 데이터가 없으면 현재 데이터로 처리
-      console.log('📄 더 이상 로드할 데이터가 없습니다.');
-      return true;
-    }
-    
-    try {
-      setPageJumpLoading(true);
-      console.log(`🚀 페이지 ${targetPage} 점프를 위한 데이터 로드 시작...`);
-      console.log(`필요한 아이템: ${requiredItems}개, 현재 아이템: ${currentItems}개`);
-      
-      // 필요한 만큼 데이터를 배치로 로드 (최대 10회 시도로 무한 루프 방지)
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      while (currentItems < requiredItems && hasNextPage && attempts < maxAttempts) {
-        console.log(`📦 다음 배치 로드 중... (현재: ${currentItems}개, 시도: ${attempts + 1}/${maxAttempts})`);
-        await fetchNextPage();
-        attempts++;
-        
-        // 로딩 후 잠시 대기하고 현재 아이템 수 다시 확인
-        await new Promise(resolve => setTimeout(resolve, 200));
-        currentItems = items.length; // 최신 아이템 수로 업데이트
-      }
-      
-      setPageJumpLoading(false);
-      console.log(`✅ 페이지 ${targetPage} 데이터 로드 완료: ${items.length}개`);
-      return true;
-      
-    } catch (error) {
-      console.error('❌ 페이지 점프 데이터 로드 실패:', error);
-      setPageJumpLoading(false);
-      return false;
-    }
-  };
 
   // 필터링된 아이템을 useMemo로 계산
   const filteredItems = useMemo(() => {
@@ -511,17 +465,21 @@ export default function ItemsPage() {
     setCurrentPage(1);
   }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
 
-  // 페이지 변경 시 필요하면 추가 데이터 로드
-  useEffect(() => {
-    const requiredItems = currentPage * pageSize;
-    const currentItems = filteredItems.length;
-    
-    // 현재 페이지에 표시할 데이터가 부족하고, 더 로드할 수 있는 데이터가 있다면
-    if (requiredItems > currentItems && hasNextPage && !isFetchingNextPage) {
-      console.log(`🔄 페이지 ${currentPage}: ${requiredItems}개 필요, ${currentItems}개 보유 - 추가 로드`);
+
+  // 더 로드 버튼 클릭 핸들러
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      console.log('🔄 사용자 요청으로 다음 500개 아이템 로드');
       fetchNextPage();
     }
-  }, [currentPage, filteredItems.length, hasNextPage, isFetchingNextPage, fetchNextPage, pageSize]);
+  };
+
+  // 페이지 끝에 도달했을 때 더 로드할 데이터가 있는지 확인
+  const needsMoreData = () => {
+    const requiredItems = currentPage * pageSize;
+    const currentItems = filteredItems.length;
+    return requiredItems > currentItems && hasNextPage;
+  };
 
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
@@ -1329,7 +1287,7 @@ export default function ItemsPage() {
 
         {/* 아이템 리스트 */}
         <div style={{ marginBottom: '4px' }}>
-          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading || pageJumpLoading || isFetchingNextPage} onItemClick={handleItemClick} />
+          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading || isFetchingNextPage} onItemClick={handleItemClick} />
           
           
         </div>
@@ -1349,22 +1307,15 @@ export default function ItemsPage() {
             {/* 검색 모드가 아닐 때만 페이지네이션 표시 */}
             {!isSearchMode && (
               <>
-                <div style={{ opacity: pageJumpLoading ? 0.5 : 1 }}>
+                <div>
                   <Pagination
                     current={currentPage}
                     total={hasNextPage ? filteredItems.length + 1000 : filteredItems.length} // 더 많은 데이터가 있으면 임시로 +1000
                     pageSize={pageSize}
-                    onChange={async (page) => {
+                    onChange={(page) => {
                       console.log(`🎯 페이지 변경 요청: ${currentPage} → ${page}`);
-                      
-                      // 페이지 점프가 필요한지 확인하고 데이터 로드
-                      const success = await loadDataForPage(page);
-                      if (success) {
-                        setCurrentPage(page);
-                        console.log(`✅ 페이지 ${page} 변경 완료`);
-                      } else {
-                        console.log(`❌ 페이지 ${page} 변경 실패`);
-                      }
+                      setCurrentPage(page);
+                      console.log(`✅ 페이지 ${page} 변경 완료`);
                     }}
                     showSizeChanger={false}
                     showTotal={(total, range) => {
@@ -1374,17 +1325,50 @@ export default function ItemsPage() {
                         : `${range[0]}-${range[1]} / 총 ${actualTotal}개`;
                       return displayText;
                     }}
-                    disabled={pageJumpLoading || isFetchingNextPage || isSearchMode}
+                    disabled={isFetchingNextPage || isSearchMode}
                   />
                 </div>
                 
-                {/* 페이지 점프 로딩 인디케이터 */}
-                {(pageJumpLoading || isFetchingNextPage) && (
+                {/* 로딩 인디케이터 */}
+                {isFetchingNextPage && (
                   <div style={{ textAlign: 'center', marginTop: '8px' }}>
                     <Spin size="small" /> 
                     <span style={{ marginLeft: '8px', color: '#666', fontSize: '12px' }}>
-                      {pageJumpLoading ? '페이지 데이터 로딩 중...' : '추가 데이터 로딩 중...'}
+                      추가 데이터 로딩 중...
                     </span>
+                  </div>
+                )}
+
+                {/* 더 로드 버튼 - 페이지 끝에 도달했고 더 데이터가 있을 때 */}
+                {needsMoreData() && !isFetchingNextPage && (
+                  <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                    <button 
+                      onClick={handleLoadMore}
+                      style={{
+                        padding: '12px 24px',
+                        backgroundColor: '#1890ff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#40a9ff';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#1890ff';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      📦 다음 500개 아이템 로드하기
+                    </button>
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                      현재 페이지에 표시할 데이터가 부족합니다. 클릭하여 더 로드하세요.
+                    </div>
                   </div>
                 )}
                 
