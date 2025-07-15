@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Typography, Row, Col, Pagination, Input, Select, Spin } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -363,7 +363,6 @@ const ITEM_CATEGORIES = {
 
 export default function ItemsPage() {
   const { theme: currentTheme } = useTheme();
-  const [filteredItems, setFilteredItems] = useState<MapleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('category');
@@ -460,8 +459,8 @@ export default function ItemsPage() {
     }
   };
 
-  // 필터링 함수
-  const applyFilters = useCallback((pageReset = false) => {
+  // 필터링된 아이템을 useMemo로 계산
+  const filteredItems = useMemo(() => {
     let filtered = [...items];
 
     // 검색 모드가 아닐 때만 클라이언트 필터링 적용
@@ -486,31 +485,16 @@ export default function ItemsPage() {
       }
     });
 
-    setFilteredItems(filtered);
-    
-    // 페이지 리셋이 필요한 경우에만 (검색어나 카테고리 변경 시)
-    if (pageReset) {
-      setCurrentPage(1);
-    }
+    return filtered;
   }, [items, isSearchMode, searchQuery, sortBy]);
 
-  // 정렬 및 카테고리 변경 시 필터링 (페이지 리셋 포함)
+  // 카테고리나 검색 모드 변경 시 페이지 리셋
   useEffect(() => {
-    applyFilters(true);
+    setCurrentPage(1);
   }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
-  
-  // 아이템 데이터 변경 시 필터링 (페이지 리셋 없음)
-  useEffect(() => {
-    if (items.length > 0) {
-      applyFilters(false);
-    }
-  }, [items, searchQuery]);
 
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
-    // 필터링된 아이템 리스트 초기화
-    setFilteredItems([]);
-    
     // 대분류별로 기본 카테고리 설정 (일괄 처리)
     const updateCategories = () => {
       if (overallCategory === 'Equip') {
