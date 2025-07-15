@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Typography, Row, Col, Pagination, Input, Select, App, Spin, Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -9,6 +9,7 @@ import { ItemDetailModal } from '@/components/items/item-detail-modal';
 import { MapleItem } from '@/types/maplestory';
 import { mapleAPI } from '@/lib/api';
 import { useTheme } from '@/components/providers/theme-provider';
+import { useItemsByCategory, useInfiniteItemsByCategory, useSearchItems, useSearchItemsInCategory } from '@/hooks/useMapleData';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -364,10 +365,7 @@ const ITEM_CATEGORIES = {
 export default function ItemsPage() {
   const { message } = App.useApp();
   const { theme: currentTheme } = useTheme();
-  const [items, setItems] = useState<MapleItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MapleItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('category');
@@ -376,51 +374,93 @@ export default function ItemsPage() {
   const [subCategory, setSubCategory] = useState<string>('Face Accessory');
   const [selectedItem, setSelectedItem] = useState<MapleItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [hasMoreItems, setHasMoreItems] = useState(true);
-  const [totalLoadedItems, setTotalLoadedItems] = useState(0);
   const [pageJumpLoading, setPageJumpLoading] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchInput, setSearchInput] = useState(''); // 검색 입력값
   const pageSize = 24;
   const batchSize = 500;
 
-  // API에서 아이템 데이터 로드 (초기 로드)
-  const loadItemsFromAPI = async (overallCat: string, cat: string, subCat: string, reset: boolean = true) => {
-    try {
-      setLoading(true);
-      console.log('🚀 API 아이템 데이터 로딩 시작...', { overallCat, cat, subCat, reset });
-      
-      const params = {
-        overallCategory: overallCat,
-        category: cat,
-        subCategory: subCat,
-        startPosition: 0, // 초기 로드는 항상 0부터
-        count: batchSize
-      };
-      
-      const itemsData = await mapleAPI.getItemsByCategory(params);
-      console.log(`✅ 초기 로드 완료: ${itemsData.length}개`);
-      
-      if (reset) {
-        setTotalLoadedItems(itemsData.length);
-        setHasMoreItems(itemsData.length === batchSize); // 500개 모두 로드되면 더 있을 가능성
-      }
-      
-      if (itemsData.length === 0) {
-        message.info(`${cat} > ${subCat} 카테고리에 아이템이 없습니다.`);
-      } else {
-        message.success(`${itemsData.length}개의 아이템을 불러왔습니다.`);
-      }
-      
-      return itemsData;
-    } catch (error) {
-      console.error('❌ API 아이템 데이터 로드 실패:', error);
-      message.error('아이템 데이터를 불러오는데 실패했습니다. 다시 시도해주세요.');
-      return [];
-    } finally {
-      setLoading(false);
+  // React Query 무한 쿼리로 아이템 데이터 가져오기
+  const {
+    data: infiniteData,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch
+  } = useInfiniteItemsByCategory(
+    overallCategory,
+    category,
+    subCategory,
+    batchSize, // batchSize
+    !!(overallCategory && category && subCategory) // enabled 조건
+  );
+
+  // 검색용 React Query 훅
+  const {
+    data: searchResults = [],
+    isLoading: isSearchLoading,
+    error: searchError
+  } = useSearchItemsInCategory(
+    overallCategory,
+    category,
+    subCategory,
+    searchQuery,
+    isSearchMode && !!searchQuery.trim()
+  );
+
+  // 모든 페이지의 아이템을 하나의 배열로 합치기 (useMemo로 최적화)
+  const items = useMemo(() => {
+    if (isSearchMode && searchResults.length > 0) {
+      return searchResults;
     }
-  };
+    if (!infiniteData?.pages) return [];
+    return infiniteData.pages.flat();
+  }, [infiniteData?.pages, isSearchMode, searchResults]);
+
+  // React Query 데이터 로딩 완료 시 처리 (한 번만 실행)
+  useEffect(() => {
+    if (items.length > 0 && !isLoading) {
+      console.log(`✅ React Query 로드 완료: ${items.length}개`);
+      message.success(`${items.length}개의 아이템을 불러왔습니다.`);
+    }
+  }, [items.length, isLoading, category, subCategory]);
+
+  // React Query 에러 처리
+  useEffect(() => {
+    if (error) {
+      console.error('❌ React Query 아이템 데이터 로드 실패:', error);
+      message.error('아이템 데이터를 불러오는데 실패했습니다. 다시 시도해주세요.');
+    }
+  }, [error]);
+
+  // 검색 에러 처리
+  useEffect(() => {
+    if (searchError) {
+      console.error('❌ React Query 검색 실패:', searchError);
+      message.error('검색에 실패했습니다. 다시 시도해주세요.');
+    }
+  }, [searchError]);
+
+  // 검색 결과 알림
+  useEffect(() => {
+    if (isSearchMode && !isSearchLoading && searchResults.length >= 0) {
+      const categoryText = `${category} > ${subCategory}`;
+      if (searchResults.length === 0) {
+        message.info(`"${searchQuery}" 검색 결과가 없습니다. (${categoryText})`);
+      } else {
+        message.success(`"${searchQuery}" 검색 결과: ${searchResults.length}개 (${categoryText})`);
+      }
+    }
+  }, [isSearchMode, isSearchLoading, searchResults.length, searchQuery, category, subCategory]);
+
+  // 카테고리별 빈 데이터 알림 (조건 강화로 중복 방지)
+  useEffect(() => {
+    if (!isLoading && !isFetchingNextPage && items.length === 0 && overallCategory && category && subCategory) {
+      message.info(`${category} > ${subCategory} 카테고리에 아이템이 없습니다.`);
+    }
+  }, [isLoading, isFetchingNextPage, items.length, category, subCategory, overallCategory]);
 
   // API 검색 함수 (선택한 카테고리 내에서만 검색)
   const searchItemsFromAPI = async (searchTerm: string) => {
@@ -467,10 +507,16 @@ export default function ItemsPage() {
   // 페이지 점프 시 필요한 데이터 로드
   const loadDataForPage = async (targetPage: number) => {
     const requiredItems = targetPage * pageSize;
-    const currentItems = items.length;
+    let currentItems = items.length;
     
     if (requiredItems <= currentItems) {
       // 이미 충분한 데이터가 있으면 바로 페이지 변경
+      return true;
+    }
+    
+    if (!hasNextPage) {
+      // 더 이상 로드할 데이터가 없으면 현재 데이터로 처리
+      console.log('📄 더 이상 로드할 데이터가 없습니다.');
       return true;
     }
     
@@ -479,44 +525,22 @@ export default function ItemsPage() {
       console.log(`🚀 페이지 ${targetPage} 점프를 위한 데이터 로드 시작...`);
       console.log(`필요한 아이템: ${requiredItems}개, 현재 아이템: ${currentItems}개`);
       
-      const allItems = [...items];
-      let currentPosition = totalLoadedItems;
+      // 필요한 만큼 데이터를 배치로 로드 (최대 10회 시도로 무한 루프 방지)
+      let attempts = 0;
+      const maxAttempts = 10;
       
-      // 필요한 만큼 데이터를 배치로 로드
-      while (allItems.length < requiredItems && hasMoreItems) {
-        const params = {
-          overallCategory: overallCategory,
-          category: category,
-          subCategory: subCategory,
-          startPosition: currentPosition,
-          count: batchSize
-        };
+      while (currentItems < requiredItems && hasNextPage && attempts < maxAttempts) {
+        console.log(`📦 다음 배치 로드 중... (현재: ${currentItems}개, 시도: ${attempts + 1}/${maxAttempts})`);
+        await fetchNextPage();
+        attempts++;
         
-        const newItems = await mapleAPI.getItemsByCategory(params);
-        console.log(`📦 배치 로드 완료: ${newItems.length}개 (총 ${allItems.length + newItems.length}개)`);
-        
-        if (newItems.length === 0) {
-          setHasMoreItems(false);
-          break;
-        }
-        
-        allItems.push(...newItems);
-        currentPosition += newItems.length;
-        
-        // 충분한 데이터가 로드되면 중단
-        if (allItems.length >= requiredItems) {
-          break;
-        }
+        // 로딩 후 잠시 대기하고 현재 아이템 수 다시 확인
+        await new Promise(resolve => setTimeout(resolve, 200));
+        currentItems = items.length; // 최신 아이템 수로 업데이트
       }
       
-      setItems(allItems);
-      setTotalLoadedItems(currentPosition);
-      setHasMoreItems(currentPosition > 0 && allItems.length === currentPosition);
-      
-      // 페이지 점프 로딩 완료 후 필터링 다시 실행
       setPageJumpLoading(false);
-      
-      console.log(`✅ 페이지 ${targetPage} 데이터 로드 완료: ${allItems.length}개`);
+      console.log(`✅ 페이지 ${targetPage} 데이터 로드 완료: ${items.length}개`);
       return true;
       
     } catch (error) {
@@ -527,24 +551,7 @@ export default function ItemsPage() {
     }
   };
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    const loadInitialData = async () => {
-      // 모든 카테고리가 설정되어 있을 때만 로드
-      if (!overallCategory || !category || !subCategory) {
-        return;
-      }
-      
-      setDataLoading(true);
-      const initialItems = await loadItemsFromAPI(overallCategory, category, subCategory);
-      setItems(initialItems);
-      setFilteredItems(initialItems);
-      setCurrentPage(1); // 페이지 초기화
-      setDataLoading(false);
-    };
-    
-    loadInitialData();
-  }, [overallCategory, category, subCategory]);
+  // React Query가 자동으로 초기 데이터를 로드하므로 별도 useEffect 불필요
 
 
   // 필터링 함수
@@ -588,16 +595,15 @@ export default function ItemsPage() {
   
   // 아이템 데이터 변경 시 필터링 (페이지 리셋 없음)
   useEffect(() => {
-    applyFilters(false);
-  }, [items]);
+    if (items.length > 0) {
+      applyFilters(false);
+    }
+  }, [items, searchQuery]);
 
   // 대분류 변경시 하위 카테고리 초기화
   useEffect(() => {
-    // 로드 상태와 아이템 리스트 먼저 초기화
-    setItems([]);
-    setHasMoreItems(true);
-    setTotalLoadedItems(0);
-    setDataLoading(true);
+    // 필터링된 아이템 리스트 초기화 (React Query가 자동으로 새 데이터 로드)
+    setFilteredItems([]);
     
     // 대분류별로 기본 카테고리 설정 (일괄 처리)
     const updateCategories = () => {
@@ -626,19 +632,18 @@ export default function ItemsPage() {
     setTimeout(updateCategories, 0);
   }, [overallCategory]);
 
-  // 수동 검색 핸들러
+  // 수동 검색 핸들러 (React Query 사용)
   const handleManualSearch = async (value: string) => {
     setSearchQuery(value);
     
     if (value.trim()) {
-      // 검색어가 있으면 API 검색 실행
-      const searchResults = await searchItemsFromAPI(value);
-      setItems(searchResults);
+      // React Query가 자동으로 검색 실행
+      setIsSearchMode(true);
+      console.log('🔍 React Query 검색 시작:', value);
     } else {
       // 검색어가 없으면 카테고리 기반 로드
       setIsSearchMode(false);
-      const categoryItems = await loadItemsFromAPI(overallCategory, category, subCategory);
-      setItems(categoryItems);
+      refetch(); // React Query 리페치
     }
   };
 
@@ -680,7 +685,7 @@ export default function ItemsPage() {
   };
 
   // 로딩 화면
-  if (dataLoading) {
+  if ((isLoading || isSearchLoading) && items.length === 0) {
     return (
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px' }}>
@@ -688,8 +693,8 @@ export default function ItemsPage() {
             <div style={{ minHeight: '200px' }} />
           </Spin>
           <div style={{ marginTop: '20px', color: '#666' }}>
-            장비 &gt; 장신구 &gt; 얼굴장식 카테고리의 아이템을 로딩하고 있습니다...<br/>
-            초기에 500개의 아이템을 로드하고, 필요시 추가로 더 로드합니다.
+            {category} &gt; {subCategory} 카테고리의 아이템을 로딩하고 있습니다...<br/>
+            React Query를 사용하여 효율적으로 데이터를 캐싱합니다.
           </div>
         </div>
       </MainLayout>
@@ -708,7 +713,7 @@ export default function ItemsPage() {
           <Paragraph>
             메이플스토리의 다양한 아이템을 검색하고 확인할 수 있습니다.
             <br />
-            📊 총 {totalLoadedItems.toLocaleString()}개 아이템 로드됨 {hasMoreItems && '(더 있음)'}
+            📊 총 {items.length.toLocaleString()}개 아이템 로드됨 {hasNextPage && '(더 많은 데이터 로드 가능)'}
           </Paragraph>
         </div>
 
@@ -1405,18 +1410,20 @@ export default function ItemsPage() {
 
         {/* 아이템 리스트 */}
         <div style={{ marginBottom: '4px' }}>
-          <ItemList items={paginatedItems} loading={loading || pageJumpLoading} onItemClick={handleItemClick} />
+          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading || pageJumpLoading || isFetchingNextPage} onItemClick={handleItemClick} />
           
           
         </div>
 
         {/* 페이지네이션 및 더 불러오기 */}
-        {!loading && filteredItems.length > 0 && (
+        {!isLoading && !isSearchLoading && filteredItems.length > 0 && (
           <div style={{ marginTop: '4px' }}>
             {/* 검색 모드일 때 안내 메시지 */}
             {isSearchMode && (
               <div style={{ textAlign: 'center', marginBottom: '16px', color: '#666' }}>
-                🔍 검색 결과입니다. 카테고리를 선택하거나 검색어를 지우면 일반 모드로 돌아갑니다.
+                🔍 검색 결과입니다. "{searchQuery}" - {category} > {subCategory} 카테고리 내에서 검색됨
+                <br />
+                <span style={{ fontSize: '12px' }}>검색어를 지우면 일반 모드로 돌아갑니다.</span>
               </div>
             )}
             
@@ -1442,18 +1449,20 @@ export default function ItemsPage() {
                     }}
                     showSizeChanger={false}
                     showTotal={(total, range) => {
-                      const totalText = hasMoreItems ? `${total}+` : `${total}`;
-                      return `${range[0]}-${range[1]} / 총 ${totalText}개`;
+                      // React Query는 정확한 총 개수를 제공하므로 '+' 표시 불필요
+                      return `${range[0]}-${range[1]} / 총 ${total}개`;
                     }}
-                    disabled={pageJumpLoading}
+                    disabled={pageJumpLoading || isFetchingNextPage || isSearchMode}
                   />
                 </div>
                 
                 {/* 페이지 점프 로딩 인디케이터 */}
-                {pageJumpLoading && (
+                {(pageJumpLoading || isFetchingNextPage) && (
                   <div style={{ textAlign: 'center', marginTop: '8px' }}>
                     <Spin size="small" /> 
-                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '12px' }}>데이터 로딩 중...</span>
+                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '12px' }}>
+                      {pageJumpLoading ? '페이지 데이터 로딩 중...' : '추가 데이터 로딩 중...'}
+                    </span>
                   </div>
                 )}
                 

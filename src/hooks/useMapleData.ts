@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { mapleAPI } from '@/lib/api';
 
 export const useMapleItem = (id: number) => {
@@ -159,6 +159,33 @@ export const useSearchItems = (query: string, enabled: boolean = true) => {
   });
 };
 
+// 카테고리 내 검색용 훅
+export const useSearchItemsInCategory = (
+  overallCategory: string,
+  category: string,
+  subCategory: string,
+  searchQuery: string,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['search', 'items', 'category', overallCategory, category, subCategory, searchQuery],
+    queryFn: () => mapleAPI.getItemsByCategory({
+      overallCategoryFilter: overallCategory,
+      categoryFilter: category,
+      subCategoryFilter: subCategory,
+      searchFor: searchQuery.trim(),
+      count: 200 // 검색 결과는 200개까지
+    }),
+    enabled: enabled && 
+             !!overallCategory && 
+             !!category && 
+             !!subCategory && 
+             searchQuery.trim().length > 1,
+    staleTime: 1000 * 60 * 5, // 5분 캐시
+    gcTime: 1000 * 60 * 15, // 15분 가비지 컬렉션
+  });
+};
+
 export const useItemsByCategory = (
   overallCategory: string, 
   category: string, 
@@ -177,6 +204,38 @@ export const useItemsByCategory = (
       count
     }),
     enabled: enabled && !!overallCategory && !!category && !!subCategory,
+    staleTime: 1000 * 60 * 10, // 10분 캐시
+    gcTime: 1000 * 60 * 30, // 30분 가비지 컬렉션
+  });
+};
+
+// 무한 스크롤을 위한 아이템 카테고리 훅
+export const useInfiniteItemsByCategory = (
+  overallCategory: string, 
+  category: string, 
+  subCategory: string,
+  batchSize: number = 500,
+  enabled: boolean = true
+) => {
+  return useInfiniteQuery({
+    queryKey: ['items', 'infinite', overallCategory, category, subCategory, batchSize],
+    queryFn: ({ pageParam = 0 }) => mapleAPI.getItemsByCategory({
+      overallCategoryFilter: overallCategory,
+      categoryFilter: category,
+      subCategoryFilter: subCategory,
+      startPosition: pageParam,
+      count: batchSize
+    }),
+    enabled: enabled && !!overallCategory && !!category && !!subCategory,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      // 마지막 페이지가 배치 크기보다 작으면 더 이상 데이터가 없음
+      if (lastPage.length < batchSize) {
+        return undefined;
+      }
+      // 다음 페이지의 시작 위치 계산
+      return allPages.reduce((total, page) => total + page.length, 0);
+    },
     staleTime: 1000 * 60 * 10, // 10분 캐시
     gcTime: 1000 * 60 * 30, // 30분 가비지 컬렉션
   });
