@@ -159,6 +159,29 @@ export const useSearchItems = (query: string, enabled: boolean = true) => {
   });
 };
 
+export const useItemsByCategory = (
+  overallCategory: string, 
+  category: string, 
+  subCategory: string,
+  startPosition: number = 0,
+  count: number = 500,
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['items', 'category', overallCategory, category, subCategory, startPosition, count],
+    queryFn: () => mapleAPI.getItemsByCategory({
+      overallCategoryFilter: overallCategory,
+      categoryFilter: category,
+      subCategoryFilter: subCategory,
+      startPosition,
+      count
+    }),
+    enabled: enabled && !!overallCategory && !!category && !!subCategory,
+    staleTime: 1000 * 60 * 10, // 10분 캐시
+    gcTime: 1000 * 60 * 30, // 30분 가비지 컬렉션
+  });
+};
+
 export const useSearchNPCs = (query: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['search', 'npcs', query],

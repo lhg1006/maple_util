@@ -308,3 +308,13 @@ body {
 .ant-layout-sider .ant-menu-light .ant-menu-item-selected .anticon {
   color: #ffffff !important;
 }
+
+/* 다크모드 페이지네이션 활성화된 페이지 숫자 흰색 처리 */
+:where(.dark) .ant-pagination .ant-pagination-item-active a {
+  color: #ffffff !important;
+}
+
+/* Ant Design CSS-in-JS 스타일 덮어쓰기 */
+:where(.css-dev-only-do-not-override-21bdrw).ant-pagination .ant-pagination-item-active a {
+  color: #ffffff !important;
+}
