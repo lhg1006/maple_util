@@ -378,6 +378,14 @@ export default function ItemsPage() {
   const batchSize = 500;
 
   // React Query 무한 스크롤로 아이템 데이터 가져오기
+  const enabled = !!(overallCategory && category && subCategory) && !isSearchMode;
+  console.log('🔍 React Query 상태:', { overallCategory, category, subCategory, enabled, isSearchMode });
+  console.log('🔍 현재 URL 파라미터가 될 값:', {
+    overallCategoryFilter: overallCategory,
+    categoryFilter: category, 
+    subCategoryFilter: subCategory
+  });
+  
   const {
     data: infiniteData,
     isLoading,
@@ -389,7 +397,7 @@ export default function ItemsPage() {
     category,
     subCategory,
     batchSize,
-    !!(overallCategory && category && subCategory) && !isSearchMode // 검색 모드가 아닐 때만 활성화
+    enabled
   );
 
   // 검색 기능 추가
@@ -407,10 +415,20 @@ export default function ItemsPage() {
   // 무한 스크롤 데이터를 하나의 배열로 합치기
   const items = useMemo(() => {
     if (isSearchMode && searchResults.length > 0) {
+      console.log('🔍 검색 모드 - 검색 결과 사용:', searchResults.length);
       return searchResults;
     }
-    if (!infiniteData?.pages) return [];
-    return infiniteData.pages.flat();
+    if (!infiniteData?.pages) {
+      console.log('🔍 infiniteData.pages 없음:', infiniteData);
+      return [];
+    }
+    const flattened = infiniteData.pages.flat();
+    console.log('🔍 무한 스크롤 데이터:', { 
+      pages: infiniteData.pages.length, 
+      totalItems: flattened.length,
+      firstPage: infiniteData.pages[0]?.length || 0
+    });
+    return flattened;
   }, [infiniteData?.pages, isSearchMode, searchResults]);
 
   // 페이지 점프 시 필요한 데이터 로드

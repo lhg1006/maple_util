@@ -170,9 +170,9 @@ export const useSearchItemsInCategory = (
   return useQuery({
     queryKey: ['search', 'items', 'category', overallCategory, category, subCategory, searchQuery],
     queryFn: () => mapleAPI.getItemsByCategory({
-      overallCategoryFilter: overallCategory,
-      categoryFilter: category,
-      subCategoryFilter: subCategory,
+      overallCategory: overallCategory,
+      category: category,
+      subCategory: subCategory,
       searchFor: searchQuery.trim(),
       count: 200 // 검색 결과는 200개까지
     }),
@@ -197,9 +197,9 @@ export const useItemsByCategory = (
   return useQuery({
     queryKey: ['items', 'category', overallCategory, category, subCategory, startPosition, count],
     queryFn: () => mapleAPI.getItemsByCategory({
-      overallCategoryFilter: overallCategory,
-      categoryFilter: category,
-      subCategoryFilter: subCategory,
+      overallCategory: overallCategory,
+      category: category,
+      subCategory: subCategory,
       startPosition,
       count
     }),
@@ -220,9 +220,9 @@ export const useInfiniteItemsByCategory = (
   return useInfiniteQuery({
     queryKey: ['items', 'infinite', overallCategory, category, subCategory, batchSize],
     queryFn: ({ pageParam = 0 }) => mapleAPI.getItemsByCategory({
-      overallCategoryFilter: overallCategory,
-      categoryFilter: category,
-      subCategoryFilter: subCategory,
+      overallCategory: overallCategory,
+      category: category,
+      subCategory: subCategory,
       startPosition: pageParam,
       count: batchSize
     }),
