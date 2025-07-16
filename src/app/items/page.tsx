@@ -319,10 +319,15 @@ const ITEM_CATEGORIES = {
     { value: 'Wedding', label: '결혼' },
   ],
   cashEquipmentModificationSubCategories: [
+    { value: 'Cube', label: '큐브' },
+    { value: 'Enhancement', label: '강화' },
+    { value: 'Karma', label: '카르마' },
     { value: 'Miracle Cube', label: '미라클 큐브' },
-    { value: 'Other', label: '기타' },
+    { value: 'Potential Stamp', label: '잠재능력 인장' },
+    { value: 'Safety Charm', label: '안전 부적' },
     { value: 'Scroll', label: '주문서' },
     { value: 'Trade', label: '거래' },
+    { value: 'Other', label: '기타' },
   ],
   cashFreeMarketSubCategories: [
     { value: 'Hired Merchant', label: '고용상인' },
@@ -340,10 +345,20 @@ const ITEM_CATEGORIES = {
     { value: 'Weather Effect', label: '날씨 이펙트' },
   ],
   cashMiscellaneousSubCategories: [
+    { value: 'Cash Bag', label: '캐시 가방' },
+    { value: 'Friendship Item', label: '우정 아이템' },
+    { value: 'Gift Box', label: '선물 상자' },
+    { value: 'Medal', label: '메달' },
+    { value: 'Quest Item', label: '퀘스트 아이템' },
+    { value: 'Special Event', label: '특별 이벤트' },
     { value: 'Other', label: '기타' },
   ],
   cashPetSubCategories: [
+    { value: 'Pet Equipment', label: '펫 장비' },
     { value: 'Pet Food', label: '펫 사료' },
+    { value: 'Pet Name Tag', label: '펫 이름표' },
+    { value: 'Pet Revival', label: '펫 부활' },
+    { value: 'Pet Skill', label: '펫 스킬' },
     { value: 'Pet Use', label: '펫 용품' },
   ],
   cashRandomRewardSubCategories: [
@@ -357,7 +372,11 @@ const ITEM_CATEGORIES = {
     { value: 'Teleport Rock', label: '텔레포트 록' },
   ],
   cashWeaponSubCategories: [
+    { value: 'Melee Weapon', label: '근접 무기' },
+    { value: 'Ranged Weapon', label: '원거리 무기' },
+    { value: 'Special Weapon', label: '특수 무기' },
     { value: 'Thrown', label: '투척' },
+    { value: 'Weapon Skin', label: '무기 스킨' },
   ],
 };
 
