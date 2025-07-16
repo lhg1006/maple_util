@@ -128,7 +128,7 @@ export default function SkillsPage() {
           <Col xs={24} sm={6} md={6}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#fa8c16' }}>
-                {new Set(allSkills.map(skill => skill.type)).size}
+                {new Set(allSkills.map((skill: any) => skill.type)).size}
               </div>
               <div style={{ fontSize: '12px', color: '#666' }}>스킬 타입</div>
             </Card>
@@ -157,7 +157,7 @@ export default function SkillsPage() {
                   option?.children?.toString().toLowerCase().includes(input.toLowerCase()) ?? false
                 }
               >
-                {allJobs.map(job => (
+                {allJobs.map((job: any) => (
                   <Option key={job.id} value={job.id}>
                     {job.name}
                   </Option>

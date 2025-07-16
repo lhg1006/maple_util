@@ -30,7 +30,7 @@ npm install
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3001](http://localhost:3001)로 접속하여 확인하세요.
+브라우저에서 [http://localhost:3000](http://localhost:3000)로 접속하여 확인하세요.
 
 ### 스크립트 명령어
 
@@ -39,6 +39,7 @@ npm run dev      # 개발 서버 실행
 npm run build    # 프로덕션 빌드
 npm run start    # 프로덕션 서버 실행
 npm run lint     # 코드 품질 검사
+npm run test     # 테스트 실행
 ```
 
 ## 🏗️ 기술 스택
@@ -46,6 +47,7 @@ npm run lint     # 코드 품질 검사
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **UI Library**: Ant Design
 - **상태 관리**: React Query (@tanstack/react-query)
+- **테스트**: Jest, React Testing Library
 - **PWA**: Service Worker, Web App Manifest
 - **배포**: Vercel
 
@@ -53,16 +55,12 @@ npm run lint     # 코드 품질 검사
 
 이 프로젝트는 [maplestory.io](https://maplestory.io) API를 사용합니다.
 
-### 🗂️ CDN 데이터 정책
+### 🗂️ 데이터 정책
 
-프로젝트에서 사용하는 CDN 데이터는 다음과 같은 정책을 준수합니다:
-
-- **원본 데이터**: maplestory.io API에서 제공하는 공개 데이터
-- **가공 데이터**: 검색 최적화 및 성능 개선을 위한 메타데이터만 저장
-- **이미지 리소스**: 직접 저장하지 않고 원본 API 링크로 참조
+- **데이터 출처**: maplestory.io API에서 제공하는 공개 데이터만 사용
+- **실시간 호출**: 모든 데이터는 실시간으로 API에서 가져옴
+- **저장 없음**: 게임 데이터나 이미지를 서버에 저장하지 않음
 - **사용 목적**: 비상업적 교육 및 연구 목적으로만 사용
-
-자세한 CDN 데이터 정책은 [CDN_LEGAL_NOTICE.md](./CDN_LEGAL_NOTICE.md)를 참고하세요.
 
 ## ⚖️ 법적 고지사항
 

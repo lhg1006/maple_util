@@ -76,7 +76,8 @@
       "WebFetch(domain:localhost)",
       "Bash(cat:*)",
       "Bash(gh issue:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

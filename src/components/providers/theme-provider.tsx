@@ -126,13 +126,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         colorBorder: currentTheme === 'dark' ? '#303030' : '#d9d9d9',
         colorText: currentTheme === 'dark' ? '#ffffffd9' : '#000000d9',
         colorPrimary: currentTheme === 'dark' ? '#4096ff' : '#1890ff',
-        itemActiveBg: currentTheme === 'dark' ? '#4096ff' : '#1890ff',
-        itemActiveColor: currentTheme === 'dark' ? '#ffffff !important' : '#ffffff',
-        itemActiveColorDisabled: currentTheme === 'dark' ? '#ffffff' : '#ffffff',
-        itemHoverBg: currentTheme === 'dark' ? '#262626' : '#f5f5f5',
-        itemHoverColor: currentTheme === 'dark' ? '#ffffff' : '#000000d9',
-        itemSelectedBg: currentTheme === 'dark' ? '#4096ff' : '#1890ff',
-        itemSelectedColor: currentTheme === 'dark' ? '#ffffff' : '#ffffff',
       }
     }
   };
