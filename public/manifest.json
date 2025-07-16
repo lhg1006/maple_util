@@ -1,0 +1,70 @@
+{
+  "name": "게임 데이터 뷰어 - 정보 검색 도구",
+  "short_name": "게임데이터뷰어",
+  "description": "게임 데이터 조회 및 검색 도구입니다. 공개 API를 통해 게임 정보를 제공합니다.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#1890ff",
+  "orientation": "any",
+  "categories": ["games", "utilities"],
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/favicon/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "아이템 검색",
+      "short_name": "아이템",
+      "description": "아이템 정보 검색",
+      "url": "/items",
+      "icons": [
+        {
+          "src": "/favicon/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "통합 검색",
+      "short_name": "검색",
+      "description": "모든 데이터 통합 검색",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/favicon/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "즐겨찾기",
+      "short_name": "즐겨찾기",
+      "description": "즐겨찾기 목록 보기",
+      "url": "/favorites",
+      "icons": [
+        {
+          "src": "/favicon/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

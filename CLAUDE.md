@@ -11,6 +11,7 @@ npm run dev      # Start development server with Turbopack
 npm run build    # Build for production
 npm run start    # Start production server
 npm run lint     # Run ESLint
+npm run generate-maps  # Generate static maps data (13,973 maps)
 ```
 
 ## Architecture
@@ -19,8 +20,10 @@ npm run lint     # Run ESLint
 - API client: `src/lib/api.ts`
 - Base URL: `https://maplestory.io/api`
 - Default region: KMS (Korea MapleStory)
-- Version: 284
+- Version: 389
 - Endpoints: items, NPCs, mobs, jobs, skills
+- Static data files: `public/maps.json` (13,973 maps), `public/jobs.json`, `public/skills.json`
+- Data source: maplestory.io API + pre-generated static files for performance
 
 ### Key Directories
 - `src/app/` - Next.js App Router pages
@@ -40,16 +43,24 @@ npm run lint     # Run ESLint
 
 ## Key Implementation Details
 
+### Map System (Optimized)
+- **Static Data Approach**: Pre-generated `maps.json` with 13,973 maps to minimize API calls
+- **Data Generation**: `npm run generate-maps` crawls all maps and creates static file
+- **Performance**: Single file fetch vs thousands of API calls (99%+ faster)
+- **Continental Classification**: 16 regions with color-coded UI
+- **Live NPC Data**: Only individual NPC details fetched on-demand
+
 ### Item System
 - List view with pagination at `/items`
 - Search and filtering by category
 - Icon rendering via maplestory.io API
 - Error handling for missing items
 
-### API Error Handling
-- Timeout: 10 seconds
-- Graceful fallbacks for missing data
-- Console warnings instead of errors for better UX
+### API Optimization Strategy
+- **Hybrid Approach**: Static files for bulk data + API for details
+- **Minimal API Calls**: Maps, jobs, skills use static JSON files
+- **On-demand Loading**: NPCs, items fetched when needed
+- **Aggressive Caching**: 24-hour cache for static data, shorter for dynamic
 
 ### TypeScript Configuration
 - Strict mode enabled
@@ -65,3 +76,7 @@ Working on feature/issue-5-item-list branch implementing:
 
 ## Testing
 No test framework currently configured. Would need Jest/Vitest + React Testing Library for testing.
+
+## Development Notes
+- port 3000 번사용 
+- 서버는 내가 직접 켜

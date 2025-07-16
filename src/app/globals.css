@@ -81,3 +81,240 @@ body {
 .dark ::-webkit-scrollbar-thumb {
   background: #434343;
 }
+
+/* 메이플스토리 툴팁 스타일 */
+.maple-tooltip {
+  background: #2A2A4A;
+  border: 2px solid #FFD700;
+  border-radius: 4px;
+  padding: 0;
+  font-family: '돋움', 'Dotum', sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #ffffff;
+  width: 300px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* 아이템 이름 (상단) */
+.maple-tooltip-name {
+  background: #1A1A2E;
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 1px solid #FFD700;
+  position: relative;
+}
+
+/* 닫기 버튼 */
+.maple-tooltip-close-btn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.maple-tooltip-close-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 상세 정보 박스 */
+.maple-tooltip-detail-box {
+  display: flex;
+  padding: 16px;
+  background: #16213E;
+  border-bottom: 1px solid #555;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 아이콘 섹션 */
+.maple-tooltip-icon-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #F5F5F5;
+  border: 2px solid #D1D5DB;
+  padding: 20px;
+  border-radius: 8px;
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.maple-tooltip-icon {
+  width: 110px;
+  height: 110px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  display: block;
+  margin: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* 스탯 섹션 */
+.maple-tooltip-stats-section {
+  flex: 0 0 auto;
+  font-size: 14px;
+  text-align: left;
+  min-width: fit-content;
+}
+
+.maple-tooltip-req {
+  color: #FFD700;
+  margin-bottom: 3px;
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* 구분선 */
+.maple-tooltip-divider {
+  height: 1px;
+  background: #FFD700;
+  margin: 0 8px;
+}
+
+/* 하단 스탯 영역 */
+.maple-tooltip-bottom-stats {
+  padding: 20px;
+  background: #2A2A4A;
+  text-align: center;
+}
+
+.maple-tooltip-stat {
+  display: block;
+  padding: 4px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.maple-tooltip-stat-label {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.maple-tooltip-stat-value {
+  font-weight: normal;
+  font-size: 14px;
+}
+
+/* 스탯 색상 */
+.stat-normal { color: #ffffff; }
+.stat-bonus { color: #00ff00; } /* 초록색 - 추가 스탯 */
+.stat-enhance { color: #ffff00; } /* 노란색 - 강화 스탯 */
+.stat-special { color: #00ffff; } /* 파란색 - 특수 스탯 */
+.stat-negative { color: #ff0000; } /* 빨간색 - 부정적 효과 */
+.stat-epic { color: #ff00ff; } /* 보라색 - 에픽 등급 */
+.stat-unique { color: #ff8800; } /* 주황색 - 유니크 등급 */
+.dark .stat-unique { color: #fbbf24; } /* 다크모드: 밝은 앰버 */
+.stat-legendary { color: #00ff00; } /* 연두색 - 레전더리 등급 */
+
+/* 업그레이드 정보 */
+.maple-tooltip-upgrade {
+  color: #ffff00;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #555;
+}
+
+/* 설명 텍스트 */
+.maple-tooltip-description {
+  color: #cccccc;
+  font-style: italic;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: center;
+  background: #2A2A4A;
+  margin: 10px 0;
+}
+
+/* 세트 효과 */
+.maple-tooltip-set {
+  color: #00ffff;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: center;
+  background: #2A2A4A;
+}
+
+.maple-tooltip-set-title {
+  color: #ffff00;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* 판매 가격 */
+.maple-tooltip-price {
+  color: #cccccc;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 12px;
+  border-top: 1px solid #555;
+  background: #2A2A4A;
+}
+
+/* 주황색 사이드바 메뉴 스타일 */
+.ant-layout-sider .ant-menu-light {
+  background: transparent !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item {
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  margin: 4px 8px !important;
+  padding-left: 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item .anticon {
+  color: #ffffff !important;
+  font-size: 16px !important;
+}
+
+.ant-layout-sider .ant-menu-light .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
+}
+
+/* 다크모드 페이지네이션 활성화된 페이지 숫자 흰색 처리 */
+:where(.dark) .ant-pagination .ant-pagination-item-active a {
+  color: #ffffff !important;
+}
+
+/* Ant Design CSS-in-JS 스타일 덮어쓰기 */
+:where(.css-dev-only-do-not-override-21bdrw).ant-pagination .ant-pagination-item-active a {
+  color: #ffffff !important;
+}

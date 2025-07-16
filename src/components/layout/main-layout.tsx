@@ -10,10 +10,13 @@ import {
   BugOutlined,
   TeamOutlined,
   ThunderboltOutlined,
-  MenuOutlined
+  MenuOutlined,
+  SearchOutlined,
+  HeartOutlined
 } from '@ant-design/icons';
 import { ThemeToggle } from '../theme-toggle';
 import { useTheme } from '../providers/theme-provider';
+import { Footer } from './footer';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -27,6 +30,16 @@ const menuItems = [
     key: '/',
     icon: <HomeOutlined />,
     label: '홈',
+  },
+  {
+    key: '/search',
+    icon: <SearchOutlined />,
+    label: '통합 검색',
+  },
+  {
+    key: '/favorites',
+    icon: <HeartOutlined />,
+    label: '즐겨찾기',
   },
   {
     key: '/items',
@@ -74,32 +87,60 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           setCollapsed(broken);
           setIsMobile(broken);
         }}
-        width={200}
+        width={240}
+        theme="light"
         style={{ 
           height: '100vh', 
           overflowX: 'hidden',
           overflowY: 'auto',
-          borderRight: `1px solid ${currentTheme === 'dark' ? '#303030' : '#f0f0f0'}`
+          boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
+          background: currentTheme === 'dark' 
+            ? 'linear-gradient(180deg, #1a365d 0%, #2d3748 50%, #4a5568 100%)' 
+            : 'linear-gradient(180deg, #ff8c00 0%, #ff7300 50%, #ff6600 100%)'
         }}
       >
-        <div className="p-4" style={{ overflow: 'hidden', marginTop: '20px', marginBottom: '24px' }}>
+        <div style={{ 
+          padding: '20px 16px',
+          textAlign: 'center',
+          background: currentTheme === 'dark' 
+            ? 'rgba(255,255,255,0.08)' 
+            : 'rgba(255,255,255,0.15)',
+          borderBottom: currentTheme === 'dark' 
+            ? '1px solid rgba(255,255,255,0.1)' 
+            : '1px solid rgba(255,255,255,0.2)'
+        }}>
           <Title 
-            level={4} 
-            className="!mb-0 text-center" 
+            level={collapsed ? 2 : 4} 
             style={{ 
+              margin: 0,
+              color: '#ffffff',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              textOverflow: 'ellipsis',
+              fontSize: collapsed ? '24px' : '20px',
+              fontWeight: 600,
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
             }}
           >
-            {collapsed ? 'ML' : '메이플랜드'}
+            {collapsed ? 'MS' : '메이플스토리'}
           </Title>
+          {!collapsed && (
+            <p style={{ margin: '4px 0 0', color: '#ffffff', fontSize: '12px', opacity: 0.9 }}>
+              유틸리티
+            </p>
+          )}
         </div>
         <Menu
           mode="inline"
           selectedKeys={[pathname]}
           items={menuItems}
-          style={{ border: 'none', flex: 1 }}
+          theme="light"
+          style={{ 
+            border: 'none', 
+            flex: 1,
+            background: 'transparent',
+            color: '#ffffff'
+          }}
           onClick={({ key }) => router.push(key)}
         />
       </Sider>
@@ -109,20 +150,27 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           style={{ 
             height: '64px',
             lineHeight: '64px',
-            padding: '0 16px',
+            padding: '0 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
             overflow: 'hidden',
-            borderBottom: `1px solid ${currentTheme === 'dark' ? '#303030' : '#f0f0f0'}`
+            borderBottom: `1px solid ${currentTheme === 'dark' ? '#303030' : '#e8e8e8'}`,
+            boxShadow: '0 2px 8px rgba(0,0,0,.06)',
+            zIndex: 10
           }}
         >
-          <Space style={{ overflow: 'hidden', flex: 1 }}>
+          <Space size="middle" style={{ overflow: 'hidden', flex: 1 }}>
             <MenuOutlined 
-              className="text-lg cursor-pointer hover:text-blue-500"
+              style={{ 
+                fontSize: '18px', 
+                cursor: 'pointer',
+                color: currentTheme === 'dark' ? '#ffffffa6' : '#00000073'
+              }}
               onClick={() => setCollapsed(!collapsed)}
             />
+            <div style={{ borderLeft: `1px solid ${currentTheme === 'dark' ? '#303030' : '#e8e8e8'}`, height: '24px' }} />
             <Title 
               level={3} 
               className="!mb-0"
@@ -130,10 +178,18 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                fontSize: isMobile ? '16px' : '20px'
+                fontSize: isMobile ? '16px' : '18px',
+                fontWeight: 500
               }}
             >
-              {isMobile ? '메이플 유틸' : '메이플랜드 유틸리티'}
+              {pathname === '/' ? '홈' : 
+               pathname === '/search' ? '통합 검색' :
+               pathname === '/favorites' ? '즐겨찾기' :
+               pathname === '/items' ? '아이템' :
+               pathname === '/npcs' ? 'NPC' :
+               pathname === '/mobs' ? '몬스터' :
+               pathname === '/jobs' ? '직업' :
+               pathname === '/skills' ? '스킬' : ''}
             </Title>
           </Space>
           <ThemeToggle />
@@ -145,15 +201,30 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             width: '100%',
             overflowX: 'hidden',
             overflowY: 'auto',
-            padding: isMobile ? '8px' : '16px'
+            padding: 0,
+            background: currentTheme === 'dark' ? '#000000' : '#f0f2f5'
           }}
         >
           <div style={{ 
-            width: '100%', 
-            maxWidth: '100%', 
-            overflow: 'hidden' 
+            minHeight: '100%',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            {children}
+            <div style={{ 
+              width: '100%', 
+              maxWidth: '100%', 
+              flex: 1,
+              padding: isMobile ? '16px' : '24px'
+            }}>
+              <div style={{
+                maxWidth: '1600px',
+                margin: '0 auto',
+                width: '100%'
+              }}>
+                {children}
+              </div>
+            </div>
+            <Footer />
           </div>
         </Content>
       </Layout>

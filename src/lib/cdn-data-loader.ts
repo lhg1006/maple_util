@@ -40,13 +40,28 @@ export async function loadMonsters(): Promise<Record<number, any>> {
 
   cache.monstersLoading = true;
   try {
-    console.log('📥 몬스터 데이터 로딩 중...');
+    console.log('📥 새로운 몬스터 데이터 로딩 중...');
+    
+    // 우선 최종 몬스터 데이터 시도
+    try {
+      const response = await fetch('/monsters-ultimate.json');
+      if (response.ok) {
+        const data = await response.json();
+        cache.monsters = data;
+        console.log(`✅ 최종 몬스터 데이터 로드 완료: ${Object.keys(data).length}개`);
+        return data;
+      }
+    } catch (error) {
+      console.warn('최종 몬스터 데이터 로드 실패, 기존 CDN 시도 중...');
+    }
+    
+    // 새로운 데이터 실패시 기존 CDN 데이터 사용
     const response = await fetch(`${BASE_URL}/monsters.json`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const data = await response.json();
     cache.monsters = data;
-    console.log(`✅ ${Object.keys(data).length}개 몬스터 로드 완료`);
+    console.log(`✅ CDN 몬스터 데이터 로드 완료: ${Object.keys(data).length}개`);
     return data;
   } catch (error) {
     console.error('몬스터 데이터 로드 실패:', error);
