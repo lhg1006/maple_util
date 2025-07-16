@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { Modal, Spin, Button, Result } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';
@@ -15,6 +15,58 @@ interface ItemDetailModalProps {
 }
 
 export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDetailModalProps) {
+  // 화면 크기 감지
+  const [isMobile, setIsMobile] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // ESC 키 및 키보드 네비게이션 처리
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape':
+          event.preventDefault();
+          onClose();
+          break;
+        case 'Tab':
+          // Tab 키 처리는 기본적으로 브라우저가 처리하도록 둠
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  // 포커스 관리
+  useEffect(() => {
+    if (open && modalRef.current) {
+      // 모달이 열릴 때 포커스를 모달로 이동
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [open, loading]);
+
   // 장비 아이템 판별
   const isEquipment = item?.category && ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'].includes(item.category);
   const isCashItem = item?.cash || false;
@@ -26,7 +78,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
     data: statsData,
     isLoading: isLoadingStats,
     error: statsError,
-    refetch: refetchStats
+    retry: retryStats
   } = useItemStats(item?.id || 0, shouldFetchStats);
 
   // ESC 키로 모달 닫기
@@ -46,8 +98,8 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
 
   // 재시도 핸들러
   const handleRetry = useCallback(() => {
-    refetchStats();
-  }, [refetchStats]);
+    retryStats();
+  }, [retryStats]);
 
   // 디버깅 로그
   useEffect(() => {
@@ -140,33 +192,60 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       destroyOnClose={true}
       keyboard={true} // ESC 키 지원
       focusTriggerAfterClose={false}
+      aria-labelledby="item-modal-title"
+      aria-describedby="item-modal-description"
+      role="dialog"
+      aria-modal="true"
       styles={{
         body: { 
-          padding: 0,
+          padding: typeof window !== 'undefined' && window.innerWidth <= 768 ? '10px' : 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           background: 'transparent',
-          minHeight: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto'
+          minHeight: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto',
+          overflow: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'auto' : 'visible'
         },
         content: { 
           padding: 0,
           background: 'transparent',
           border: 'none',
-          boxShadow: 'none'
+          boxShadow: 'none',
+          maxWidth: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vw' : '1000px',
+          height: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto',
+          borderRadius: typeof window !== 'undefined' && window.innerWidth <= 768 ? 0 : '8px'
         },
         mask: { backgroundColor: 'rgba(0, 0, 0, 0.85)' }
       }}
     >
+      <div ref={modalRef} tabIndex={-1}>
       {(loading || isLoadingStats) ? (
         <div style={{ 
-          padding: '40px', 
-          textAlign: 'center',
-          color: '#fff'
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '60px 40px',
+          color: '#ffffff'
         }}>
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-          <div style={{ marginTop: '12px', color: '#ccc' }}>
+          <Spin 
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />} 
+            size="large"
+          />
+          <div style={{ 
+            marginTop: '20px', 
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
             아이템 정보를 불러오는 중...
+          </div>
+          <div style={{ 
+            marginTop: '8px', 
+            fontSize: '14px',
+            color: '#999',
+            textAlign: 'center'
+          }}>
+            {item?.name && `"${item.name}" 상세 정보 로딩`}
           </div>
         </div>
       ) : statsError ? (
@@ -206,6 +285,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
           onClose={onClose}
         />
       )}
+      </div>
     </Modal>
   );
 }
