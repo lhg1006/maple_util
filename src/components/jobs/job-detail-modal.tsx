@@ -115,7 +115,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({ jobId, open, onC
           <Descriptions.Item label="전직 차수">{getAdvancementName(job.advancement)}</Descriptions.Item>
           {job.weapon && job.weapon.length > 0 && (
             <Descriptions.Item label="사용 가능 무기">
-              {job.weapon.map((weapon, index) => (
+              {job.weapon.map((weapon: any, index: number) => (
                 <Tag key={index} style={{ margin: '2px' }}>{weapon}</Tag>
               ))}
             </Descriptions.Item>

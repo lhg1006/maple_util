@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Typography, Row, Col, Pagination, Select, Spin } from 'antd';
+import { Typography, Row, Col, Pagination, Select, Spin, Switch } from 'antd';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { ItemDetailModal } from '@/components/items/item-detail-modal';
 import { AutocompleteSearch } from '@/components/search/autocomplete-search';
-import { AdvancedFilters, AdvancedFilters as AdvancedFiltersType } from '@/components/search/advanced-filters';
 import { MapleItem } from '@/types/maplestory';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useInfiniteItemsByCategory, useSearchItemsInCategory } from '@/hooks/useMapleData';
@@ -373,15 +372,8 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchInput, setSearchInput] = useState(''); // 검색 입력값
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFiltersType>({
-    levelRange: [0, 300],
-    jobRestriction: [],
-    itemType: 'ALL',
-    hasStats: false,
-    cashOnly: false,
-    questItemsOnly: false
-  });
+  const [excludeCashItems, setExcludeCashItems] = useState(false);
+  const [cashItemsOnly, setCashItemsOnly] = useState(false);
   const pageSize = 24;
   const batchSize = 500;
 
@@ -440,83 +432,18 @@ export default function ItemsPage() {
   }, [infiniteData, isSearchMode, searchResults]);
 
 
-  // 고급 필터링 함수
-  const applyAdvancedFilters = useCallback((item: MapleItem): boolean => {
-    // 레벨 범위 체크
-    const itemLevel = item.requirements?.level || 0;
-    if (itemLevel < advancedFilters.levelRange[0] || itemLevel > advancedFilters.levelRange[1]) {
+  // 캐시 아이템 필터링 함수
+  const applyCashItemFilters = useCallback((item: MapleItem): boolean => {
+    // 캐시 아이템 필터 체크
+    if (excludeCashItems && item.cash) {
       return false;
     }
-
-    // 직업 제한 체크
-    if (advancedFilters.jobRestriction.length > 0 && !advancedFilters.jobRestriction.includes('ALL')) {
-      const itemJob = item.requirements?.job;
-      if (itemJob !== undefined) {
-        const jobMap: Record<number, string> = {
-          0: 'ALL',
-          1: 'WARRIOR',
-          2: 'MAGICIAN', 
-          4: 'ARCHER',
-          8: 'THIEF',
-          16: 'PIRATE'
-        };
-        const itemJobString = jobMap[itemJob] || 'ALL';
-        if (!advancedFilters.jobRestriction.includes(itemJobString) && !advancedFilters.jobRestriction.includes('ALL')) {
-          return false;
-        }
-      }
-    }
-
-    // 아이템 타입 체크
-    if (advancedFilters.itemType !== 'ALL') {
-      const itemCategory = item.category || '';
-      const typeMap: Record<string, string[]> = {
-        'EQUIPMENT': ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'],
-        'CONSUMABLE': ['Consumable', 'Special Scroll', 'Armor Scroll', 'Weapon Scroll'],
-        'ETC': ['Other', 'Crafting', 'Cash Shop'],
-        'CASH': ['Cash']
-      };
-      
-      const allowedCategories = typeMap[advancedFilters.itemType] || [];
-      if (!allowedCategories.some(cat => itemCategory.includes(cat))) {
-        return false;
-      }
-    }
-
-    // 스탯 있는 아이템만
-    if (advancedFilters.hasStats) {
-      const hasStats = !!(item.stats?.str || item.stats?.dex || item.stats?.int || item.stats?.luk ||
-                         item.combat?.attack || item.combat?.magicAttack || item.combat?.defense);
-      if (!hasStats) {
-        return false;
-      }
-    }
-
-    // 가격 범위 체크
-    if (advancedFilters.minPrice !== undefined && item.price && item.price < advancedFilters.minPrice) {
+    if (cashItemsOnly && !item.cash) {
       return false;
-    }
-    if (advancedFilters.maxPrice !== undefined && item.price && item.price > advancedFilters.maxPrice) {
-      return false;
-    }
-
-    // 캐시 아이템만
-    if (advancedFilters.cashOnly && !item.cash) {
-      return false;
-    }
-
-    // 퀘스트 아이템만
-    if (advancedFilters.questItemsOnly) {
-      const isQuestItem = item.description?.toLowerCase().includes('quest') || 
-                         item.name.toLowerCase().includes('quest') ||
-                         item.description?.toLowerCase().includes('퀘스트');
-      if (!isQuestItem) {
-        return false;
-      }
     }
 
     return true;
-  }, [advancedFilters]);
+  }, [excludeCashItems, cashItemsOnly]);
 
   // 필터링된 아이템을 useMemo로 계산
   const filteredItems = useMemo(() => {
@@ -532,8 +459,8 @@ export default function ItemsPage() {
       }
     }
 
-    // 고급 필터 적용
-    filtered = filtered.filter(applyAdvancedFilters);
+    // 캐시 아이템 필터 적용
+    filtered = filtered.filter(applyCashItemFilters);
 
     // 정렬
     filtered.sort((a, b) => {
@@ -548,12 +475,12 @@ export default function ItemsPage() {
     });
 
     return filtered;
-  }, [items, isSearchMode, searchQuery, sortBy, applyAdvancedFilters]);
+  }, [items, isSearchMode, searchQuery, sortBy, applyCashItemFilters]);
 
   // 카테고리나 검색 모드, 필터 변경 시 페이지 리셋
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortBy, category, subCategory, overallCategory, isSearchMode, advancedFilters]);
+  }, [sortBy, category, subCategory, overallCategory, isSearchMode, excludeCashItems, cashItemsOnly]);
 
 
   // 페이지 변경 시 필요하면 자동으로 다음 배치 로드
@@ -1290,18 +1217,41 @@ export default function ItemsPage() {
                     <Option value="name">이름순 (스탯 우선)</Option>
                   </Select>
                 </Col>
+                <Col xs={24} sm={8} md={6}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Switch
+                        checked={excludeCashItems}
+                        onChange={(checked) => {
+                          setExcludeCashItems(checked);
+                          if (checked) {
+                            setCashItemsOnly(false); // 캐시 아이템 제외를 켜면 캐시 아이템만 끄기
+                          }
+                        }}
+                        size="small"
+                      />
+                      <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템 제외</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Switch
+                        checked={cashItemsOnly}
+                        onChange={(checked) => {
+                          setCashItemsOnly(checked);
+                          if (checked) {
+                            setExcludeCashItems(false); // 캐시 아이템만을 켜면 캐시 아이템 제외 끄기
+                          }
+                        }}
+                        size="small"
+                      />
+                      <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템만</span>
+                    </div>
+                  </div>
+                </Col>
               </Row>
             </Col>
           </Row>
         </div>
 
-        {/* 고급 필터 */}
-        <AdvancedFilters
-          filters={advancedFilters}
-          onChange={setAdvancedFilters}
-          visible={showAdvancedFilters}
-          onToggle={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        />
 
         {/* 결과 정보 */}
         <div 

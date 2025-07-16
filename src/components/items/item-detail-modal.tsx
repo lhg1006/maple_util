@@ -145,8 +145,6 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       destroyOnHidden
       aria-labelledby="item-modal-title"
       aria-describedby="item-modal-description"
-      role="dialog"
-      aria-modal="true"
       styles={{
         body: { 
           padding: isMobile ? '10px' : 0,

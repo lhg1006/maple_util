@@ -11,11 +11,10 @@ export interface AdvancedFilters {
   levelRange: [number, number];
   jobRestriction: string[];
   itemType: string;
-  hasStats: boolean;
   minPrice?: number;
   maxPrice?: number;
-  cashOnly: boolean;
-  questItemsOnly: boolean;
+  excludeCashItems: boolean; // 캐시 아이템 제외 토글
+  cashItemsOnly: boolean; // 캐시 아이템만 표시 토글
 }
 
 interface AdvancedFiltersProps {
@@ -190,38 +189,31 @@ export function AdvancedFilters({ filters, onChange, visible, onToggle }: Advanc
           </div>
         </Col>
 
-        {/* 스위치 옵션들 */}
+        {/* 캐시 아이템 필터 */}
         <Col xs={24} sm={12} md={8}>
           <div>
-            <Text strong style={{ fontSize: '14px' }}>추가 옵션</Text>
+            <Text strong style={{ fontSize: '14px' }}>캐시 아이템 필터</Text>
             <div style={{ marginTop: '8px' }}>
               <div style={{ marginBottom: '8px' }}>
                 <Switch
-                  checked={filters.hasStats}
-                  onChange={(checked) => updateFilters('hasStats', checked)}
+                  checked={filters.excludeCashItems}
+                  onChange={(checked) => updateFilters('excludeCashItems', checked)}
                   size="small"
                 />
-                <span style={{ marginLeft: '8px', fontSize: '13px' }}>스탯 있는 아이템만</span>
+                <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템 제외</span>
               </div>
-              <div style={{ marginBottom: '8px' }}>
+              <div>
                 <Switch
-                  checked={filters.cashOnly}
-                  onChange={(checked) => updateFilters('cashOnly', checked)}
+                  checked={filters.cashItemsOnly}
+                  onChange={(checked) => updateFilters('cashItemsOnly', checked)}
                   size="small"
                 />
                 <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템만</span>
               </div>
-              <div>
-                <Switch
-                  checked={filters.questItemsOnly}
-                  onChange={(checked) => updateFilters('questItemsOnly', checked)}
-                  size="small"
-                />
-                <span style={{ marginLeft: '8px', fontSize: '13px' }}>퀘스트 아이템만</span>
-              </div>
             </div>
           </div>
         </Col>
+
 
         {/* 필터 초기화 */}
         <Col xs={24}>
@@ -231,11 +223,10 @@ export function AdvancedFilters({ filters, onChange, visible, onToggle }: Advanc
                 levelRange: [0, 300],
                 jobRestriction: [],
                 itemType: 'ALL',
-                hasStats: false,
                 minPrice: undefined,
                 maxPrice: undefined,
-                cashOnly: false,
-                questItemsOnly: false
+                excludeCashItems: false,
+                cashItemsOnly: false
               })}
               style={{
                 background: 'none',

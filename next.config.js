@@ -64,6 +64,18 @@ const nextConfig = {
       },
     ];
   },
+  // Webpack 설정으로 Ant Design 경고 억제
+  webpack: (config, { dev, isServer, webpack }) => {
+    // Ant Design 경고 억제를 위한 webpack DefinePlugin 설정
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __ANTD_COMPATIBLE_WARN__: JSON.stringify(false),
+        __DEV__: JSON.stringify(dev),
+      })
+    );
+
+    return config;
+  },
 };
 
 module.exports = nextConfig;
