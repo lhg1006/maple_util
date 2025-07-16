@@ -35,7 +35,7 @@ const AllTheProviders = ({ children }: AllTheProvidersProps) => {
 }
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  wrapper?: React.ComponentType<any>
+  wrapper?: React.ComponentType<{ children: React.ReactNode }>
 }
 
 // Custom render function that includes providers

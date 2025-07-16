@@ -5,7 +5,7 @@ import { createMockMapleItem } from '@/__tests__/utils/test-utils'
 // Mock the FavoriteButton component
 jest.mock('@/components/favorites/favorite-button', () => {
   return {
-    FavoriteButton: ({ item, size, type }: any) => (
+    FavoriteButton: ({ item }: { item: { id: number } }) => (
       <button data-testid="favorite-button" data-item-id={item.id}>
         Favorite
       </button>

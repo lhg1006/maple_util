@@ -37,12 +37,12 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
     }
   };
 
-  const getItemImage = () => {
-    if (imageError) return null;
+  const getItemImage = (): string => {
+    if (imageError) return '';
     if (imageVersion !== '389') {
       return `https://maplestory.io/api/KMS/${imageVersion}/item/${item.id}/icon`;
     }
-    return item.icon;
+    return item.icon || '';
   };
 
   // 직업 코드를 직업명으로 변환
@@ -150,15 +150,6 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
     );
   };
 
-  // 요구사항 체크 (0보다 큰 값이 있거나 장비 아이템이면 표시)
-  const hasRequirements = item.requirements && (
-    item.requirements.level > 0 ||
-    item.requirements.str > 0 ||
-    item.requirements.dex > 0 ||
-    item.requirements.int > 0 ||
-    item.requirements.luk > 0 ||
-    (item.category && ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'].includes(item.category))
-  );
 
   // 공격속도 표시 여부 (무기 아이템에만 표시)
   const hasAttackSpeed = (item.weapon?.attackSpeed || stats?.weapon?.attackSpeed || item.enhancement?.attackSpeed || stats?.enhancement?.attackSpeed) && 

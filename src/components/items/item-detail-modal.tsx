@@ -15,20 +15,7 @@ interface ItemDetailModalProps {
 }
 
 export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDetailModalProps) {
-  // 화면 크기 감지
-  const [isMobile, setIsMobile] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // ESC 키 및 키보드 네비게이션 처리
   useEffect(() => {
@@ -192,10 +179,6 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       destroyOnHidden={true}
       keyboard={true} // ESC 키 지원
       focusTriggerAfterClose={false}
-      aria-labelledby="item-modal-title"
-      aria-describedby="item-modal-description"
-      role="dialog"
-      aria-modal="true"
       styles={{
         body: { 
           padding: typeof window !== 'undefined' && window.innerWidth <= 768 ? '10px' : 0,
