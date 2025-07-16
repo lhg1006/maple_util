@@ -189,7 +189,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       footer={null}
       {...modalProps}
       closable={true}
-      destroyOnClose={true}
+      destroyOnHidden={true}
       keyboard={true} // ESC 키 지원
       focusTriggerAfterClose={false}
       aria-labelledby="item-modal-title"
