@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Modal } from 'antd';
+import { Modal, Spin } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';
 import { ItemMapleTooltip } from './item-maple-tooltip';
-import { ItemDetailSkeleton } from './item-detail-skeleton';
 import { ItemErrorState } from './item-error-state';
+import { LoadingOutlined } from '@ant-design/icons';
 
 interface ItemDetailModalProps {
   item: MapleItem | null;
@@ -171,7 +171,37 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
     >
       <div ref={modalRef} tabIndex={-1}>
       {(loading || isLoadingStats) ? (
-        <ItemDetailSkeleton onClose={onClose} />
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '60px 40px',
+          color: '#ffffff',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          borderRadius: '8px',
+          minWidth: '300px'
+        }}>
+          <Spin 
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />} 
+            size="large"
+          />
+          <div style={{ 
+            marginTop: '20px', 
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
+            아이템 정보를 불러오는 중...
+          </div>
+          <div style={{ 
+            marginTop: '8px', 
+            fontSize: '14px',
+            color: '#999',
+            textAlign: 'center'
+          }}>
+            {item?.name && `"${item.name}" 상세 정보 로딩`}
+          </div>
+        </div>
       ) : statsError ? (
         <ItemErrorState
           onRetry={retryStats}
