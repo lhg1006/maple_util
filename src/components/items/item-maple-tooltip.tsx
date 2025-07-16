@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { MapleItem } from '@/types/maplestory';
+import { ImageWithFallback } from '../common/image-with-fallback';
 
 interface ItemMapleTooltipProps {
   item: MapleItem;
@@ -177,13 +178,12 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
       <div className="maple-tooltip-detail-box">
         {/* 좌측: 아이템 아이콘 */}
         <div className="maple-tooltip-icon-section">
-          <img 
+          <ImageWithFallback
             src={item.icon} 
             alt={item.name}
             className="maple-tooltip-icon"
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder-item.png';
-            }}
+            fallbackSrc="/placeholder-item.png"
+            showSpinner={true}
           />
         </div>
 
