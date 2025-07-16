@@ -177,10 +177,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
           alignItems: 'center', 
           justifyContent: 'center',
           padding: '60px 40px',
-          color: '#ffffff',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          borderRadius: '8px',
-          minWidth: '300px'
+          color: '#ffffff'
         }}>
           <Spin 
             indicator={<LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />} 
