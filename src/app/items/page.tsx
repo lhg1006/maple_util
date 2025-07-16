@@ -505,15 +505,27 @@ export default function ItemsPage() {
       } else if (overallCategory === 'Use') {
         setCategory('Consumable');
         setSubCategory('Potion');
+        // 장비가 아닌 카테고리로 변경 시 캐시 필터 리셋
+        setExcludeCashItems(false);
+        setCashItemsOnly(false);
       } else if (overallCategory === 'Setup') {
         setCategory('Other');
         setSubCategory('Chair');
+        // 장비가 아닌 카테고리로 변경 시 캐시 필터 리셋
+        setExcludeCashItems(false);
+        setCashItemsOnly(false);
       } else if (overallCategory === 'Etc') {
         setCategory('Other');
         setSubCategory('Monster Drop');
+        // 장비가 아닌 카테고리로 변경 시 캐시 필터 리셋
+        setExcludeCashItems(false);
+        setCashItemsOnly(false);
       } else if (overallCategory === 'Cash') {
         setCategory('Appearance');
         setSubCategory('Effect');
+        // 장비가 아닌 카테고리로 변경 시 캐시 필터 리셋
+        setExcludeCashItems(false);
+        setCashItemsOnly(false);
       } else {
         setCategory('');
         setSubCategory('');
@@ -1217,36 +1229,39 @@ export default function ItemsPage() {
                     <Option value="name">이름순 (스탯 우선)</Option>
                   </Select>
                 </Col>
-                <Col xs={24} sm={8} md={6}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <Switch
-                        checked={excludeCashItems}
-                        onChange={(checked) => {
-                          setExcludeCashItems(checked);
-                          if (checked) {
-                            setCashItemsOnly(false); // 캐시 아이템 제외를 켜면 캐시 아이템만 끄기
-                          }
-                        }}
-                        size="small"
-                      />
-                      <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템 제외</span>
+                {/* 캐시 아이템 필터 - 장비 카테고리일 때만 표시 */}
+                {overallCategory === 'Equip' && (
+                  <Col xs={24} sm={8} md={6}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Switch
+                          checked={excludeCashItems}
+                          onChange={(checked) => {
+                            setExcludeCashItems(checked);
+                            if (checked) {
+                              setCashItemsOnly(false); // 캐시 아이템 제외를 켜면 캐시 아이템만 끄기
+                            }
+                          }}
+                          size="small"
+                        />
+                        <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템 제외</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Switch
+                          checked={cashItemsOnly}
+                          onChange={(checked) => {
+                            setCashItemsOnly(checked);
+                            if (checked) {
+                              setExcludeCashItems(false); // 캐시 아이템만을 켜면 캐시 아이템 제외 끄기
+                            }
+                          }}
+                          size="small"
+                        />
+                        <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템만</span>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <Switch
-                        checked={cashItemsOnly}
-                        onChange={(checked) => {
-                          setCashItemsOnly(checked);
-                          if (checked) {
-                            setExcludeCashItems(false); // 캐시 아이템만을 켜면 캐시 아이템 제외 끄기
-                          }
-                        }}
-                        size="small"
-                      />
-                      <span style={{ marginLeft: '8px', fontSize: '13px' }}>캐시 아이템만</span>
-                    </div>
-                  </div>
-                </Col>
+                  </Col>
+                )}
               </Row>
             </Col>
           </Row>
