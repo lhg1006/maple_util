@@ -66,7 +66,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
         (focusableElements[0] as HTMLElement).focus();
       }
     }
-  }, [open, loading, statsError]);
+  }, [open, loading]);
 
   // 장비 아이템 판별
   const isEquipment = item?.category && ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'].includes(item.category);
