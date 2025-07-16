@@ -48,11 +48,11 @@ export default function SkillsPage() {
       return [];
     }
 
-    let filtered = allSkills.filter(skill => skill.jobId === selectedJobId);
+    let filtered = allSkills.filter((skill: any) => skill.jobId === selectedJobId);
 
     // 검색어 필터링
     if (searchQuery.length >= 1) {
-      filtered = filtered.filter(skill => 
+      filtered = filtered.filter((skill: any) => 
         skill.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
