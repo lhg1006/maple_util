@@ -4,15 +4,17 @@ import { useState } from 'react';
 import { Row, Col, Card, Tag, Empty, Skeleton } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { FavoriteButton } from '@/components/favorites/favorite-button';
+import { HighlightText } from '@/components/search/highlight-text';
 import { useTheme } from '@/components/providers/theme-provider';
 
 interface ItemListProps {
   items: MapleItem[];
   loading?: boolean;
   onItemClick?: (item: MapleItem) => void;
+  searchQuery?: string; // 검색어 하이라이팅용
 }
 
-export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick }) => {
+export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick, searchQuery }) => {
   const { theme: currentTheme } = useTheme();
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [imageVersions, setImageVersions] = useState<Record<number, string>>({});
@@ -282,7 +284,17 @@ export const ItemList: React.FC<ItemListProps> = ({ items, loading, onItemClick 
                     }}
                     title={item.name}
                   >
-                    {item.name}
+                    <HighlightText 
+                      text={item.name} 
+                      query={searchQuery || ''} 
+                      highlightStyle={{
+                        backgroundColor: currentTheme === 'dark' ? '#fadb14' : '#fffbe6',
+                        color: currentTheme === 'dark' ? '#000000' : '#d48806',
+                        fontWeight: 'bold',
+                        padding: '0 2px',
+                        borderRadius: '2px'
+                      }}
+                    />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
                     {item.category && (

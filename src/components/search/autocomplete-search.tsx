@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Input, List, Spin } from 'antd';
-import { SearchOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Input, List, Spin, Button, Divider } from 'antd';
+import { SearchOutlined, LoadingOutlined, HistoryOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useItemAutocomplete, AutocompleteItem } from '@/hooks/use-item-autocomplete';
+import { useSearchHistory } from '@/hooks/use-search-history';
 import { ImageWithFallback } from '@/components/common/image-with-fallback';
 
 const { Search } = Input;
@@ -48,8 +49,17 @@ export function AutocompleteSearch({
     enabled && inputFocused
   );
 
+  // 검색 히스토리
+  const { history, addSearchQuery, removeSearchQuery, getSuggestions } = useSearchHistory();
+
+  // 히스토리 제안
+  const historySuggestions = getSuggestions(value, 3);
+  
   // 드롭다운 표시 조건
-  const shouldShowDropdown = showDropdown && inputFocused && value.trim().length >= 2 && suggestions.length > 0;
+  const shouldShowDropdown = showDropdown && inputFocused && (
+    (value.trim().length >= 2 && suggestions.length > 0) ||
+    (value.trim().length === 0 && historySuggestions.length > 0)
+  );
 
   // 입력값 변경 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,8 +84,9 @@ export function AutocompleteSearch({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
+        const maxIndex = historySuggestions.length + suggestions.length - 1;
         setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
+          prev < maxIndex ? prev + 1 : prev
         );
         break;
       
@@ -86,15 +97,21 @@ export function AutocompleteSearch({
       
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
-          const selectedItem = suggestions[selectedIndex];
-          onChange(selectedItem.name);
-          onSearch(selectedItem.name);
-          setShowDropdown(false);
-          setSelectedIndex(-1);
+        if (selectedIndex >= 0) {
+          if (selectedIndex < historySuggestions.length) {
+            // 히스토리 항목 선택
+            const selectedQuery = historySuggestions[selectedIndex];
+            handleHistoryClick(selectedQuery);
+          } else {
+            // 자동완성 항목 선택
+            const suggestionIndex = selectedIndex - historySuggestions.length;
+            if (suggestionIndex < suggestions.length) {
+              const selectedItem = suggestions[suggestionIndex];
+              handleSuggestionClick(selectedItem);
+            }
+          }
         } else {
-          onSearch(value);
-          setShowDropdown(false);
+          handleSearchClick();
         }
         break;
       
@@ -113,7 +130,18 @@ export function AutocompleteSearch({
   // 추천 아이템 클릭
   const handleSuggestionClick = (item: AutocompleteItem) => {
     onChange(item.name);
+    addSearchQuery(item.name, `${category} > ${subCategory}`);
     onSearch(item.name);
+    setShowDropdown(false);
+    setSelectedIndex(-1);
+    inputRef.current?.blur();
+  };
+
+  // 히스토리 항목 클릭
+  const handleHistoryClick = (query: string) => {
+    onChange(query);
+    addSearchQuery(query, `${category} > ${subCategory}`);
+    onSearch(query);
     setShowDropdown(false);
     setSelectedIndex(-1);
     inputRef.current?.blur();
@@ -138,6 +166,9 @@ export function AutocompleteSearch({
 
   // 검색 버튼 클릭
   const handleSearchClick = () => {
+    if (value.trim()) {
+      addSearchQuery(value.trim(), `${category} > ${subCategory}`);
+    }
     onSearch(value);
     setShowDropdown(false);
     setSelectedIndex(-1);
@@ -203,45 +234,104 @@ export function AutocompleteSearch({
             overflow: 'auto'
           }}
         >
-          <List
-            size="small"
-            dataSource={suggestions}
-            renderItem={(item, index) => (
-              <List.Item
-                key={item.id}
-                onClick={() => handleSuggestionClick(item)}
-                style={{
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  backgroundColor: selectedIndex === index ? '#f0f8ff' : 'transparent',
-                  borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none'
-                }}
-                onMouseEnter={() => setSelectedIndex(index)}
-              >
-                <List.Item.Meta
-                  avatar={
-                    <ImageWithFallback
-                      src={item.icon}
-                      alt={item.name}
-                      style={{ width: 24, height: 24 }}
-                      fallbackSrc="/placeholder-item.png"
+          {/* 검색 히스토리 (검색어가 없을 때) */}
+          {value.trim().length === 0 && historySuggestions.length > 0 && (
+            <>
+              <div style={{ 
+                padding: '8px 12px', 
+                fontSize: '12px', 
+                color: '#666', 
+                backgroundColor: '#fafafa',
+                borderBottom: '1px solid #f0f0f0',
+                fontWeight: '500'
+              }}>
+                <HistoryOutlined style={{ marginRight: '4px' }} />
+                최근 검색어
+              </div>
+              <List
+                size="small"
+                dataSource={historySuggestions}
+                renderItem={(query, index) => (
+                  <List.Item
+                    key={query}
+                    onClick={() => handleHistoryClick(query)}
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      backgroundColor: selectedIndex === index ? '#f0f8ff' : 'transparent',
+                      borderBottom: index < historySuggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <span style={{ fontSize: '14px' }}>{query}</span>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeSearchQuery(query);
+                      }}
+                      style={{ 
+                        opacity: 0.5,
+                        fontSize: '12px',
+                        padding: '0 4px'
+                      }}
                     />
-                  }
-                  title={
-                    <div style={{ fontSize: '14px', fontWeight: '500' }}>
-                      {highlightMatch(item.name, value)}
-                    </div>
-                  }
-                  description={
-                    <span style={{ fontSize: '12px', color: '#666' }}>
-                      {item.category}
-                      {item.subCategory && ` > ${item.subCategory}`}
-                    </span>
-                  }
-                />
-              </List.Item>
-            )}
-          />
+                  </List.Item>
+                )}
+              />
+            </>
+          )}
+
+          {/* 자동완성 아이템 (검색어가 있을 때) */}
+          {value.trim().length >= 2 && suggestions.length > 0 && (
+            <>
+              {historySuggestions.length > 0 && <Divider style={{ margin: 0 }} />}
+              <List
+                size="small"
+                dataSource={suggestions}
+                renderItem={(item, index) => (
+                  <List.Item
+                    key={item.id}
+                    onClick={() => handleSuggestionClick(item)}
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      backgroundColor: selectedIndex === (historySuggestions.length + index) ? '#f0f8ff' : 'transparent',
+                      borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none'
+                    }}
+                    onMouseEnter={() => setSelectedIndex(historySuggestions.length + index)}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <ImageWithFallback
+                          src={item.icon}
+                          alt={item.name}
+                          style={{ width: 24, height: 24 }}
+                          fallbackSrc="/placeholder-item.png"
+                        />
+                      }
+                      title={
+                        <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                          {highlightMatch(item.name, value)}
+                        </div>
+                      }
+                      description={
+                        <span style={{ fontSize: '12px', color: '#666' }}>
+                          {item.category}
+                          {item.subCategory && ` > ${item.subCategory}`}
+                        </span>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </>
+          )}
           
           {/* 로딩 상태 */}
           {isAutocompleteLoading && (

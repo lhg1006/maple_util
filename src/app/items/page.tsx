@@ -1276,7 +1276,12 @@ export default function ItemsPage() {
 
         {/* 아이템 리스트 */}
         <div style={{ marginBottom: '4px' }}>
-          <ItemList items={paginatedItems} loading={isLoading || isSearchLoading || isFetchingNextPage} onItemClick={handleItemClick} />
+          <ItemList 
+            items={paginatedItems} 
+            loading={isLoading || isSearchLoading || isFetchingNextPage} 
+            onItemClick={handleItemClick}
+            searchQuery={searchQuery}
+          />
           
           
         </div>
