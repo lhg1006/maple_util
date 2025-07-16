@@ -171,7 +171,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
     >
       <div ref={modalRef} tabIndex={-1}>
       {(loading || isLoadingStats) ? (
-        <ItemDetailSkeleton />
+        <ItemDetailSkeleton onClose={onClose} />
       ) : statsError ? (
         <ItemErrorState
           onRetry={retryStats}
