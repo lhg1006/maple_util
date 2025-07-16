@@ -41,7 +41,7 @@ export default function JobsPage() {
 
     // 검색어 필터링
     if (searchQuery.length >= 1) {
-      filtered = filtered.filter(job => 
+      filtered = filtered.filter((job: any) => 
         job.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }

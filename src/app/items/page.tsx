@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Typography, Row, Col, Pagination, Input, Select, Spin } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Typography, Row, Col, Pagination, Select, Spin } from 'antd';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
 import { ItemDetailModal } from '@/components/items/item-detail-modal';
+import { AutocompleteSearch } from '@/components/search/autocomplete-search';
 import { MapleItem } from '@/types/maplestory';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useInfiniteItemsByCategory, useSearchItemsInCategory } from '@/hooks/useMapleData';
 
 const { Title, Paragraph } = Typography;
-const { Search } = Input;
 const { Option } = Select;
 
 // 카테고리 옵션
@@ -521,21 +520,12 @@ export default function ItemsPage() {
     }
   };
 
-  // 검색 입력 핸들러 (검색은 실행하지 않고 상태만 업데이트)
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  };
-
-  // Enter 키 핸들러
+  // Enter 키 핸들러 (자동완성에서 사용)
   const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    // 자동완성 컴포넌트에서 처리하므로 여기서는 기본 동작만
+    if (e.key === 'Enter' && !e.defaultPrevented) {
       handleManualSearch(searchInput);
     }
-  };
-
-  // 검색 버튼 클릭 핸들러
-  const handleSearchButtonClick = () => {
-    handleManualSearch(searchInput);
   };
 
   const handleItemClick = (item: MapleItem) => {
@@ -1184,15 +1174,17 @@ export default function ItemsPage() {
             <Col span={24}>
               <Row gutter={[16, 16]} align="middle">
                 <Col xs={24} sm={16} md={12}>
-                  <Search
-                    placeholder="아이템 이름을 검색하세요 (Enter 또는 검색 버튼 클릭)"
-                    allowClear
-                    enterButton={<SearchOutlined />}
-                    size="large"
+                  <AutocompleteSearch
+                    placeholder="아이템 이름을 검색하세요 (자동완성 지원)"
                     value={searchInput}
-                    onChange={handleSearchInputChange}
+                    onChange={setSearchInput}
+                    onSearch={handleManualSearch}
                     onKeyPress={handleSearchKeyPress}
-                    onSearch={handleSearchButtonClick}
+                    overallCategory={overallCategory}
+                    category={category}
+                    subCategory={subCategory}
+                    enabled={!!(overallCategory && category && subCategory)}
+                    size="large"
                   />
                 </Col>
                 <Col xs={24} sm={8} md={6}>
