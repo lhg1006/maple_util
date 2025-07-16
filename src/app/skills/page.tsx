@@ -72,7 +72,7 @@ export default function SkillsPage() {
 
   // 선택된 직업 정보
   const selectedJob = useMemo(() => {
-    return allJobs.find(job => job.id === selectedJobId);
+    return allJobs.find((job: any) => job.id === selectedJobId);
   }, [allJobs, selectedJobId]);
 
   // 스킬 클릭 핸들러
