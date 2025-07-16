@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Modal, Spin } from 'antd';
+import React, { useEffect, useCallback } from 'react';
+import { Modal, Spin, Button, Result } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';
 import { ItemMapleTooltip } from './item-maple-tooltip';
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 
 interface ItemDetailModalProps {
   item: MapleItem | null;
@@ -24,8 +24,30 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
   // API에서 실시간 스탯 정보 가져오기
   const {
     data: statsData,
-    isLoading: isLoadingStats
+    isLoading: isLoadingStats,
+    error: statsError,
+    refetch: refetchStats
   } = useItemStats(item?.id || 0, shouldFetchStats);
+
+  // ESC 키로 모달 닫기
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape' && open) {
+      onClose();
+    }
+  }, [open, onClose]);
+
+  // 키보드 이벤트 리스너 추가
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // 재시도 핸들러
+  const handleRetry = useCallback(() => {
+    refetchStats();
+  }, [refetchStats]);
 
   // 디버깅 로그
   useEffect(() => {
@@ -77,22 +99,55 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
 
   if (!item || !enhancedItem) return null;
 
+  // 반응형 모달 설정
+  const getModalProps = () => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 768;
+      const isTablet = window.innerWidth <= 1024;
+      
+      if (isMobile) {
+        return {
+          width: '100vw',
+          height: '100vh',
+          style: { top: 0, margin: 0, maxWidth: '100vw' },
+          centered: false,
+        };
+      } else if (isTablet) {
+        return {
+          width: '90vw',
+          centered: true,
+        };
+      } else {
+        return {
+          width: 1000,
+          centered: true,
+        };
+      }
+    }
+    return { width: 1000, centered: true };
+  };
+
+  const modalProps = getModalProps();
+
   return (
     <Modal
       title={null}
       open={open}
       onCancel={onClose}
       footer={null}
-      width={1000}
-      centered
-      closable={false}
+      {...modalProps}
+      closable={true}
+      destroyOnClose={true}
+      keyboard={true} // ESC 키 지원
+      focusTriggerAfterClose={false}
       styles={{
         body: { 
           padding: 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: 'transparent'
+          background: 'transparent',
+          minHeight: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto'
         },
         content: { 
           padding: 0,
@@ -104,11 +159,45 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       }}
     >
       {(loading || isLoadingStats) ? (
-        <div style={{ padding: '40px', textAlign: 'center' }}>
+        <div style={{ 
+          padding: '40px', 
+          textAlign: 'center',
+          color: '#fff'
+        }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-          <div style={{ marginTop: '12px', color: '#666' }}>
+          <div style={{ marginTop: '12px', color: '#ccc' }}>
             아이템 정보를 불러오는 중...
           </div>
+        </div>
+      ) : statsError ? (
+        <div style={{ 
+          padding: '40px', 
+          textAlign: 'center',
+          maxWidth: '400px',
+          margin: '0 auto'
+        }}>
+          <Result
+            status="error"
+            title="아이템 정보를 불러올 수 없습니다"
+            subTitle="네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요."
+            extra={[
+              <Button 
+                key="retry" 
+                type="primary" 
+                icon={<ReloadOutlined />}
+                onClick={handleRetry}
+              >
+                다시 시도
+              </Button>,
+              <Button key="close" onClick={onClose}>
+                닫기
+              </Button>
+            ]}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.95)',
+              borderRadius: '8px'
+            }}
+          />
         </div>
       ) : (
         <ItemMapleTooltip 

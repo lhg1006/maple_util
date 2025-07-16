@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MapleItem } from '@/types/maplestory';
 
 interface ItemMapleTooltipProps {
@@ -8,6 +8,43 @@ interface ItemMapleTooltipProps {
 }
 
 export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats, onClose }) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageVersion, setImageVersion] = useState('389');
+
+  // 이미지 fallback 처리
+  const getFallbackImage = () => {
+    // 카테고리별 기본 이미지
+    const category = item.category?.toLowerCase();
+    if (category?.includes('weapon')) return '⚔️';
+    if (category?.includes('armor')) return '🛡️';
+    if (category?.includes('accessory')) return '💍';
+    if (category?.includes('use')) return '🧪';
+    if (category?.includes('etc')) return '📦';
+    return '❓'; // 기본 아이콘
+  };
+
+  const handleImageError = () => {
+    const versions = ['389', '284', '283', '285'];
+    const currentIndex = versions.indexOf(imageVersion);
+    
+    if (currentIndex < versions.length - 1) {
+      // 다음 버전 시도
+      const nextVersion = versions[currentIndex + 1];
+      setImageVersion(nextVersion);
+    } else {
+      // 모든 버전 실패
+      setImageError(true);
+    }
+  };
+
+  const getItemImage = () => {
+    if (imageError) return null;
+    if (imageVersion !== '389') {
+      return `https://maplestory.io/api/KMS/${imageVersion}/item/${item.id}/icon`;
+    }
+    return item.icon;
+  };
+
   // 직업 코드를 직업명으로 변환
   const getJobName = (jobCode: number): string => {
     switch (jobCode) {
@@ -177,14 +214,33 @@ export const ItemMapleTooltip: React.FC<ItemMapleTooltipProps> = ({ item, stats,
       <div className="maple-tooltip-detail-box">
         {/* 좌측: 아이템 아이콘 */}
         <div className="maple-tooltip-icon-section">
-          <img 
-            src={item.icon} 
-            alt={item.name}
-            className="maple-tooltip-icon"
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder-item.png';
-            }}
-          />
+          {imageError ? (
+            <div 
+              className="maple-tooltip-icon-fallback"
+              style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '4px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              title={`${item.name} (이미지 없음)`}
+            >
+              {getFallbackImage()}
+            </div>
+          ) : (
+            <img 
+              src={getItemImage()} 
+              alt={item.name}
+              className="maple-tooltip-icon"
+              onError={handleImageError}
+              loading="lazy"
+            />
+          )}
         </div>
 
         {/* 우측: 스탯 정보 */}
