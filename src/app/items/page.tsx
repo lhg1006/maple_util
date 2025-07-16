@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Typography, Row, Col, Pagination, Select, Spin } from 'antd';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
@@ -441,7 +441,7 @@ export default function ItemsPage() {
 
 
   // 고급 필터링 함수
-  const applyAdvancedFilters = (item: MapleItem): boolean => {
+  const applyAdvancedFilters = useCallback((item: MapleItem): boolean => {
     // 레벨 범위 체크
     const itemLevel = item.requirements?.level || 0;
     if (itemLevel < advancedFilters.levelRange[0] || itemLevel > advancedFilters.levelRange[1]) {
@@ -516,7 +516,7 @@ export default function ItemsPage() {
     }
 
     return true;
-  };
+  }, [advancedFilters]);
 
   // 필터링된 아이템을 useMemo로 계산
   const filteredItems = useMemo(() => {
@@ -548,7 +548,7 @@ export default function ItemsPage() {
     });
 
     return filtered;
-  }, [items, isSearchMode, searchQuery, sortBy, advancedFilters]);
+  }, [items, isSearchMode, searchQuery, sortBy, applyAdvancedFilters]);
 
   // 카테고리나 검색 모드, 필터 변경 시 페이지 리셋
   useEffect(() => {

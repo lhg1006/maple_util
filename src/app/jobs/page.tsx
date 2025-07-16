@@ -48,12 +48,12 @@ export default function JobsPage() {
 
     // 카테고리 필터링
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(job => job.category === selectedCategory);
+      filtered = filtered.filter((job: any) => job.category === selectedCategory);
     }
 
     // 전직 차수 필터링
     if (selectedAdvancement !== 'all') {
-      filtered = filtered.filter(job => job.advancement === selectedAdvancement);
+      filtered = filtered.filter((job: any) => job.advancement === selectedAdvancement);
     }
 
     return filtered;
@@ -104,7 +104,7 @@ export default function JobsPage() {
           <Col xs={24} sm={8} md={6}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#722ed1' }}>
-                {new Set(allJobs.map(job => job.category)).size}
+                {new Set(allJobs.map((job: any) => job.category)).size}
               </div>
               <div style={{ fontSize: '12px', color: '#666' }}>직업 계열</div>
             </Card>
