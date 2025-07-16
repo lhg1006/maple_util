@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Spin } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';
 import { ItemMapleTooltip } from './item-maple-tooltip';
+import { ItemErrorState } from './item-error-state';
 import { LoadingOutlined } from '@ant-design/icons';
 
 interface ItemDetailModalProps {
@@ -15,6 +16,58 @@ interface ItemDetailModalProps {
 }
 
 export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDetailModalProps) {
+  // 화면 크기 감지
+  const [isMobile, setIsMobile] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // ESC 키 및 키보드 네비게이션 처리
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape':
+          event.preventDefault();
+          onClose();
+          break;
+        case 'Tab':
+          // Tab 키 처리는 기본적으로 브라우저가 처리하도록 둠
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  // 포커스 관리
+  useEffect(() => {
+    if (open && modalRef.current) {
+      // 모달이 열릴 때 포커스를 모달로 이동
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [open, loading]);
+
   // 장비 아이템 판별
   const isEquipment = item?.category && ['Accessory', 'Armor', 'One-Handed Weapon', 'Two-Handed Weapon', 'Secondary Weapon'].includes(item.category);
   const isCashItem = item?.cash || false;
@@ -24,7 +77,9 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
   // API에서 실시간 스탯 정보 가져오기
   const {
     data: statsData,
-    isLoading: isLoadingStats
+    isLoading: isLoadingStats,
+    error: statsError,
+    retry: retryStats
   } = useItemStats(item?.id || 0, shouldFetchStats);
 
   // 디버깅 로그
@@ -83,33 +138,73 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       open={open}
       onCancel={onClose}
       footer={null}
-      width={1000}
-      centered
+      width={isMobile ? '100vw' : 1000}
+      height={isMobile ? '100vh' : 'auto'}
+      centered={!isMobile}
       closable={false}
+      destroyOnHidden
+      aria-labelledby="item-modal-title"
+      aria-describedby="item-modal-description"
+      role="dialog"
+      aria-modal="true"
       styles={{
         body: { 
-          padding: 0,
+          padding: isMobile ? '10px' : 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: 'transparent'
+          background: 'transparent',
+          height: isMobile ? '100vh' : 'auto',
+          overflow: isMobile ? 'auto' : 'visible'
         },
         content: { 
           padding: 0,
           background: 'transparent',
           border: 'none',
-          boxShadow: 'none'
+          boxShadow: 'none',
+          maxWidth: isMobile ? '100vw' : '1000px',
+          height: isMobile ? '100vh' : 'auto',
+          borderRadius: isMobile ? 0 : '8px'
         },
         mask: { backgroundColor: 'rgba(0, 0, 0, 0.85)' }
       }}
     >
+      <div ref={modalRef} tabIndex={-1}>
       {(loading || isLoadingStats) ? (
-        <div style={{ padding: '40px', textAlign: 'center' }}>
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-          <div style={{ marginTop: '12px', color: '#666' }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          padding: '60px 40px',
+          color: '#ffffff'
+        }}>
+          <Spin 
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />} 
+            size="large"
+          />
+          <div style={{ 
+            marginTop: '20px', 
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
             아이템 정보를 불러오는 중...
           </div>
+          <div style={{ 
+            marginTop: '8px', 
+            fontSize: '14px',
+            color: '#999',
+            textAlign: 'center'
+          }}>
+            {item?.name && `"${item.name}" 상세 정보 로딩`}
+          </div>
         </div>
+      ) : statsError ? (
+        <ItemErrorState
+          onRetry={retryStats}
+          message={`아이템 "${item?.name || 'Unknown'}"의 상세 정보를 불러올 수 없습니다.`}
+          title="데이터 로딩 실패"
+        />
       ) : (
         <ItemMapleTooltip 
           item={enhancedItem} 
@@ -117,6 +212,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
           onClose={onClose}
         />
       )}
+      </div>
     </Modal>
   );
 }
