@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Modal, Spin } from 'antd';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
+import { Modal, Spin, Button, Result } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';
 import { ItemMapleTooltip } from './item-maple-tooltip';
-import { ItemErrorState } from './item-error-state';
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 
 interface ItemDetailModalProps {
   item: MapleItem | null;
@@ -82,6 +81,26 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
     retry: retryStats
   } = useItemStats(item?.id || 0, shouldFetchStats);
 
+  // ESC 키로 모달 닫기
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape' && open) {
+      onClose();
+    }
+  }, [open, onClose]);
+
+  // 키보드 이벤트 리스너 추가
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // 재시도 핸들러
+  const handleRetry = useCallback(() => {
+    retryStats();
+  }, [retryStats]);
+
   // 디버깅 로그
   useEffect(() => {
     if (open && item) {
@@ -132,39 +151,69 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
 
   if (!item || !enhancedItem) return null;
 
+  // 반응형 모달 설정
+  const getModalProps = () => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 768;
+      const isTablet = window.innerWidth <= 1024;
+      
+      if (isMobile) {
+        return {
+          width: '100vw',
+          height: '100vh',
+          style: { top: 0, margin: 0, maxWidth: '100vw' },
+          centered: false,
+        };
+      } else if (isTablet) {
+        return {
+          width: '90vw',
+          centered: true,
+        };
+      } else {
+        return {
+          width: 1000,
+          centered: true,
+        };
+      }
+    }
+    return { width: 1000, centered: true };
+  };
+
+  const modalProps = getModalProps();
+
   return (
     <Modal
       title={null}
       open={open}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? '100vw' : 1000}
-      height={isMobile ? '100vh' : 'auto'}
-      centered={!isMobile}
-      closable={false}
-      destroyOnHidden
+      {...modalProps}
+      closable={true}
+      destroyOnClose={true}
+      keyboard={true} // ESC 키 지원
+      focusTriggerAfterClose={false}
       aria-labelledby="item-modal-title"
       aria-describedby="item-modal-description"
       role="dialog"
       aria-modal="true"
       styles={{
         body: { 
-          padding: isMobile ? '10px' : 0,
+          padding: typeof window !== 'undefined' && window.innerWidth <= 768 ? '10px' : 0,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           background: 'transparent',
-          height: isMobile ? '100vh' : 'auto',
-          overflow: isMobile ? 'auto' : 'visible'
+          minHeight: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto',
+          overflow: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'auto' : 'visible'
         },
         content: { 
           padding: 0,
           background: 'transparent',
           border: 'none',
           boxShadow: 'none',
-          maxWidth: isMobile ? '100vw' : '1000px',
-          height: isMobile ? '100vh' : 'auto',
-          borderRadius: isMobile ? 0 : '8px'
+          maxWidth: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vw' : '1000px',
+          height: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100vh' : 'auto',
+          borderRadius: typeof window !== 'undefined' && window.innerWidth <= 768 ? 0 : '8px'
         },
         mask: { backgroundColor: 'rgba(0, 0, 0, 0.85)' }
       }}
@@ -200,11 +249,35 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
           </div>
         </div>
       ) : statsError ? (
-        <ItemErrorState
-          onRetry={retryStats}
-          message={`아이템 "${item?.name || 'Unknown'}"의 상세 정보를 불러올 수 없습니다.`}
-          title="데이터 로딩 실패"
-        />
+        <div style={{ 
+          padding: '40px', 
+          textAlign: 'center',
+          maxWidth: '400px',
+          margin: '0 auto'
+        }}>
+          <Result
+            status="error"
+            title="아이템 정보를 불러올 수 없습니다"
+            subTitle="네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요."
+            extra={[
+              <Button 
+                key="retry" 
+                type="primary" 
+                icon={<ReloadOutlined />}
+                onClick={handleRetry}
+              >
+                다시 시도
+              </Button>,
+              <Button key="close" onClick={onClose}>
+                닫기
+              </Button>
+            ]}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.95)',
+              borderRadius: '8px'
+            }}
+          />
+        </div>
       ) : (
         <ItemMapleTooltip 
           item={enhancedItem} 

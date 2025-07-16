@@ -41,19 +41,19 @@ export default function JobsPage() {
 
     // 검색어 필터링
     if (searchQuery.length >= 1) {
-      filtered = filtered.filter(job => 
+      filtered = filtered.filter((job: any) => 
         job.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // 카테고리 필터링
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(job => job.category === selectedCategory);
+      filtered = filtered.filter((job: any) => job.category === selectedCategory);
     }
 
     // 전직 차수 필터링
     if (selectedAdvancement !== 'all') {
-      filtered = filtered.filter(job => job.advancement === selectedAdvancement);
+      filtered = filtered.filter((job: any) => job.advancement === selectedAdvancement);
     }
 
     return filtered;
@@ -104,7 +104,7 @@ export default function JobsPage() {
           <Col xs={24} sm={8} md={6}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#722ed1' }}>
-                {new Set(allJobs.map(job => job.category)).size}
+                {new Set(allJobs.map((job: any) => job.category)).size}
               </div>
               <div style={{ fontSize: '12px', color: '#666' }}>직업 계열</div>
             </Card>
@@ -112,7 +112,7 @@ export default function JobsPage() {
           <Col xs={24} sm={8} md={6}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#fa8c16' }}>
-                {Math.max(...allJobs.map(job => job.advancement))}
+                {Math.max(...allJobs.map((job: any) => job.advancement))}
               </div>
               <div style={{ fontSize: '12px', color: '#666' }}>최대 전직</div>
             </Card>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Typography, Row, Col, Pagination, Input, Select, Spin } from 'antd';
+import { Typography, Row, Col, Pagination, Input, Select, Spin, Switch } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ItemList } from '@/components/items/item-list';
@@ -319,10 +319,15 @@ const ITEM_CATEGORIES = {
     { value: 'Wedding', label: '결혼' },
   ],
   cashEquipmentModificationSubCategories: [
+    { value: 'Cube', label: '큐브' },
+    { value: 'Enhancement', label: '강화' },
+    { value: 'Karma', label: '카르마' },
     { value: 'Miracle Cube', label: '미라클 큐브' },
-    { value: 'Other', label: '기타' },
+    { value: 'Potential Stamp', label: '잠재능력 인장' },
+    { value: 'Safety Charm', label: '안전 부적' },
     { value: 'Scroll', label: '주문서' },
     { value: 'Trade', label: '거래' },
+    { value: 'Other', label: '기타' },
   ],
   cashFreeMarketSubCategories: [
     { value: 'Hired Merchant', label: '고용상인' },
@@ -340,10 +345,20 @@ const ITEM_CATEGORIES = {
     { value: 'Weather Effect', label: '날씨 이펙트' },
   ],
   cashMiscellaneousSubCategories: [
+    { value: 'Cash Bag', label: '캐시 가방' },
+    { value: 'Friendship Item', label: '우정 아이템' },
+    { value: 'Gift Box', label: '선물 상자' },
+    { value: 'Medal', label: '메달' },
+    { value: 'Quest Item', label: '퀘스트 아이템' },
+    { value: 'Special Event', label: '특별 이벤트' },
     { value: 'Other', label: '기타' },
   ],
   cashPetSubCategories: [
+    { value: 'Pet Equipment', label: '펫 장비' },
     { value: 'Pet Food', label: '펫 사료' },
+    { value: 'Pet Name Tag', label: '펫 이름표' },
+    { value: 'Pet Revival', label: '펫 부활' },
+    { value: 'Pet Skill', label: '펫 스킬' },
     { value: 'Pet Use', label: '펫 용품' },
   ],
   cashRandomRewardSubCategories: [
@@ -357,7 +372,11 @@ const ITEM_CATEGORIES = {
     { value: 'Teleport Rock', label: '텔레포트 록' },
   ],
   cashWeaponSubCategories: [
+    { value: 'Melee Weapon', label: '근접 무기' },
+    { value: 'Ranged Weapon', label: '원거리 무기' },
+    { value: 'Special Weapon', label: '특수 무기' },
     { value: 'Thrown', label: '투척' },
+    { value: 'Weapon Skin', label: '무기 스킨' },
   ],
 };
 
@@ -373,6 +392,10 @@ export default function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchInput, setSearchInput] = useState(''); // 검색 입력값
+  
+  // 캐시 아이템 필터 상태
+  const [excludeCashItems, setExcludeCashItems] = useState(false);
+  const [cashItemsOnly, setCashItemsOnly] = useState(false);
   const pageSize = 24;
   const batchSize = 500;
 
@@ -445,6 +468,15 @@ export default function ItemsPage() {
       }
     }
 
+    // 캐시 아이템 필터링 (장비 카테고리일 때만 적용)
+    if (overallCategory === 'Equip') {
+      if (excludeCashItems) {
+        filtered = filtered.filter(item => !item.cash);
+      } else if (cashItemsOnly) {
+        filtered = filtered.filter(item => item.cash);
+      }
+    }
+
     // 정렬
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -458,12 +490,17 @@ export default function ItemsPage() {
     });
 
     return filtered;
-  }, [items, isSearchMode, searchQuery, sortBy]);
+  }, [items, isSearchMode, searchQuery, sortBy, overallCategory, excludeCashItems, cashItemsOnly]);
 
   // 카테고리나 검색 모드 변경 시 페이지 리셋
   useEffect(() => {
     setCurrentPage(1);
   }, [sortBy, category, subCategory, overallCategory, isSearchMode]);
+
+  // 캐시 아이템 필터 변경 시 페이지 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [excludeCashItems, cashItemsOnly]);
 
 
   // 페이지 변경 시 필요하면 자동으로 다음 배치 로드
@@ -536,6 +573,21 @@ export default function ItemsPage() {
   // 검색 버튼 클릭 핸들러
   const handleSearchButtonClick = () => {
     handleManualSearch(searchInput);
+  };
+
+  // 캐시 아이템 필터 핸들러 (상호 배타적)
+  const handleExcludeCashItemsChange = (checked: boolean) => {
+    setExcludeCashItems(checked);
+    if (checked) {
+      setCashItemsOnly(false); // 캐시아이템 제외를 켜면 캐시아이템만 끄기
+    }
+  };
+
+  const handleCashItemsOnlyChange = (checked: boolean) => {
+    setCashItemsOnly(checked);
+    if (checked) {
+      setExcludeCashItems(false); // 캐시아이템만을 켜면 캐시아이템 제외 끄기
+    }
   };
 
   const handleItemClick = (item: MapleItem) => {
@@ -1179,6 +1231,7 @@ export default function ItemsPage() {
                 )}
               </Row>
             </Col>
+
             
             {/* 검색 및 정렬 */}
             <Col span={24}>
@@ -1207,6 +1260,32 @@ export default function ItemsPage() {
                     <Option value="name">이름순 (스탯 우선)</Option>
                   </Select>
                 </Col>
+                
+                {/* 캐시 아이템 토글 (장비 카테고리일 때만 표시) */}
+                {overallCategory === 'Equip' && (
+                  <>
+                    <Col xs={12} sm={6} md={3}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Switch 
+                          checked={excludeCashItems}
+                          onChange={handleExcludeCashItemsChange}
+                          size="default"
+                        />
+                        <span style={{ fontSize: '14px' }}>캐시아이템 제외</span>
+                      </div>
+                    </Col>
+                    <Col xs={12} sm={6} md={3}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Switch 
+                          checked={cashItemsOnly}
+                          onChange={handleCashItemsOnlyChange}
+                          size="default"
+                        />
+                        <span style={{ fontSize: '14px' }}>캐시아이템만</span>
+                      </div>
+                    </Col>
+                  </>
+                )}
               </Row>
             </Col>
           </Row>

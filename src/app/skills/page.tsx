@@ -48,23 +48,23 @@ export default function SkillsPage() {
       return [];
     }
 
-    let filtered = allSkills.filter(skill => skill.jobId === selectedJobId);
+    let filtered = allSkills.filter((skill: any) => skill.jobId === selectedJobId);
 
     // 검색어 필터링
     if (searchQuery.length >= 1) {
-      filtered = filtered.filter(skill => 
+      filtered = filtered.filter((skill: any) => 
         skill.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // 타입 필터링
     if (selectedType !== 'all') {
-      filtered = filtered.filter(skill => skill.type === selectedType);
+      filtered = filtered.filter((skill: any) => skill.type === selectedType);
     }
 
     // 속성 필터링
     if (selectedElement !== 'all') {
-      filtered = filtered.filter(skill => skill.element === selectedElement);
+      filtered = filtered.filter((skill: any) => skill.element === selectedElement);
     }
 
     return filtered;
@@ -72,7 +72,7 @@ export default function SkillsPage() {
 
   // 선택된 직업 정보
   const selectedJob = useMemo(() => {
-    return allJobs.find(job => job.id === selectedJobId);
+    return allJobs.find((job: any) => job.id === selectedJobId);
   }, [allJobs, selectedJobId]);
 
   // 스킬 클릭 핸들러
