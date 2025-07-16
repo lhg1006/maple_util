@@ -112,7 +112,7 @@ export default function JobsPage() {
           <Col xs={24} sm={8} md={6}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#fa8c16' }}>
-                {Math.max(...allJobs.map(job => job.advancement))}
+                {Math.max(...allJobs.map((job: any) => job.advancement))}
               </div>
               <div style={{ fontSize: '12px', color: '#666' }}>최대 전직</div>
             </Card>
