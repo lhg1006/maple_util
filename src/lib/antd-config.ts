@@ -1,19 +1,29 @@
 // Ant Design 설정 및 경고 억제
 
-// React 19 경고 억제
+// React 19 경고 억제 (클라이언트와 서버 모두)
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  // Ant Design React 호환성 경고 필터링
+  const message = args[0];
+  if (typeof message === 'string') {
+    if (message.includes('antd v5 support React is 16 ~ 18') ||
+        message.includes('antd: compatible') ||
+        message.includes('see https://u.ant.design/v5-for-19')) {
+      return; // 경고 무시
+    }
+  }
+  originalWarn(...args);
+};
+
+// 브라우저 환경에서 추가 설정
 if (typeof window !== 'undefined') {
-  // 브라우저 환경에서만 실행
-  const originalWarn = console.warn;
-  console.warn = (...args) => {
-    // Ant Design React 호환성 경고 필터링
-    if (args[0]?.includes?.('antd v5 support React is 16 ~ 18')) {
-      return;
+  // 전역 경고 억제
+  window.addEventListener('error', (e) => {
+    if (e.message?.includes('antd v5 support React')) {
+      e.preventDefault();
+      return false;
     }
-    if (args[0]?.includes?.('compatible')) {
-      return;
-    }
-    originalWarn(...args);
-  };
+  });
 }
 
 // Ant Design 기본 설정

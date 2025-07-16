@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AntdRegistry } from '@ant-design/nextjs-registry';
+import { AntdProvider } from '@/components/providers/antd-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { PWAProvider } from '@/components/providers/pwa-provider';
@@ -74,13 +74,13 @@ export default function RootLayout({
         style={{ margin: 0, padding: 0, height: '100%' }}
       >
         <QueryProvider>
-          <AntdRegistry>
+          <AntdProvider>
             <ThemeProvider>
               <PWAProvider>
                 {children}
               </PWAProvider>
             </ThemeProvider>
-          </AntdRegistry>
+          </AntdProvider>
         </QueryProvider>
       </body>
     </html>

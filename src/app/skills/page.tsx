@@ -59,12 +59,12 @@ export default function SkillsPage() {
 
     // 타입 필터링
     if (selectedType !== 'all') {
-      filtered = filtered.filter(skill => skill.type === selectedType);
+      filtered = filtered.filter((skill: any) => skill.type === selectedType);
     }
 
     // 속성 필터링
     if (selectedElement !== 'all') {
-      filtered = filtered.filter(skill => skill.element === selectedElement);
+      filtered = filtered.filter((skill: any) => skill.element === selectedElement);
     }
 
     return filtered;

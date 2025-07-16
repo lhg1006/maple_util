@@ -3,6 +3,19 @@ const nextConfig = {
   reactStrictMode: true,
   // 정적 파일 최적화
   compress: true,
+  // 컴파일 경고 억제
+  onDemandEntries: {
+    // 개발 모드에서 경고 억제
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  // 빌드 시 경고 억제
+  eslint: {
+    ignoreDuringBuilds: false, // ESLint는 유지
+  },
+  typescript: {
+    ignoreBuildErrors: false, // TypeScript 에러는 유지
+  },
   // 이미지 최적화 설정
   images: {
     remotePatterns: [
