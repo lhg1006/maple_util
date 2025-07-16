@@ -142,7 +142,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       height={isMobile ? '100vh' : 'auto'}
       centered={!isMobile}
       closable={false}
-      destroyOnClose
+      destroyOnHidden
       aria-labelledby="item-modal-title"
       aria-describedby="item-modal-description"
       role="dialog"
