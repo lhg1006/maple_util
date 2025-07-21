@@ -18,7 +18,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
       title={
         <Space>
           <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-          <span className="text-gray-800 dark:text-gray-100">저작권 안내 및 이용약관</span>
+          <span style={{ color: '#ffffffd9' }}>저작권 안내 및 이용약관</span>
         </Space>
       }
       open={isVisible}
@@ -43,7 +43,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={4} className="text-red-500 dark:text-red-400">
               <CopyrightOutlined /> 중요한 저작권 안내
             </Title>
-            <Paragraph className="text-gray-800 dark:text-gray-200">
+            <Paragraph style={{ color: '#ffffffd9' }}>
               이 웹사이트 이용 시 다음 내용을 숙지해주시기 바랍니다.
             </Paragraph>
           </div>
