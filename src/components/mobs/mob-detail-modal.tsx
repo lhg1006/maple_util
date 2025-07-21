@@ -42,6 +42,20 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
     }
   }, [open, mobId]);
 
+  // 모달 열릴 때 body 스크롤 방지
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    
+    // 컴포넌트 언마운트 시 정리
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [open]);
+
   const loadMobDetails = async () => {
     if (!mobId) return;
     
@@ -143,8 +157,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
       open={open}
       onCancel={onClose}
       footer={null}
-      width="950px"
+      width={{ xs: '92vw', sm: '85vw', md: '750px', lg: '850px' }}
       centered
+      maskClosable={false}
       styles={{
         body: { 
           padding: 0,
@@ -152,10 +167,15 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
           overflow: 'hidden',
           maxHeight: '90vh',
           overflowY: 'auto'
+        },
+        mask: {
+          backdropFilter: 'blur(8px)'
         }
       }}
+      getContainer={false}
     >
       <div 
+        className="modal-scroll-container"
         style={{
           background: theme === 'dark' 
             ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
@@ -174,12 +194,12 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
             }}
           />
           
-          <div className="relative p-8">
-            <div className="flex flex-col lg:flex-row gap-8 items-center">
+          <div className="relative p-3 sm:p-4 md:p-6">
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center">
               {/* 왼쪽 - 몬스터 이미지 */}
               <div className="flex-shrink-0">
                 <div 
-                  className="p-8 rounded-3xl"
+                  className="p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl"
                   style={{
                     background: theme === 'dark' 
                       ? 'rgba(255, 255, 255, 0.05)' 
@@ -197,8 +217,8 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                     src={`https://maplestory.io/api/KMS/389/mob/${mob.id}/render/stand`}
                     alt={mob.name}
                     style={{ 
-                      width: '280px',
-                      height: '280px',
+                      width: 'clamp(150px, 20vw, 220px)',
+                      height: 'clamp(150px, 20vw, 220px)',
                       objectFit: 'contain'
                     }}
                     fallback="/placeholder-monster.png"
@@ -208,12 +228,12 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
               </div>
 
               {/* 오른쪽 - 기본 정보 */}
-              <div className="flex-1 text-center lg:text-left">
+              <div className="flex-1 text-center md:text-left">
                 <Title 
                   level={1} 
                   style={{ 
-                    margin: '0 0 16px 0',
-                    fontSize: 'clamp(28px, 5vw, 36px)',
+                    margin: '0 0 12px 0',
+                    fontSize: 'clamp(22px, 4vw, 32px)',
                     fontWeight: 800,
                     color: theme === 'dark' ? '#f8fafc' : '#1e293b',
                     textShadow: theme === 'dark' 
@@ -224,7 +244,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   {mob.name}
                 </Title>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-6">
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6">
                   {mob.level && (
                     <Tag 
                       icon={<TrophyOutlined />}
@@ -232,9 +252,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                         background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
                         border: 'none',
                         color: 'white',
-                        borderRadius: '25px',
-                        padding: '8px 20px',
-                        fontSize: '15px',
+                        borderRadius: '20px',
+                        padding: '6px 16px',
+                        fontSize: '13px',
                         fontWeight: '700',
                         boxShadow: '0 6px 16px rgba(245, 158, 11, 0.4)'
                       }}
@@ -251,9 +271,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                           : 'linear-gradient(135deg, #3b82f6, #2563eb)',
                         border: 'none',
                         color: 'white',
-                        borderRadius: '25px',
-                        padding: '8px 20px',
-                        fontSize: '15px',
+                        borderRadius: '20px',
+                        padding: '6px 16px',
+                        fontSize: '13px',
                         fontWeight: '700',
                         boxShadow: mob.isBodyAttack 
                           ? '0 6px 16px rgba(239, 68, 68, 0.4)'
@@ -270,9 +290,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                         background: 'linear-gradient(135deg, #dc2626, #991b1b)',
                         border: 'none',
                         color: 'white',
-                        borderRadius: '25px',
-                        padding: '8px 20px',
-                        fontSize: '15px',
+                        borderRadius: '20px',
+                        padding: '6px 16px',
+                        fontSize: '13px',
                         fontWeight: '700',
                         boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)'
                       }}
@@ -283,7 +303,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                 </div>
 
                 {/* ID 정보 */}
-                <div className="text-sm opacity-75 mb-4">
+                <div className="text-xs sm:text-sm opacity-75 mb-3 sm:mb-4">
                   <Text style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>
                     몬스터 ID: {mob.id}
                     {mob.linksTo && ` • 연결 ID: ${mob.linksTo}`}
@@ -296,14 +316,14 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
 
         {/* 메인 콘텐츠 - 상세 정보 */}
         <div 
-          className="p-6"
+          className="p-3 sm:p-4 md:p-6"
           style={{
             background: theme === 'dark' ? '#0f172a' : '#ffffff'
           }}
         >
           {/* 주요 스탯 */}
           {primaryStats.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-4 sm:mb-6 md:mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <TrophyOutlined style={{ color: '#faad14', fontSize: '18px' }} />
                 <Text 
@@ -313,11 +333,11 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   기본 능력치
                 </Text>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {primaryStats.map((stat) => (
                   <div 
                     key={stat.key}
-                    className="text-center p-4 rounded-2xl"
+                    className="text-center p-3 sm:p-4 rounded-2xl"
                     style={{
                       background: theme === 'dark' 
                         ? `${stat.color}15` 
@@ -327,13 +347,13 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                     }}
                   >
                     <div 
-                      className="text-2xl mb-3"
+                      className="text-xl sm:text-2xl mb-2 sm:mb-3"
                       style={{ color: stat.color }}
                     >
                       {getStatIcon(stat.key)}
                     </div>
                     <div 
-                      className="text-xl font-bold mb-2"
+                      className="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
                       style={{ 
                         color: theme === 'dark' ? '#f8fafc' : '#1e293b'
                       }}
@@ -341,7 +361,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       {stat.value}
                     </div>
                     <div 
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium"
                       style={{ 
                         color: theme === 'dark' ? '#94a3b8' : '#64748b'
                       }}
@@ -356,7 +376,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
 
           {/* 전투 스탯 */}
           {combatStats.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-4 sm:mb-6 md:mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <BugOutlined style={{ color: '#ef4444', fontSize: '18px' }} />
                 <Text 
@@ -366,11 +386,11 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   전투 능력치
                 </Text>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {combatStats.map((stat) => (
                   <div 
                     key={stat.key}
-                    className="text-center p-4 rounded-2xl"
+                    className="text-center p-3 sm:p-4 rounded-2xl"
                     style={{
                       background: theme === 'dark' 
                         ? `${stat.color}15` 
@@ -379,13 +399,13 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                     }}
                   >
                     <div 
-                      className="text-2xl mb-3"
+                      className="text-xl sm:text-2xl mb-2 sm:mb-3"
                       style={{ color: stat.color }}
                     >
                       {getStatIcon(stat.key)}
                     </div>
                     <div 
-                      className="text-xl font-bold mb-2"
+                      className="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
                       style={{ 
                         color: theme === 'dark' ? '#f8fafc' : '#1e293b'
                       }}
@@ -393,7 +413,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       {stat.value}
                     </div>
                     <div 
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium"
                       style={{ 
                         color: theme === 'dark' ? '#94a3b8' : '#64748b'
                       }}
@@ -408,7 +428,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
 
           {/* 방어 스탯 */}
           {defenseStats.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-4 sm:mb-6 md:mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <SafetyOutlined style={{ color: '#6b7280', fontSize: '18px' }} />
                 <Text 
@@ -418,11 +438,11 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                   방어 능력치
                 </Text>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {defenseStats.map((stat) => (
                   <div 
                     key={stat.key}
-                    className="text-center p-6 rounded-2xl"
+                    className="text-center p-4 sm:p-6 rounded-2xl"
                     style={{
                       background: theme === 'dark' 
                         ? `${stat.color}15` 
@@ -431,13 +451,13 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                     }}
                   >
                     <div 
-                      className="text-3xl mb-3"
+                      className="text-2xl sm:text-3xl mb-2 sm:mb-3"
                       style={{ color: stat.color }}
                     >
                       {getStatIcon(stat.key)}
                     </div>
                     <div 
-                      className="text-2xl font-bold mb-2"
+                      className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2"
                       style={{ 
                         color: theme === 'dark' ? '#f8fafc' : '#1e293b'
                       }}
@@ -445,7 +465,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                       {stat.value}{stat.unit || ''}
                     </div>
                     <div 
-                      className="text-sm font-medium"
+                      className="text-xs sm:text-sm font-medium"
                       style={{ 
                         color: theme === 'dark' ? '#94a3b8' : '#64748b'
                       }}
@@ -472,12 +492,14 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                 </Text>
               </div>
               <div 
-                className="p-6 rounded-2xl"
+                className="p-4 sm:p-6 rounded-2xl"
                 style={{
                   background: theme === 'dark' 
                     ? 'rgba(245, 158, 11, 0.15)' 
                     : 'rgba(245, 158, 11, 0.08)',
-                  border: '2px solid rgba(245, 158, 11, 0.3)'
+                  border: '2px solid rgba(245, 158, 11, 0.3)',
+                  maxHeight: '200px',
+                  overflowY: 'auto'
                 }}
               >
                 <div className="flex flex-wrap gap-2">
@@ -488,9 +510,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                         background: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 0.2)',
                         border: '1px solid rgba(245, 158, 11, 0.5)',
                         color: theme === 'dark' ? '#fbbf24' : '#d97706',
-                        borderRadius: '12px',
-                        padding: '4px 12px',
-                        fontSize: '12px',
+                        borderRadius: '10px',
+                        padding: '3px 10px',
+                        fontSize: '11px',
                         fontWeight: '600'
                       }}
                     >
@@ -503,9 +525,9 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
                         background: theme === 'dark' ? 'rgba(156, 163, 175, 0.3)' : 'rgba(156, 163, 175, 0.2)',
                         border: '1px solid rgba(156, 163, 175, 0.5)',
                         color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-                        borderRadius: '12px',
-                        padding: '4px 12px',
-                        fontSize: '12px',
+                        borderRadius: '10px',
+                        padding: '3px 10px',
+                        fontSize: '11px',
                         fontWeight: '600'
                       }}
                     >
