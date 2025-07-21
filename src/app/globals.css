@@ -47,6 +47,39 @@ body.modal-open {
   background-color: rgba(155, 155, 155, 0.7);
 }
 
+/* 모바일 사이드바 오버레이 */
+.mobile-sidebar-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+.mobile-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+  transition: all 0.3s ease;
+}
+
+.mobile-sidebar-container {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 999;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-sidebar-container.open {
+  transform: translateX(0);
+}
+
 #__next {
   height: 100%;
   width: 100%;
@@ -316,6 +349,8 @@ body.modal-open {
   padding-left: 20px !important;
   font-weight: 500 !important;
   transition: all 0.3s ease !important;
+  min-height: 44px !important;
+  line-height: 44px !important;
 }
 
 .ant-layout-sider .ant-menu-light .ant-menu-item:hover {
@@ -350,4 +385,91 @@ body.modal-open {
 /* Ant Design CSS-in-JS 스타일 덮어쓰기 */
 :where(.css-dev-only-do-not-override-21bdrw).ant-pagination .ant-pagination-item-active a {
   color: #ffffff !important;
+}
+
+/* 모바일 몬스터 카드 최적화 - 576px 미만에서도 한 줄에 2개 */
+@media (max-width: 575px) {
+  .ant-col-xs-12 {
+    width: 50% !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+  }
+  
+  .ant-card {
+    min-width: unset !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  .ant-card-body {
+    padding: 6px !important;
+    overflow: hidden !important;
+    height: auto !important;
+  }
+}
+
+/* 매우 작은 화면 (360px 미만)에서도 2개씩 표시 */
+@media (max-width: 359px) {
+  .ant-col-xs-12 {
+    width: 50% !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding: 0 2px !important;
+  }
+  
+  .ant-card-body {
+    padding: 4px !important;
+  }
+  
+  .ant-row {
+    margin-left: -2px !important;
+    margin-right: -2px !important;
+  }
+}
+
+/* 모바일 페이지네이션 최적화 */
+@media (max-width: 768px) {
+  .ant-pagination {
+    text-align: center;
+    margin: 16px 0 !important;
+  }
+  
+  .ant-pagination .ant-pagination-item,
+  .ant-pagination .ant-pagination-prev,
+  .ant-pagination .ant-pagination-next {
+    min-width: 44px !important;
+    height: 44px !important;
+    line-height: 42px !important;
+    margin: 0 4px !important;
+  }
+  
+  .ant-pagination .ant-pagination-item a,
+  .ant-pagination .ant-pagination-prev a,
+  .ant-pagination .ant-pagination-next a {
+    padding: 0 8px !important;
+    font-size: 16px !important;
+  }
+  
+  .ant-pagination .ant-pagination-total-text {
+    font-size: 14px !important;
+    margin: 8px 0 !important;
+    display: block !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-pagination .ant-pagination-item,
+  .ant-pagination .ant-pagination-prev,
+  .ant-pagination .ant-pagination-next {
+    min-width: 40px !important;
+    height: 40px !important;
+    line-height: 38px !important;
+    margin: 0 2px !important;
+  }
+  
+  .ant-pagination .ant-pagination-item a,
+  .ant-pagination .ant-pagination-prev a,
+  .ant-pagination .ant-pagination-next a {
+    font-size: 14px !important;
+  }
 }

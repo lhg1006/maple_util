@@ -59,32 +59,75 @@ const menuItems = [
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme: currentTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
 
+  // 모바일 메뉴 관리
+  const handleMobileMenuToggle = () => {
+    if (isMobile) {
+      setMobileMenuOpen(!mobileMenuOpen);
+      // body 스크롤 방지
+      if (!mobileMenuOpen) {
+        document.body.classList.add('mobile-sidebar-open');
+      } else {
+        document.body.classList.remove('mobile-sidebar-open');
+      }
+    } else {
+      setCollapsed(!collapsed);
+    }
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    document.body.classList.remove('mobile-sidebar-open');
+  };
+
+  // 메뉴 아이템 클릭 시 모바일에서 메뉴 닫기
+  const handleMenuClick = ({ key }: { key: string }) => {
+    router.push(key);
+    if (isMobile) {
+      closeMobileMenu();
+    }
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh', width: '100%', overflow: 'hidden' }}>
+      {/* 모바일 오버레이 배경 */}
+      {isMobile && mobileMenuOpen && (
+        <div 
+          className="mobile-sidebar-overlay"
+          onClick={closeMobileMenu}
+        />
+      )}
+      
       <Sider 
         trigger={null} 
         collapsible 
-        collapsed={collapsed}
+        collapsed={isMobile ? false : collapsed}
         breakpoint="lg"
-        collapsedWidth={isMobile ? 0 : 80}
+        collapsedWidth={0}
         onBreakpoint={(broken) => {
           setCollapsed(broken);
           setIsMobile(broken);
+          if (broken) {
+            setMobileMenuOpen(false);
+            document.body.classList.remove('mobile-sidebar-open');
+          }
         }}
-        width={240}
+        width={280}
         theme="light"
+        className={isMobile ? `mobile-sidebar-container ${mobileMenuOpen ? 'open' : ''}` : ''}
         style={{ 
           height: '100vh', 
           overflowX: 'hidden',
           overflowY: 'auto',
-          boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
+          boxShadow: isMobile ? '4px 0 12px 0 rgba(0,0,0,.15)' : '2px 0 8px 0 rgba(29,35,41,.05)',
           background: currentTheme === 'dark' 
             ? 'linear-gradient(180deg, #1a365d 0%, #2d3748 50%, #4a5568 100%)' 
-            : 'linear-gradient(180deg, #ff8c00 0%, #ff7300 50%, #ff6600 100%)'
+            : 'linear-gradient(180deg, #ff8c00 0%, #ff7300 50%, #ff6600 100%)',
+          zIndex: isMobile ? 999 : 'auto'
         }}
       >
         <div style={{ 
@@ -98,21 +141,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             : '1px solid rgba(255,255,255,0.2)'
         }}>
           <Title 
-            level={collapsed ? 2 : 4} 
+            level={(!isMobile && collapsed) ? 2 : 4} 
             style={{ 
               margin: 0,
               color: '#ffffff',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontSize: collapsed ? '24px' : '20px',
+              fontSize: (!isMobile && collapsed) ? '24px' : '20px',
               fontWeight: 600,
               textShadow: '0 1px 2px rgba(0,0,0,0.3)'
             }}
           >
-            {collapsed ? 'MS' : '메이플스토리'}
+            {(!isMobile && collapsed) ? 'MS' : '메이플스토리'}
           </Title>
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <p style={{ margin: '4px 0 0', color: '#ffffff', fontSize: '12px', opacity: 0.9 }}>
               데이터 뷰어
             </p>
@@ -129,7 +172,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             background: 'transparent',
             color: '#ffffff'
           }}
-          onClick={({ key }) => router.push(key)}
+          onClick={handleMenuClick}
         />
       </Sider>
       
@@ -146,7 +189,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             overflow: 'hidden',
             borderBottom: `1px solid ${currentTheme === 'dark' ? '#303030' : '#e8e8e8'}`,
             boxShadow: '0 2px 8px rgba(0,0,0,.06)',
-            zIndex: 10
+            zIndex: 1000
           }}
         >
           <Space size="middle" style={{ overflow: 'hidden', flex: 1 }}>
@@ -156,7 +199,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 cursor: 'pointer',
                 color: currentTheme === 'dark' ? '#ffffffa6' : '#00000073'
               }}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={handleMobileMenuToggle}
             />
             <div style={{ borderLeft: `1px solid ${currentTheme === 'dark' ? '#303030' : '#e8e8e8'}`, height: '24px' }} />
             <Title 
