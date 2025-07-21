@@ -27,6 +27,7 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   
   // Modal states
   const [selectedItem, setSelectedItemId] = useState<any | null>(null);
@@ -68,12 +69,22 @@ export default function SearchPage() {
     total: items.length + npcs.length + mobs.length
   };
 
+  // Load search history on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+      setSearchHistory(history);
+    }
+  }, []);
+
   // Save search history
   useEffect(() => {
     if (debouncedQuery && searchStats.total > 0 && typeof window !== 'undefined') {
-      const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-      const newHistory = [debouncedQuery, ...history.filter((h: string) => h !== debouncedQuery)].slice(0, 10);
-      localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      setSearchHistory(prevHistory => {
+        const newHistory = [debouncedQuery, ...prevHistory.filter((h: string) => h !== debouncedQuery)].slice(0, 10);
+        localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+        return newHistory;
+      });
     }
   }, [debouncedQuery, searchStats.total]);
 
@@ -228,7 +239,7 @@ export default function SearchPage() {
               <Text type="secondary">최근 검색어</Text>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('searchHistory') || '[]') : []).map((query: string, index: number) => (
+              {searchHistory.map((query: string, index: number) => (
                 <Tag 
                   key={index}
                   className="cursor-pointer"
