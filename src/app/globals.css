@@ -337,6 +337,55 @@ body.modal-open {
   background: #2A2A4A;
 }
 
+/* 몬스터 모달 특화 스타일 */
+.maple-tooltip .monster-image-fallback {
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #FFD700;
+}
+
+/* 몬스터 태그 스타일 */
+.maple-tooltip .monster-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.maple-tooltip .monster-tag.boss {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: white;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+}
+
+.maple-tooltip .monster-tag.melee {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+.maple-tooltip .monster-tag.ranged {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
+}
+
+/* 몬스터 모달 투명 배경 처리 */
+.ant-modal .ant-modal-content {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ant-modal .ant-modal-body {
+  background: transparent !important;
+}
+
 /* 주황색 사이드바 메뉴 스타일 */
 .ant-layout-sider .ant-menu-light {
   background: transparent !important;

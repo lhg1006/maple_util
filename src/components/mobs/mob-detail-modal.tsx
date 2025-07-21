@@ -1,65 +1,79 @@
 'use client';
 
-import { Modal, Typography, Image, Spin, Tag } from 'antd';
+import React, { useEffect, useCallback, useRef } from 'react';
+import { Modal, Spin, Button, Result } from 'antd';
 import { MapleMob } from '@/types/maplestory';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { mapleAPI } from '@/lib/api';
-import { 
-  TrophyOutlined, 
-  FireOutlined, 
-  HeartOutlined,
-  StarOutlined,
-  ThunderboltOutlined,
-  EyeOutlined,
-  SafetyOutlined,
-  RocketOutlined,
-  BugOutlined,
-  AimOutlined,
-  CrownOutlined
-} from '@ant-design/icons';
-import { useTheme } from '@/components/providers/theme-provider';
-
-const { Title, Text } = Typography;
+import { MobMapleTooltip } from './mob-maple-tooltip';
+import { LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 
 interface MobDetailModalProps {
   mobId: number | null;
   open: boolean;
   onClose: () => void;
+  loading?: boolean;
 }
 
 interface DetailedMob extends MapleMob {
   [key: string]: any;
 }
 
-export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onClose }) => {
+export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onClose, loading = false }) => {
   const [mob, setMob] = useState<DetailedMob | null>(null);
-  const [loading, setLoading] = useState(false);
-  const { theme } = useTheme();
+  const [isLoadingMob, setIsLoadingMob] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
+  // ESC 키 및 키보드 네비게이션 처리
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape':
+          event.preventDefault();
+          onClose();
+          break;
+        case 'Tab':
+          // Tab 키 처리는 기본적으로 브라우저가 처리하도록 둠
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  // 포커스 관리
+  useEffect(() => {
+    if (open && modalRef.current) {
+      // 모달이 열릴 때 포커스를 모달로 이동
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [open, isLoadingMob]);
+
+  // 몬스터 데이터 로드
   useEffect(() => {
     if (open && mobId) {
       loadMobDetails();
     }
   }, [open, mobId]);
 
-  // 모달 열릴 때 body 스크롤 방지
-  useEffect(() => {
-    if (open) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-    
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, [open]);
-
   const loadMobDetails = async () => {
     if (!mobId) return;
     
-    setLoading(true);
+    setIsLoadingMob(true);
+    setError(null);
     try {
       const mobData = await mapleAPI.getMob(mobId);
       if (mobData) {
@@ -68,477 +82,197 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
           ...(mobData.meta || {}),
         };
         setMob(detailedMob);
+      } else {
+        setError('몬스터 정보를 찾을 수 없습니다.');
       }
     } catch (error) {
       console.error('몬스터 상세 정보 로딩 실패:', error);
+      setError('몬스터 정보를 불러오는데 실패했습니다.');
     } finally {
-      setLoading(false);
+      setIsLoadingMob(false);
     }
   };
 
-  const getStatIcon = (statKey: string) => {
-    const iconMap: { [key: string]: JSX.Element } = {
-      'level': <TrophyOutlined />,
-      'maxHP': <HeartOutlined />,
-      'exp': <StarOutlined />,
-      'physicalDamage': <BugOutlined />,
-      'magicDamage': <FireOutlined />,
-      'accuracy': <AimOutlined />,
-      'speed': <ThunderboltOutlined />,
-      'physicalDefenseRate': <SafetyOutlined />,
-      'magicDefenseRate': <SafetyOutlined />,
-      'minimumPushDamage': <RocketOutlined />,
-      'summonType': <CrownOutlined />
-    };
-    return iconMap[statKey] || <StarOutlined />;
-  };
+  // 재시도 핸들러
+  const handleRetry = useCallback(() => {
+    if (mobId) {
+      loadMobDetails();
+    }
+  }, [mobId]);
 
-  if (loading) {
+  // 디버깅 로그
+  useEffect(() => {
+    if (open && mobId) {
+      console.log('🎯 MobDetailModal 열림:', {
+        mobId,
+        isLoadingMob,
+        error
+      });
+    }
+  }, [open, mobId, isLoadingMob, error]);
+
+  // 로딩 상태 처리
+  if (loading || isLoadingMob) {
     return (
       <Modal
-        title={null}
         open={open}
         onCancel={onClose}
         footer={null}
-        width="950px"
+        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+        style={{ top: 20 }}
+        styles={{
+          body: { padding: 0 },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
         centered
-        styles={{ body: { padding: 0 } }}
+        closable={false}
+        maskClosable={false}
       >
-        <div className="flex justify-center items-center py-20">
-          <Spin size="large" />
+        <div ref={modalRef} style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '400px',
+          background: '#2A2A4A'
+        }}>
+          <Spin 
+            size="large" 
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: '#FFD700' }} spin />}
+          />
         </div>
       </Modal>
     );
   }
 
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <Modal
+        open={open}
+        onCancel={onClose}
+        footer={null}
+        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+        style={{ top: 20 }}
+        styles={{
+          body: { padding: 0 },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
+        centered
+        closable={false}
+        maskClosable={false}
+      >
+        <div ref={modalRef} style={{ background: '#2A2A4A', padding: '40px', textAlign: 'center' }}>
+          <Result
+            status="error"
+            title={<span style={{ color: '#FFD700' }}>몬스터 정보 로딩 실패</span>}
+            subTitle={<span style={{ color: '#ffffff' }}>{error}</span>}
+            extra={[
+              <Button 
+                key="retry" 
+                type="primary" 
+                icon={<ReloadOutlined />}
+                onClick={handleRetry}
+                style={{
+                  background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                  border: 'none',
+                  color: '#000000',
+                  fontWeight: 'bold'
+                }}
+              >
+                다시 시도
+              </Button>,
+              <Button 
+                key="close" 
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #FFD700',
+                  color: '#FFD700'
+                }}
+              >
+                닫기
+              </Button>
+            ]}
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  // 데이터 없음 상태 처리
   if (!mob) {
     return (
       <Modal
-        title={null}
         open={open}
         onCancel={onClose}
         footer={null}
-        width="950px"
+        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+        style={{ top: 20 }}
+        styles={{
+          body: { padding: 0 },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
         centered
-        styles={{ body: { padding: 0 } }}
+        closable={false}
+        maskClosable={false}
       >
-        <div className="text-center py-20">
-          <Text type="secondary" className="text-lg">
-            몬스터 정보를 불러올 수 없습니다.
-          </Text>
+        <div ref={modalRef} style={{ background: '#2A2A4A', padding: '40px', textAlign: 'center' }}>
+          <Result
+            status="404"
+            title={<span style={{ color: '#FFD700' }}>몬스터를 찾을 수 없습니다</span>}
+            subTitle={<span style={{ color: '#ffffff' }}>요청하신 몬스터 정보가 존재하지 않습니다.</span>}
+            extra={
+              <Button 
+                key="close" 
+                onClick={onClose}
+                style={{
+                  background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                  border: 'none',
+                  color: '#000000',
+                  fontWeight: 'bold'
+                }}
+              >
+                닫기
+              </Button>
+            }
+          />
         </div>
       </Modal>
     );
   }
 
-  const primaryStats = [
-    { key: 'level', label: '레벨', value: mob.level ? mob.level.toLocaleString() : null, color: '#faad14' },
-    { key: 'maxHP', label: 'HP', value: mob.maxHP ? mob.maxHP.toLocaleString() : null, color: '#ef4444' },
-    { key: 'exp', label: '경험치', value: mob.exp ? mob.exp.toLocaleString() : null, color: '#10b981' },
-    { key: 'physicalDamage', label: '물리공격', value: mob.physicalDamage ? mob.physicalDamage.toLocaleString() : null, color: '#f59e0b' }
-  ].filter(stat => stat.value !== null && stat.value !== undefined);
-
-  const combatStats = [
-    { key: 'magicDamage', label: '마법공격', value: mob.magicDamage ? mob.magicDamage.toLocaleString() : null, color: '#8b5cf6' },
-    { key: 'accuracy', label: '명중률', value: mob.accuracy ? mob.accuracy.toLocaleString() : null, color: '#06b6d4' },
-    { key: 'speed', label: '이동속도', value: mob.speed ? mob.speed.toLocaleString() : null, color: '#84cc16' },
-    { key: 'minimumPushDamage', label: '최소밀림데미지', value: mob.minimumPushDamage ? mob.minimumPushDamage.toLocaleString() : null, color: '#f97316' }
-  ].filter(stat => stat.value !== null && stat.value !== undefined);
-
-  const defenseStats = [
-    { key: 'physicalDefenseRate', label: '물리방어율', value: mob.physicalDefenseRate ? mob.physicalDefenseRate.toLocaleString() : null, color: '#6b7280', unit: '%' },
-    { key: 'magicDefenseRate', label: '마법방어율', value: mob.magicDefenseRate ? mob.magicDefenseRate.toLocaleString() : null, color: '#6b7280', unit: '%' }
-  ].filter(stat => stat.value !== null && stat.value !== undefined);
-
-
+  // 정상 상태 - 메이플 툴팁 표시
   return (
     <Modal
-      title={null}
       open={open}
       onCancel={onClose}
       footer={null}
-      width={{ xs: '92vw', sm: '85vw', md: '750px', lg: '850px' }}
-      centered
-      maskClosable={false}
+      width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+      style={{ top: 20 }}
       styles={{
         body: { 
           padding: 0,
-          borderRadius: '20px',
-          overflow: 'hidden',
-          maxHeight: '90vh',
-          overflowY: 'auto'
+          background: 'transparent'
         },
-        mask: {
-          backdropFilter: 'blur(8px)'
-        }
+        content: {
+          background: 'transparent',
+          boxShadow: 'none'
+        },
+        mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
       }}
-      getContainer={false}
+      centered
+      closable={false}
+      maskClosable={false}
     >
-      <div 
-        className="modal-scroll-container"
-        style={{
-          background: theme === 'dark' 
-            ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
-            : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'
-        }}
-      >
-        {/* 상단 헤더 - 이미지와 기본 정보 */}
-        <div className="relative">
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: theme === 'dark' 
-                ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))'
-                : 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1))',
-              filter: 'blur(60px)'
-            }}
-          />
-          
-          <div className="relative p-3 sm:p-4 md:p-6">
-            <div className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6 items-center">
-              {/* 왼쪽 - 몬스터 이미지 */}
-              <div className="flex-shrink-0">
-                <div 
-                  className="p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl"
-                  style={{
-                    background: theme === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(20px)',
-                    border: theme === 'dark' 
-                      ? '3px solid rgba(255, 255, 255, 0.3)' 
-                      : '3px solid rgba(0, 0, 0, 0.2)',
-                    boxShadow: theme === 'dark' 
-                      ? '0 20px 40px rgba(0, 0, 0, 0.3)' 
-                      : '0 20px 40px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  <Image
-                    src={`https://maplestory.io/api/KMS/389/mob/${mob.id}/render/stand`}
-                    alt={mob.name}
-                    style={{ 
-                      width: 'clamp(150px, 20vw, 220px)',
-                      height: 'clamp(150px, 20vw, 220px)',
-                      objectFit: 'contain'
-                    }}
-                    fallback="/placeholder-monster.png"
-                    preview={false}
-                  />
-                </div>
-              </div>
-
-              {/* 오른쪽 - 기본 정보 */}
-              <div className="flex-1 text-center md:text-left">
-                <Title 
-                  level={1} 
-                  style={{ 
-                    margin: '0 0 12px 0',
-                    fontSize: 'clamp(22px, 4vw, 32px)',
-                    fontWeight: 800,
-                    color: theme === 'dark' ? '#f8fafc' : '#1e293b',
-                    textShadow: theme === 'dark' 
-                      ? '0 4px 12px rgba(0, 0, 0, 0.5)' 
-                      : '0 4px 12px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  {mob.name}
-                </Title>
-
-                <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6">
-                  {mob.level && (
-                    <Tag 
-                      icon={<TrophyOutlined />}
-                      style={{
-                        background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                        border: 'none',
-                        color: 'white',
-                        borderRadius: '20px',
-                        padding: '6px 16px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        boxShadow: '0 6px 16px rgba(245, 158, 11, 0.4)'
-                      }}
-                    >
-                      레벨 {mob.level}
-                    </Tag>
-                  )}
-                  {mob.isBodyAttack !== undefined && (
-                    <Tag 
-                      icon={<FireOutlined />}
-                      style={{
-                        background: mob.isBodyAttack 
-                          ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                          : 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                        border: 'none',
-                        color: 'white',
-                        borderRadius: '20px',
-                        padding: '6px 16px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        boxShadow: mob.isBodyAttack 
-                          ? '0 6px 16px rgba(239, 68, 68, 0.4)'
-                          : '0 6px 16px rgba(59, 130, 246, 0.4)'
-                      }}
-                    >
-                      {mob.isBodyAttack ? '근접공격' : '원거리공격'}
-                    </Tag>
-                  )}
-                  {mob.boss && (
-                    <Tag 
-                      icon={<CrownOutlined />}
-                      style={{
-                        background: 'linear-gradient(135deg, #dc2626, #991b1b)',
-                        border: 'none',
-                        color: 'white',
-                        borderRadius: '20px',
-                        padding: '6px 16px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)'
-                      }}
-                    >
-                      보스 몬스터
-                    </Tag>
-                  )}
-                </div>
-
-                {/* ID 정보 */}
-                <div className="text-xs sm:text-sm opacity-75 mb-3 sm:mb-4">
-                  <Text style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>
-                    몬스터 ID: {mob.id}
-                    {mob.linksTo && ` • 연결 ID: ${mob.linksTo}`}
-                  </Text>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 메인 콘텐츠 - 상세 정보 */}
-        <div 
-          className="p-3 sm:p-4 md:p-6"
-          style={{
-            background: theme === 'dark' ? '#0f172a' : '#ffffff'
-          }}
-        >
-          {/* 주요 스탯 */}
-          {primaryStats.length > 0 && (
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <TrophyOutlined style={{ color: '#faad14', fontSize: '18px' }} />
-                <Text 
-                  className="text-lg font-bold"
-                  style={{ color: theme === 'dark' ? '#f8fafc' : '#1e293b' }}
-                >
-                  기본 능력치
-                </Text>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {primaryStats.map((stat) => (
-                  <div 
-                    key={stat.key}
-                    className="text-center p-3 sm:p-4 rounded-2xl"
-                    style={{
-                      background: theme === 'dark' 
-                        ? `${stat.color}15` 
-                        : `${stat.color}08`,
-                      border: `2px solid ${stat.color}30`,
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <div 
-                      className="text-xl sm:text-2xl mb-2 sm:mb-3"
-                      style={{ color: stat.color }}
-                    >
-                      {getStatIcon(stat.key)}
-                    </div>
-                    <div 
-                      className="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
-                      style={{ 
-                        color: theme === 'dark' ? '#f8fafc' : '#1e293b'
-                      }}
-                    >
-                      {stat.value}
-                    </div>
-                    <div 
-                      className="text-xs sm:text-sm font-medium"
-                      style={{ 
-                        color: theme === 'dark' ? '#94a3b8' : '#64748b'
-                      }}
-                    >
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 전투 스탯 */}
-          {combatStats.length > 0 && (
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <BugOutlined style={{ color: '#ef4444', fontSize: '18px' }} />
-                <Text 
-                  className="text-lg font-bold"
-                  style={{ color: theme === 'dark' ? '#f8fafc' : '#1e293b' }}
-                >
-                  전투 능력치
-                </Text>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {combatStats.map((stat) => (
-                  <div 
-                    key={stat.key}
-                    className="text-center p-3 sm:p-4 rounded-2xl"
-                    style={{
-                      background: theme === 'dark' 
-                        ? `${stat.color}15` 
-                        : `${stat.color}08`,
-                      border: `2px solid ${stat.color}30`
-                    }}
-                  >
-                    <div 
-                      className="text-xl sm:text-2xl mb-2 sm:mb-3"
-                      style={{ color: stat.color }}
-                    >
-                      {getStatIcon(stat.key)}
-                    </div>
-                    <div 
-                      className="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
-                      style={{ 
-                        color: theme === 'dark' ? '#f8fafc' : '#1e293b'
-                      }}
-                    >
-                      {stat.value}
-                    </div>
-                    <div 
-                      className="text-xs sm:text-sm font-medium"
-                      style={{ 
-                        color: theme === 'dark' ? '#94a3b8' : '#64748b'
-                      }}
-                    >
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 방어 스탯 */}
-          {defenseStats.length > 0 && (
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <SafetyOutlined style={{ color: '#6b7280', fontSize: '18px' }} />
-                <Text 
-                  className="text-lg font-bold"
-                  style={{ color: theme === 'dark' ? '#f8fafc' : '#1e293b' }}
-                >
-                  방어 능력치
-                </Text>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {defenseStats.map((stat) => (
-                  <div 
-                    key={stat.key}
-                    className="text-center p-4 sm:p-6 rounded-2xl"
-                    style={{
-                      background: theme === 'dark' 
-                        ? `${stat.color}15` 
-                        : `${stat.color}08`,
-                      border: `2px solid ${stat.color}30`
-                    }}
-                  >
-                    <div 
-                      className="text-2xl sm:text-3xl mb-2 sm:mb-3"
-                      style={{ color: stat.color }}
-                    >
-                      {getStatIcon(stat.key)}
-                    </div>
-                    <div 
-                      className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2"
-                      style={{ 
-                        color: theme === 'dark' ? '#f8fafc' : '#1e293b'
-                      }}
-                    >
-                      {stat.value}{stat.unit || ''}
-                    </div>
-                    <div 
-                      className="text-xs sm:text-sm font-medium"
-                      style={{ 
-                        color: theme === 'dark' ? '#94a3b8' : '#64748b'
-                      }}
-                    >
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-
-          {/* 출현 위치 */}
-          {mob.foundAt && mob.foundAt.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <EyeOutlined style={{ color: '#f59e0b', fontSize: '18px' }} />
-                <Text 
-                  className="text-lg font-bold"
-                  style={{ color: theme === 'dark' ? '#f8fafc' : '#1e293b' }}
-                >
-                  출현 위치 ({mob.foundAt.length}개 맵)
-                </Text>
-              </div>
-              <div 
-                className="p-4 sm:p-6 rounded-2xl"
-                style={{
-                  background: theme === 'dark' 
-                    ? 'rgba(245, 158, 11, 0.15)' 
-                    : 'rgba(245, 158, 11, 0.08)',
-                  border: '2px solid rgba(245, 158, 11, 0.3)',
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}
-              >
-                <div className="flex flex-wrap gap-2">
-                  {mob.foundAt.slice(0, 30).map((mapId, index) => (
-                    <Tag 
-                      key={index}
-                      style={{ 
-                        background: theme === 'dark' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 0.2)',
-                        border: '1px solid rgba(245, 158, 11, 0.5)',
-                        color: theme === 'dark' ? '#fbbf24' : '#d97706',
-                        borderRadius: '10px',
-                        padding: '3px 10px',
-                        fontSize: '11px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      맵 {mapId}
-                    </Tag>
-                  ))}
-                  {mob.foundAt.length > 30 && (
-                    <Tag 
-                      style={{ 
-                        background: theme === 'dark' ? 'rgba(156, 163, 175, 0.3)' : 'rgba(156, 163, 175, 0.2)',
-                        border: '1px solid rgba(156, 163, 175, 0.5)',
-                        color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-                        borderRadius: '10px',
-                        padding: '3px 10px',
-                        fontSize: '11px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      +{mob.foundAt.length - 30}개 더
-                    </Tag>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      <div ref={modalRef} style={{ 
+        maxHeight: '90vh', 
+        overflowY: 'auto',
+        background: 'transparent'
+      }}>
+        <MobMapleTooltip 
+          mob={mob} 
+          onClose={onClose}
+        />
       </div>
     </Modal>
   );
