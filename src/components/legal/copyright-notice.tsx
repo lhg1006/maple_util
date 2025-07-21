@@ -52,12 +52,12 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={5} className="text-red-600 dark:text-red-400" style={{ margin: '0 0 8px 0' }}>
               📋 서비스 정보 및 저작권 안내
             </Title>
-            <ul className="text-gray-700 dark:text-gray-300" style={{ margin: 0, paddingLeft: '20px' }}>
-              <li><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
-              <li><strong>저작권 소유</strong>: 모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 넥슨코리아에 있습니다.</li>
-              <li><strong>비상업적 이용</strong>: 이 서비스는 비상업적 목적으로만 제공되며, 어떠한 수익도 창출하지 않습니다.</li>
-              <li><strong>정보 제공 목적</strong>: 메이플스토리 이용자들의 편의를 위한 정보 제공이 유일한 목적입니다.</li>
-              <li><strong>책임 제한</strong>: 제공되는 정보의 정확성을 보장하지 않으며, 이용으로 인한 손해에 대해 책임지지 않습니다.</li>
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }} className="dark:text-gray-300">
+              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>저작권 소유</strong>: 모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 넥슨코리아에 있습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비상업적 이용</strong>: 이 서비스는 비상업적 목적으로만 제공되며, 어떠한 수익도 창출하지 않습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>정보 제공 목적</strong>: 메이플스토리 이용자들의 편의를 위한 정보 제공이 유일한 목적입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>책임 제한</strong>: 제공되는 정보의 정확성을 보장하지 않으며, 이용으로 인한 손해에 대해 책임지지 않습니다.</li>
             </ul>
           </div>
 
@@ -65,11 +65,11 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={5} className="text-green-600 dark:text-green-400" style={{ margin: '0 0 8px 0' }}>
               ℹ️ 이용 시 참고사항
             </Title>
-            <ul className="text-gray-700 dark:text-gray-300" style={{ margin: 0, paddingLeft: '20px' }}>
-              <li>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
-              <li>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
-              <li>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
-              <li>데이터는 maplestory.io API를 통해 제공받습니다.</li>
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }} className="dark:text-gray-300">
+              <li style={{ color: 'inherit', marginBottom: '4px' }}>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '4px' }}>데이터는 maplestory.io API를 통해 제공받습니다.</li>
             </ul>
           </div>
 
