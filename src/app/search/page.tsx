@@ -38,9 +38,14 @@ export default function SearchPage() {
   const [mobModalOpen, setMobModalOpen] = useState(false);
 
   // Search hooks
-  const { data: items = [], isLoading: itemsLoading } = useSearchItems(debouncedQuery, debouncedQuery.length >= 2);
-  const { data: npcs = [], isLoading: npcsLoading } = useSearchNPCs(debouncedQuery, debouncedQuery.length >= 2);
-  const { data: mobs = [], isLoading: mobsLoading } = useSearchMobs(debouncedQuery, debouncedQuery.length >= 2);
+  const { data: itemsData, isLoading: itemsLoading } = useSearchItems(debouncedQuery, debouncedQuery.length >= 2);
+  const { data: npcsData, isLoading: npcsLoading } = useSearchNPCs(debouncedQuery, debouncedQuery.length >= 2);
+  const { data: mobsData, isLoading: mobsLoading } = useSearchMobs(debouncedQuery, debouncedQuery.length >= 2);
+
+  // Ensure data is always an array
+  const items = itemsData || [];
+  const npcs = npcsData || [];
+  const mobs = mobsData || [];
 
   const isLoading = itemsLoading || npcsLoading || mobsLoading;
 
