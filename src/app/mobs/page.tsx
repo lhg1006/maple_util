@@ -306,10 +306,13 @@ export default function MobsPage() {
     return (
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px' }}>
-          <Spin size="large" spinning={true} tip="API에서 몬스터 데이터 로딩 중...">
+          <Spin size="large" spinning={true}>
             <div style={{ minHeight: '200px' }} />
           </Spin>
-          <div style={{ marginTop: '20px', color: '#666' }}>
+          <div style={{ marginTop: '20px', color: '#666', fontSize: '16px' }}>
+            API에서 몬스터 데이터 로딩 중...
+          </div>
+          <div style={{ marginTop: '8px', color: '#999', fontSize: '14px' }}>
             API 서버에서 몬스터 정보를 가져오는 중입니다...
           </div>
         </div>

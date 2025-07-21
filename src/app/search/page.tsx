@@ -263,7 +263,10 @@ export default function SearchPage() {
             {/* Loading State */}
             {isLoading && (
               <div className="text-center py-12">
-                <Spin size="large" tip="검색 중..." />
+                <Spin size="large" />
+                <div style={{ marginTop: '16px', fontSize: '16px', color: '#666' }}>
+                  검색 중...
+                </div>
               </div>
             )}
 

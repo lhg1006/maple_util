@@ -21,9 +21,12 @@ export const NPCList: React.FC<NPCListProps> = ({ npcs, loading, onNPCClick }) =
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '60px' }}>
-        <Spin size="large" tip="NPC 정보를 불러오는 중...">
+        <Spin size="large">
           <div style={{ minHeight: '200px' }} />
         </Spin>
+        <div style={{ marginTop: '16px', fontSize: '16px', color: '#666' }}>
+          NPC 정보를 불러오는 중...
+        </div>
       </div>
     );
   }

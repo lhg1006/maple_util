@@ -615,10 +615,13 @@ export default function ItemsPage() {
     return (
       <MainLayout>
         <div style={{ textAlign: 'center', padding: '100px' }}>
-          <Spin size="large" spinning={true} tip="아이템 데이터를 로딩하는 중...">
+          <Spin size="large" spinning={true}>
             <div style={{ minHeight: '200px' }} />
           </Spin>
-          <div style={{ marginTop: '20px', color: '#666' }}>
+          <div style={{ marginTop: '20px', color: '#666', fontSize: '16px' }}>
+            아이템 데이터를 로딩하는 중...
+          </div>
+          <div style={{ marginTop: '8px', color: '#999', fontSize: '14px' }}>
             {category} &gt; {subCategory} 카테고리의 아이템을 로딩하고 있습니다...<br/>
             React Query를 사용하여 효율적으로 데이터를 캐싱합니다.
           </div>
