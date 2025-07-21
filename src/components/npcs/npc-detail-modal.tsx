@@ -1,207 +1,239 @@
 'use client';
 
-import { Modal, Typography, Spin, Alert, Divider, Space, Tag } from 'antd';
-import { UserOutlined, EnvironmentOutlined, MessageOutlined } from '@ant-design/icons';
+import React, { useEffect, useCallback, useRef } from 'react';
+import { Modal, Spin, Button, Result } from 'antd';
 import { useMapleNPC } from '@/hooks/useMapleData';
-import { useTheme } from '@/components/providers/theme-provider';
-import Image from 'next/image';
-
-const { Title, Text, Paragraph } = Typography;
+import { NPCMapleTooltip } from './npc-maple-tooltip';
+import { LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 
 interface NPCDetailModalProps {
   npcId: number | null;
   open: boolean;
   onClose: () => void;
+  loading?: boolean;
 }
 
-export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onClose }) => {
-  const { theme: currentTheme } = useTheme();
-  const { data: npc, isLoading, isError, error } = useMapleNPC(npcId || 0, !!npcId);
+export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onClose, loading = false }) => {
+  const { data: npc, isLoading, isError, error, refetch } = useMapleNPC(npcId || 0, !!npcId);
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  const handleClose = () => {
-    onClose();
-  };
+  // ESC 키 및 키보드 네비게이션 처리
+  useEffect(() => {
+    if (!open) return;
 
-  return (
-    <Modal
-      title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <UserOutlined />
-          <span>NPC 상세 정보</span>
-        </div>
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape':
+          event.preventDefault();
+          onClose();
+          break;
+        case 'Tab':
+          // Tab 키 처리는 기본적으로 브라우저가 처리하도록 둠
+          break;
       }
-      open={open}
-      onCancel={handleClose}
-      footer={null}
-      width={600}
-      styles={{
-        body: {
-          maxHeight: '70vh',
-          overflowY: 'auto'
-        }
-      }}
-    >
-      {isLoading && (
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large">
-            <div style={{ minHeight: '200px' }} />
-          </Spin>
-          <div style={{ marginTop: '16px', fontSize: '16px', color: '#666' }}>
-            NPC 정보를 불러오는 중...
-          </div>
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
+
+  // 포커스 관리
+  useEffect(() => {
+    if (open && modalRef.current) {
+      // 모달이 열릴 때 포커스를 모달로 이동
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, [open, isLoading]);
+
+  // 재시도 핸들러
+  const handleRetry = useCallback(() => {
+    if (npcId && refetch) {
+      refetch();
+    }
+  }, [npcId, refetch]);
+
+  // 디버깅 로그
+  useEffect(() => {
+    if (open && npcId) {
+      console.log('🎯 NPCDetailModal 열림:', {
+        npcId,
+        isLoading,
+        isError,
+        error
+      });
+    }
+  }, [open, npcId, isLoading, isError, error]);
+
+  // 로딩 상태 처리 - 딤 배경 + 로딩바만 표시
+  if (loading || isLoading) {
+    return (
+      <Modal
+        open={open}
+        onCancel={onClose}
+        footer={null}
+        closable={false}
+        maskClosable={false}
+        styles={{
+          body: { padding: 0, background: 'transparent' },
+          content: { background: 'transparent', boxShadow: 'none' },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
+        centered
+        width={0}
+      >
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center'
+        }}>
+          <Spin 
+            size="large" 
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: '#FFD700' }} spin />}
+          />
         </div>
-      )}
+      </Modal>
+    );
+  }
 
-      {isError && (
-        <Alert
-          message="오류 발생"
-          description={`NPC 정보를 불러오는데 실패했습니다. ${error?.message || ''}`}
-          type="error"
-          showIcon
-        />
-      )}
-
-      {npc && (
-        <div style={{ padding: '8px 0' }}>
-          {/* NPC 기본 정보 */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'flex-start', 
-            gap: '20px',
-            marginBottom: '24px'
-          }}>
-            {/* NPC 이미지 */}
-            <div style={{
-              width: '120px',
-              height: '120px',
-              background: 'linear-gradient(135deg, #f5f5f5 0%, #737373 100%)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              overflow: 'hidden'
-            }}>
-              <Image
-                src={`https://maplestory.io/api/KMS/389/npc/${npc.id}/render/stand`}
-                alt={npc.name}
-                width={100}
-                height={100}
+  // 에러 상태 처리
+  if (isError) {
+    return (
+      <Modal
+        open={open}
+        onCancel={onClose}
+        footer={null}
+        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+        style={{ top: 20 }}
+        styles={{
+          body: { padding: 0 },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
+        centered
+        closable={false}
+        maskClosable={false}
+      >
+        <div ref={modalRef} style={{ background: '#2A2A4A', padding: '40px', textAlign: 'center' }}>
+          <Result
+            status="error"
+            title={<span style={{ color: '#FFD700' }}>NPC 정보 로딩 실패</span>}
+            subTitle={<span style={{ color: '#ffffff' }}>{error?.message || 'NPC 정보를 불러오는데 실패했습니다.'}</span>}
+            extra={[
+              <Button 
+                key="retry" 
+                type="primary" 
+                icon={<ReloadOutlined />}
+                onClick={handleRetry}
                 style={{
-                  objectFit: 'contain',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #999;">
-                        <span style="font-size: 48px;">👤</span>
-                      </div>
-                    `;
-                  }
-                }}
-              />
-            </div>
-
-            {/* NPC 정보 */}
-            <div style={{ flex: 1 }}>
-              <Title 
-                level={3} 
-                style={{ 
-                  margin: '0 0 16px 0', 
-                  color: currentTheme === 'dark' ? '#4fc3f7' : '#1890ff' 
+                  background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                  border: 'none',
+                  color: '#000000',
+                  fontWeight: 'bold'
                 }}
               >
-                {npc.name}
-              </Title>
-              
-              <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <div>
-                  <Text strong>ID: </Text>
-                  <Text code>{npc.id}</Text>
-                </div>
-                
-                {npc.location && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <EnvironmentOutlined style={{ color: currentTheme === 'dark' ? '#4fc3f7' : '#1890ff' }} />
-                    <Text>{npc.location}</Text>
-                  </div>
-                )}
-              </Space>
-            </div>
-          </div>
-
-          <Divider />
-
-          {/* NPC 설명 */}
-          {npc.description && (
-            <div style={{ marginBottom: '24px' }}>
-              <Title level={4} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MessageOutlined />
-                설명
-              </Title>
-              <div style={{
-                backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f8f9fa',
-                padding: '16px',
-                borderRadius: '8px',
-                border: currentTheme === 'dark' ? '1px solid #404040' : '1px solid #e9ecef'
-              }}>
-                <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                  {npc.description}
-                </Paragraph>
-              </div>
-            </div>
-          )}
-
-          {/* 대화 스크립트 */}
-          {npc.scripts && npc.scripts.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <Title level={4} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MessageOutlined />
-                대화 내용
-              </Title>
-              <div style={{
-                backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f8f9fa',
-                padding: '16px',
-                borderRadius: '8px',
-                border: currentTheme === 'dark' ? '1px solid #404040' : '1px solid #e9ecef',
-                maxHeight: '200px',
-                overflowY: 'auto'
-              }}>
-                {npc.scripts.map((script, index) => (
-                  <div key={index} style={{ marginBottom: '12px' }}>
-                    <Tag color="blue" style={{ marginBottom: '4px' }}>
-                      대화 {index + 1}
-                    </Tag>
-                    <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                      {script}
-                    </Paragraph>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 추가 정보 */}
-          <div style={{
-            backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f0f2f5',
-            padding: '16px',
-            borderRadius: '8px',
-            textAlign: 'center'
-          }}>
-            <Text style={{ 
-              fontSize: '12px', 
-              color: currentTheme === 'dark' ? '#9ca3af' : '#666' 
-            }}>
-              본 정보는 maplestory.io API에서 제공됩니다.
-            </Text>
-          </div>
+                다시 시도
+              </Button>,
+              <Button 
+                key="close" 
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #FFD700',
+                  color: '#FFD700'
+                }}
+              >
+                닫기
+              </Button>
+            ]}
+          />
         </div>
-      )}
+      </Modal>
+    );
+  }
+
+  // 데이터 없음 상태 처리
+  if (!npc) {
+    return (
+      <Modal
+        open={open}
+        onCancel={onClose}
+        footer={null}
+        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+        style={{ top: 20 }}
+        styles={{
+          body: { padding: 0 },
+          mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+        }}
+        centered
+        closable={false}
+        maskClosable={false}
+      >
+        <div ref={modalRef} style={{ background: '#2A2A4A', padding: '40px', textAlign: 'center' }}>
+          <Result
+            status="404"
+            title={<span style={{ color: '#FFD700' }}>NPC를 찾을 수 없습니다</span>}
+            subTitle={<span style={{ color: '#ffffff' }}>요청하신 NPC 정보가 존재하지 않습니다.</span>}
+            extra={
+              <Button 
+                key="close" 
+                onClick={onClose}
+                style={{
+                  background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                  border: 'none',
+                  color: '#000000',
+                  fontWeight: 'bold'
+                }}
+              >
+                닫기
+              </Button>
+            }
+          />
+        </div>
+      </Modal>
+    );
+  }
+
+  // 정상 상태 - 메이플 툴팁 표시
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
+      style={{ top: 20 }}
+      styles={{
+        body: { 
+          padding: 0,
+          background: 'transparent'
+        },
+        content: {
+          background: 'transparent',
+          boxShadow: 'none'
+        },
+        mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
+      }}
+      centered
+      closable={false}
+      maskClosable={false}
+    >
+      <div ref={modalRef} style={{ 
+        maxHeight: '90vh', 
+        overflowY: 'auto',
+        background: 'transparent'
+      }}>
+        <NPCMapleTooltip 
+          npc={npc} 
+          onClose={onClose}
+        />
+      </div>
     </Modal>
   );
 };
