@@ -136,32 +136,47 @@ export const FlipCard: React.FC<FlipCardProps> = ({
         style={{ 
           height: '100%',
           cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
         onClick={onClick}
       >
-        <div style={{ 
-          fontSize: 'clamp(32px, 8vw, 48px)', 
-          color, 
-          marginBottom: 'clamp(8px, 2vw, 16px)' 
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          width: '100%',
+          padding: '20px'
         }}>
-          {icon}
+          <div style={{ 
+            fontSize: 'clamp(32px, 8vw, 48px)', 
+            color, 
+            marginBottom: 'clamp(8px, 2vw, 16px)' 
+          }}>
+            {icon}
+          </div>
+          <Title 
+            level={4} 
+            style={{ 
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              marginBottom: 'clamp(8px, 2vw, 16px)',
+              margin: 0
+            }}
+          >
+            {title}
+          </Title>
+          <Paragraph style={{ 
+            marginTop: 'clamp(8px, 2vw, 16px)',
+            fontSize: 'clamp(12px, 3vw, 14px)',
+            lineHeight: '1.4',
+            marginBottom: 0
+          }}>
+            {description}
+          </Paragraph>
         </div>
-        <Title 
-          level={4} 
-          style={{ 
-            fontSize: 'clamp(16px, 4vw, 20px)',
-            marginBottom: 'clamp(8px, 2vw, 16px)'
-          }}
-        >
-          {title}
-        </Title>
-        <Paragraph style={{ 
-          marginTop: 'clamp(8px, 2vw, 16px)',
-          fontSize: 'clamp(12px, 3vw, 14px)',
-          lineHeight: '1.4'
-        }}>
-          {description}
-        </Paragraph>
       </Card>
     );
   }
@@ -194,31 +209,46 @@ export const FlipCard: React.FC<FlipCardProps> = ({
             height: '100%',
             backfaceVisibility: 'hidden',
             cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          <div style={{ 
-            fontSize: 'clamp(32px, 8vw, 48px)', 
-            color, 
-            marginBottom: 'clamp(8px, 2vw, 16px)' 
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            width: '100%',
+            padding: '20px'
           }}>
-            {icon}
+            <div style={{ 
+              fontSize: 'clamp(32px, 8vw, 48px)', 
+              color, 
+              marginBottom: 'clamp(8px, 2vw, 16px)' 
+            }}>
+              {icon}
+            </div>
+            <Title 
+              level={4} 
+              style={{ 
+                fontSize: 'clamp(16px, 4vw, 20px)',
+                marginBottom: 'clamp(8px, 2vw, 16px)',
+                margin: 0
+              }}
+            >
+              {title}
+            </Title>
+            <Paragraph style={{ 
+              marginTop: 'clamp(8px, 2vw, 16px)',
+              fontSize: 'clamp(12px, 3vw, 14px)',
+              lineHeight: '1.4',
+              marginBottom: 0
+            }}>
+              {description}
+            </Paragraph>
           </div>
-          <Title 
-            level={4} 
-            style={{ 
-              fontSize: 'clamp(16px, 4vw, 20px)',
-              marginBottom: 'clamp(8px, 2vw, 16px)'
-            }}
-          >
-            {title}
-          </Title>
-          <Paragraph style={{ 
-            marginTop: 'clamp(8px, 2vw, 16px)',
-            fontSize: 'clamp(12px, 3vw, 14px)',
-            lineHeight: '1.4'
-          }}>
-            {description}
-          </Paragraph>
         </Card>
 
         {/* 뒷면 */}

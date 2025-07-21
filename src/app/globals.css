@@ -503,6 +503,23 @@ body.modal-open {
   color: inherit;
 }
 
+/* 플립 카드 중앙 정렬 */
+.flip-card-front .ant-card-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flip-card-back .ant-card-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* 모바일 페이지네이션 최적화 */
 @media (max-width: 768px) {
   .ant-pagination {
