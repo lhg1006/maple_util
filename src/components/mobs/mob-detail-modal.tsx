@@ -261,6 +261,7 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
       centered
       closable={false}
       maskClosable={false}
+      className="maple-tooltip-modal"
     >
       <div ref={modalRef} style={{ 
         maxHeight: '90vh', 

@@ -376,13 +376,13 @@ body.modal-open {
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
 }
 
-/* 몬스터 모달 투명 배경 처리 */
-.ant-modal .ant-modal-content {
+/* 메이플 툴팁 모달만 투명 배경 처리 */
+.ant-modal.maple-tooltip-modal .ant-modal-content {
   background: transparent !important;
   box-shadow: none !important;
 }
 
-.ant-modal .ant-modal-body {
+.ant-modal.maple-tooltip-modal .ant-modal-body {
   background: transparent !important;
 }
 

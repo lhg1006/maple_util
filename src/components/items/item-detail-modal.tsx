@@ -179,6 +179,7 @@ export function ItemDetailModal({ item, open, onClose, loading = false }: ItemDe
       destroyOnHidden={true}
       keyboard={true} // ESC 키 지원
       focusTriggerAfterClose={false}
+      className="maple-tooltip-modal"
       styles={{
         body: { 
           padding: typeof window !== 'undefined' && window.innerWidth <= 768 ? '10px' : 0,

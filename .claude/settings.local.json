@@ -80,7 +80,8 @@
       "Bash(npm test:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm audit:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(PORT=3000 npm run dev)"
     ],
     "deny": []
   }

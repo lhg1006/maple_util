@@ -139,11 +139,27 @@ export const FlipCard: React.FC<FlipCardProps> = ({
         }}
         onClick={onClick}
       >
-        <div style={{ fontSize: '48px', color, marginBottom: '16px' }}>
+        <div style={{ 
+          fontSize: 'clamp(32px, 8vw, 48px)', 
+          color, 
+          marginBottom: 'clamp(8px, 2vw, 16px)' 
+        }}>
           {icon}
         </div>
-        <Title level={4}>{title}</Title>
-        <Paragraph style={{ marginTop: '16px' }}>
+        <Title 
+          level={4} 
+          style={{ 
+            fontSize: 'clamp(16px, 4vw, 20px)',
+            marginBottom: 'clamp(8px, 2vw, 16px)'
+          }}
+        >
+          {title}
+        </Title>
+        <Paragraph style={{ 
+          marginTop: 'clamp(8px, 2vw, 16px)',
+          fontSize: 'clamp(12px, 3vw, 14px)',
+          lineHeight: '1.4'
+        }}>
           {description}
         </Paragraph>
       </Card>
@@ -180,11 +196,27 @@ export const FlipCard: React.FC<FlipCardProps> = ({
             cursor: 'pointer',
           }}
         >
-          <div style={{ fontSize: '48px', color, marginBottom: '16px' }}>
+          <div style={{ 
+            fontSize: 'clamp(32px, 8vw, 48px)', 
+            color, 
+            marginBottom: 'clamp(8px, 2vw, 16px)' 
+          }}>
             {icon}
           </div>
-          <Title level={4}>{title}</Title>
-          <Paragraph style={{ marginTop: '16px' }}>
+          <Title 
+            level={4} 
+            style={{ 
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              marginBottom: 'clamp(8px, 2vw, 16px)'
+            }}
+          >
+            {title}
+          </Title>
+          <Paragraph style={{ 
+            marginTop: 'clamp(8px, 2vw, 16px)',
+            fontSize: 'clamp(12px, 3vw, 14px)',
+            lineHeight: '1.4'
+          }}>
             {description}
           </Paragraph>
         </Card>
@@ -204,26 +236,31 @@ export const FlipCard: React.FC<FlipCardProps> = ({
           }}
         >
           {isLoading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', padding: 'clamp(20px, 5vw, 40px)' }}>
               <div className="loading-spinner" style={{
-                width: '40px',
-                height: '40px',
+                width: 'clamp(30px, 6vw, 40px)',
+                height: 'clamp(30px, 6vw, 40px)',
                 border: `3px solid ${color}30`,
                 borderTop: `3px solid ${color}`,
                 borderRadius: '50%',
                 margin: '0 auto',
                 animation: 'spin 1s linear infinite',
               }} />
-              <Text style={{ display: 'block', marginTop: '16px', color: '#666' }}>
+              <Text style={{ 
+                display: 'block', 
+                marginTop: 'clamp(8px, 2vw, 16px)', 
+                color: '#666',
+                fontSize: 'clamp(11px, 2.5vw, 13px)'
+              }}>
                 정보를 불러오는 중...
               </Text>
             </div>
           ) : randomData ? (
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', padding: 'clamp(8px, 2vw, 16px)' }}>
               {randomData.image && (
                 <div style={{ 
-                  height: '80px', 
-                  marginBottom: '16px',
+                  height: 'clamp(60px, 12vw, 80px)', 
+                  marginBottom: 'clamp(8px, 2vw, 16px)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -243,41 +280,63 @@ export const FlipCard: React.FC<FlipCardProps> = ({
                   />
                 </div>
               )}
-              <Title level={5} style={{ color, marginBottom: '8px' }}>
+              <Title 
+                level={5} 
+                style={{ 
+                  color, 
+                  marginBottom: 'clamp(4px, 1vw, 8px)',
+                  fontSize: 'clamp(14px, 3vw, 16px)'
+                }}
+              >
                 {randomData.name}
               </Title>
               {randomData.level && (
-                <Text style={{ display: 'block', marginBottom: '4px' }}>
+                <Text style={{ 
+                  display: 'block', 
+                  marginBottom: 'clamp(2px, 0.5vw, 4px)',
+                  fontSize: 'clamp(11px, 2.5vw, 13px)'
+                }}>
                   Lv.{randomData.level}
                 </Text>
               )}
               {randomData.location && (
-                <Text style={{ display: 'block', fontSize: '12px', color: '#666' }}>
+                <Text style={{ 
+                  display: 'block', 
+                  fontSize: 'clamp(10px, 2vw, 12px)', 
+                  color: '#666' 
+                }}>
                   📍 {randomData.location}
                 </Text>
               )}
               {randomData.description && (
                 <Paragraph 
                   ellipsis={{ rows: 2 }} 
-                  style={{ fontSize: '12px', marginTop: '8px' }}
+                  style={{ 
+                    fontSize: 'clamp(10px, 2vw, 12px)', 
+                    marginTop: 'clamp(4px, 1vw, 8px)',
+                    lineHeight: '1.3'
+                  }}
                 >
                   {randomData.description}
                 </Paragraph>
               )}
               <div style={{ 
                 position: 'absolute', 
-                bottom: '12px', 
+                bottom: 'clamp(8px, 2vw, 12px)', 
                 left: 0, 
                 right: 0,
-                fontSize: '12px',
+                fontSize: 'clamp(10px, 2vw, 12px)',
                 color: '#999'
               }}>
                 클릭하여 더 보기 →
               </div>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <Text style={{ color: '#666' }}>
+            <div style={{ textAlign: 'center', padding: 'clamp(20px, 5vw, 40px)' }}>
+              <Text style={{ 
+                color: '#666',
+                fontSize: 'clamp(11px, 2.5vw, 13px)'
+              }}>
                 정보를 불러올 수 없습니다
               </Text>
             </div>

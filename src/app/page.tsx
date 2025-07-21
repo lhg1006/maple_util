@@ -29,7 +29,7 @@ export default function Home() {
 
         <Row gutter={[24, 24]} justify="center" style={{ width: '100%', margin: 0 }}>
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-            <div style={{ height: '280px' }}>
+            <div style={{ height: 'clamp(200px, 25vw, 280px)' }}>
               <FlipCard
                 title="아이템 정보"
                 description="다양한 아이템의 상세 정보와 이미지를 확인할 수 있습니다."
@@ -42,7 +42,7 @@ export default function Home() {
           </Col>
           
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-            <div style={{ height: '280px' }}>
+            <div style={{ height: 'clamp(200px, 25vw, 280px)' }}>
               <FlipCard
                 title="NPC 정보"
                 description="게임 내 모든 NPC의 정보와 위치를 검색할 수 있습니다."
@@ -55,7 +55,7 @@ export default function Home() {
           </Col>
           
           <Col xs={24} sm={24} md={8} lg={8} xl={8}>
-            <div style={{ height: '280px' }}>
+            <div style={{ height: 'clamp(200px, 25vw, 280px)' }}>
               <FlipCard
                 title="몬스터 정보"
                 description="몬스터의 능력치와 드롭 아이템 정보를 확인하세요."

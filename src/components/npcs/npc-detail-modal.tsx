@@ -223,6 +223,7 @@ export const NPCDetailModal: React.FC<NPCDetailModalProps> = ({ npcId, open, onC
       centered
       closable={false}
       maskClosable={false}
+      className="maple-tooltip-modal"
     >
       <div ref={modalRef} style={{ 
         maxHeight: '90vh', 
