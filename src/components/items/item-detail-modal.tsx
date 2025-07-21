@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Modal, Spin, Button, Result } from 'antd';
 import { MapleItem } from '@/types/maplestory';
 import { useItemStats } from '@/hooks/use-item-stats';

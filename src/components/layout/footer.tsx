@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Layout, Typography, Space, Divider, Button } from 'antd';
-import { LinkOutlined, DatabaseOutlined, ExclamationCircleOutlined, CopyrightOutlined } from '@ant-design/icons';
+import { Layout, Typography, Space, Button } from 'antd';
+import { DatabaseOutlined, ExclamationCircleOutlined, CopyrightOutlined } from '@ant-design/icons';
 import { CopyrightNotice } from '../legal/copyright-notice';
 
 const { Footer: AntFooter } = Layout;

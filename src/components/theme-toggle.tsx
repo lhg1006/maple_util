@@ -17,7 +17,7 @@ export const ThemeToggle: React.FC = () => {
         size="large"
       />
     );
-  } catch (error) {
+  } catch {
     return (
       <Button
         type="text"

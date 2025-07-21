@@ -104,8 +104,6 @@ export const MobList: React.FC<MobListProps> = ({ mobs, loading = false, onMobCl
                     icon: `https://maplestory.io/api/KMS/389/mob/${mob.id}/render/stand`,
                     meta: {
                       level: mob.level,
-                      hp: mob.hp,
-                      exp: mob.exp,
                     }
                   }}
                   size="small"

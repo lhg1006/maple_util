@@ -409,14 +409,14 @@ export class MapleStoryAPI {
         return [];
       }
       
-      return mobs.map((mob: any) => ({
-        id: mob.id,
-        name: mob.name || `Mob ${mob.id}`,
-        level: mob.level || null,
-        hp: mob.hp || null,
-        mp: mob.mp || null,
-        exp: mob.exp || null,
-      }));
+      return mobs
+        .filter((mob: any) => mob.name) // 이름이 있는 몬스터만 필터링
+        .map((mob: any) => ({
+          id: mob.id,
+          name: mob.name,
+          level: mob.level || 0,
+          // API에서 실제로 제공하지 않는 필드들 제거
+        }));
     } catch (error) {
       console.error('Failed to fetch mobs:', error);
       throw error;

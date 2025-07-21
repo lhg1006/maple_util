@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  // manifest: "/manifest.json", // 임시 비활성화
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },

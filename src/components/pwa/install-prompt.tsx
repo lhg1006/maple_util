@@ -93,7 +93,7 @@ export function InstallPrompt({ onClose, compact = false }: InstallPromptProps) 
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <div>
           <Title level={4} style={{ margin: 0 }}>
-            메이플스토리 유틸리티를 앱으로 설치하세요
+            메이플스토리 데이터 뷰어를 앱으로 설치하세요
           </Title>
           <Paragraph style={{ margin: '8px 0' }}>
             홈 화면에 추가하여 더 빠르게 접근하고 오프라인에서도 사용할 수 있습니다.

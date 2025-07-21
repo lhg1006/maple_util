@@ -114,7 +114,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </Title>
           {!collapsed && (
             <p style={{ margin: '4px 0 0', color: '#ffffff', fontSize: '12px', opacity: 0.9 }}>
-              유틸리티
+              데이터 뷰어
             </p>
           )}
         </div>

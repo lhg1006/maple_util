@@ -18,7 +18,7 @@ export default function Home() {
       <div className="space-y-6">
         <InstallPrompt />
         <div className="text-center mb-8">
-          <Title level={1}>게임 정보 유틸리티</Title>
+          <Title level={1}>메이플스토리 데이터 뷰어</Title>
           <Paragraph className="text-lg">
             게임 정보를 검색하고 즐겨찾기할 수 있습니다.
           </Paragraph>

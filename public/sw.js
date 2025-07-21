@@ -175,7 +175,7 @@ async function handleStaticRequest(request) {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>오프라인 - 메이플스토리 유틸리티</title>
+          <title>메이플스토리 데이터 뷰어</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <style>
@@ -285,7 +285,7 @@ self.addEventListener('push', (event) => {
     
     event.waitUntil(
       self.registration.showNotification(
-        data.title || '메이플스토리 유틸리티',
+        data.title || '메이플스토리 데이터 뷰어',
         options
       )
     );

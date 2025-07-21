@@ -2,7 +2,6 @@
 
 import { Card, Typography } from 'antd';
 import { ReactNode, useState, useEffect } from 'react';
-import Image from 'next/image';
 import { mapleAPI } from '@/lib/api';
 
 const { Title, Paragraph, Text } = Typography;
