@@ -111,29 +111,27 @@ export const MobDetailModal: React.FC<MobDetailModalProps> = ({ mobId, open, onC
     }
   }, [open, mobId, isLoadingMob, error]);
 
-  // 로딩 상태 처리
+  // 로딩 상태 처리 - 딤 배경 + 로딩바만 표시
   if (loading || isLoadingMob) {
     return (
       <Modal
         open={open}
         onCancel={onClose}
         footer={null}
-        width={{ xs: '100vw', sm: '90vw', md: '1000px' }}
-        style={{ top: 20 }}
+        closable={false}
+        maskClosable={false}
         styles={{
-          body: { padding: 0 },
+          body: { padding: 0, background: 'transparent' },
+          content: { background: 'transparent', boxShadow: 'none' },
           mask: { backgroundColor: 'rgba(0, 0, 0, 0.8)' }
         }}
         centered
-        closable={false}
-        maskClosable={false}
+        width={0}
       >
-        <div ref={modalRef} style={{ 
+        <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '400px',
-          background: '#2A2A4A'
+          alignItems: 'center'
         }}>
           <Spin 
             size="large" 
