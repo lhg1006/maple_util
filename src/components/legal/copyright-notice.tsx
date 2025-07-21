@@ -18,7 +18,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
       title={
         <Space>
           <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-          <span style={{ color: '#374151' }}>저작권 안내 및 이용약관</span>
+          <span className="text-gray-800 dark:text-gray-100">저작권 안내 및 이용약관</span>
         </Space>
       }
       open={isVisible}
@@ -37,47 +37,47 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
         }
       }}
     >
-      <div style={{ padding: '16px 0' }}>
+      <div style={{ padding: '20px' }}>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div>
+          <div style={{ padding: '0 4px' }}>
             <Title level={4} className="text-red-500 dark:text-red-400">
               <CopyrightOutlined /> 중요한 저작권 안내
             </Title>
-            <Paragraph style={{ color: '#374151' }}>
+            <Paragraph className="text-gray-700 dark:text-gray-200">
               이 웹사이트 이용 시 다음 내용을 숙지해주시기 바랍니다.
             </Paragraph>
           </div>
 
-          <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800">
-            <Title level={5} className="text-red-600 dark:text-red-400" style={{ margin: '0 0 8px 0' }}>
+          <div className="bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800" style={{ padding: '20px' }}>
+            <Title level={5} className="text-red-600 dark:text-red-400" style={{ margin: '0 0 12px 0' }}>
               📋 서비스 정보 및 저작권 안내
             </Title>
             <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }}>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>저작권 소유</strong>: 모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 넥슨코리아에 있습니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비상업적 이용</strong>: 이 서비스는 비상업적 목적으로만 제공되며, 어떠한 수익도 창출하지 않습니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>정보 제공 목적</strong>: 메이플스토리 이용자들의 편의를 위한 정보 제공이 유일한 목적입니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>책임 제한</strong>: 제공되는 정보의 정확성을 보장하지 않으며, 이용으로 인한 손해에 대해 책임지지 않습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}><strong>저작권 소유</strong>: 모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 넥슨코리아에 있습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}><strong>비상업적 이용</strong>: 이 서비스는 비상업적 목적으로만 제공되며, 어떠한 수익도 창출하지 않습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}><strong>정보 제공 목적</strong>: 메이플스토리 이용자들의 편의를 위한 정보 제공이 유일한 목적입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}><strong>책임 제한</strong>: 제공되는 정보의 정확성을 보장하지 않으며, 이용으로 인한 손해에 대해 책임지지 않습니다.</li>
             </ul>
           </div>
 
-          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" style={{ padding: '16px', borderRadius: '6px' }}>
-            <Title level={5} className="text-green-600 dark:text-green-400" style={{ margin: '0 0 8px 0' }}>
+          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md" style={{ padding: '20px' }}>
+            <Title level={5} className="text-green-600 dark:text-green-400" style={{ margin: '0 0 12px 0' }}>
               ℹ️ 이용 시 참고사항
             </Title>
             <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }}>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
-              <li style={{ color: 'inherit', marginBottom: '4px' }}>데이터는 maplestory.io API를 통해 제공받습니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
+              <li style={{ color: 'inherit', marginBottom: '8px', lineHeight: '1.6' }}>데이터는 maplestory.io API를 통해 제공받습니다.</li>
             </ul>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800" style={{ padding: '16px', borderRadius: '6px' }}>
-            <Title level={5} className="text-blue-600 dark:text-blue-400" style={{ margin: '0 0 8px 0' }}>
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md" style={{ padding: '20px' }}>
+            <Title level={5} className="text-blue-600 dark:text-blue-400" style={{ margin: '0 0 12px 0' }}>
               📞 문의 및 신고
             </Title>
-            <Paragraph style={{ margin: 0, color: '#374151' }}>
+            <Paragraph style={{ margin: 0, color: '#374151', lineHeight: '1.6' }}>
               저작권 문제나 기타 문의사항이 있으시면 GitHub Issues를 통해 연락해주세요.
               <br />
               문제가 되는 내용은 즉시 제거하겠습니다.

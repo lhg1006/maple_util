@@ -476,17 +476,31 @@ body.modal-open {
   }
 }
 
-/* 저작권 모달 다크모드 텍스트 가시성 강화 */
-.ant-modal ul li {
+/* 저작권 모달 텍스트 가시성 강화 */
+/* 색깔 배경 내부 요소들은 검정 계열 */
+.bg-red-50 ul li,
+.bg-green-50 ul li,
+.bg-blue-50 ul li {
   color: #374151 !important;
 }
 
+.bg-red-50 .ant-typography,
+.bg-green-50 .ant-typography,
+.bg-blue-50 .ant-typography {
+  color: #374151 !important;
+}
+
+/* 모달 기본 영역은 회색/흰색 계열 */
 .ant-modal .ant-typography {
-  color: #374151 !important;
+  color: #374151;
 }
 
-.ant-modal span {
-  color: #374151 !important;
+.dark .ant-modal .ant-typography {
+  color: #e5e7eb;
+}
+
+.ant-modal-header .ant-modal-title span {
+  color: inherit;
 }
 
 /* 모바일 페이지네이션 최적화 */
