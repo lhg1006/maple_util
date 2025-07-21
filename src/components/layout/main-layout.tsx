@@ -8,8 +8,6 @@ import {
   ShoppingOutlined, 
   UserOutlined, 
   BugOutlined,
-  TeamOutlined,
-  ThunderboltOutlined,
   MenuOutlined,
   SearchOutlined,
   HeartOutlined
@@ -55,16 +53,6 @@ const menuItems = [
     key: '/mobs',
     icon: <BugOutlined />,
     label: '몬스터',
-  },
-  {
-    key: '/jobs',
-    icon: <TeamOutlined />,
-    label: '직업',
-  },
-  {
-    key: '/skills',
-    icon: <ThunderboltOutlined />,
-    label: '스킬',
   },
 ];
 
@@ -188,8 +176,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                pathname === '/items' ? '아이템' :
                pathname === '/npcs' ? 'NPC' :
                pathname === '/mobs' ? '몬스터' :
-               pathname === '/jobs' ? '직업' :
-               pathname === '/skills' ? '스킬' : ''}
+ ''}
             </Title>
           </Space>
           <ThemeToggle />

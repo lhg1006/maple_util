@@ -110,45 +110,6 @@ export const useMapleMob = (id: number) => {
   });
 };
 
-export const useMapleJob = (id: number, enabled: boolean = true) => {
-  return useQuery({
-    queryKey: ['job', id],
-    queryFn: async () => {
-      const response = await fetch('/jobs.json');
-      if (!response.ok) {
-        throw new Error('직업 데이터를 불러올 수 없습니다');
-      }
-      const jobs = await response.json();
-      const job = jobs.find((j: any) => j.id === id);
-      if (!job) {
-        throw new Error(`직업 ID ${id}를 찾을 수 없습니다`);
-      }
-      return job;
-    },
-    enabled: enabled && !!id,
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
-  });
-};
-
-export const useMapleSkill = (id: number, enabled: boolean = true) => {
-  return useQuery({
-    queryKey: ['skill', id],
-    queryFn: async () => {
-      const response = await fetch('/skills.json');
-      if (!response.ok) {
-        throw new Error('스킬 데이터를 불러올 수 없습니다');
-      }
-      const skills = await response.json();
-      const skill = skills.find((s: any) => s.id === id);
-      if (!skill) {
-        throw new Error(`스킬 ID ${id}를 찾을 수 없습니다`);
-      }
-      return skill;
-    },
-    enabled: enabled && !!id,
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
-  });
-};
 
 export const useSearchItems = (query: string, enabled: boolean = true) => {
   return useQuery({
@@ -260,38 +221,3 @@ export const useSearchMobs = (query: string, enabled: boolean = true) => {
   });
 };
 
-// Jobs hooks
-export const useJobs = () => {
-  return useQuery({
-    queryKey: ['jobs'],
-    queryFn: async () => {
-      console.log('🎯 정적 직업 데이터 로딩...');
-      const response = await fetch('/jobs.json');
-      if (!response.ok) {
-        throw new Error('직업 데이터를 불러올 수 없습니다');
-      }
-      const jobs = await response.json();
-      console.log(`✅ 정적 직업 데이터 로딩 완료: ${jobs.length}개 직업`);
-      return jobs;
-    },
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
-  });
-};
-
-// Skills hooks
-export const useSkills = () => {
-  return useQuery({
-    queryKey: ['skills'],
-    queryFn: async () => {
-      console.log('🎯 정적 스킬 데이터 로딩...');
-      const response = await fetch('/skills.json');
-      if (!response.ok) {
-        throw new Error('스킬 데이터를 불러올 수 없습니다');
-      }
-      const skills = await response.json();
-      console.log(`✅ 정적 스킬 데이터 로딩 완료: ${skills.length}개 스킬`);
-      return skills;
-    },
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 캐시 (정적 데이터)
-  });
-};

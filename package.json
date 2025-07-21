@@ -13,8 +13,7 @@
     "generate-data": "node scripts/generate-data.js",
     "generate-complete": "node scripts/generate-complete-data.js",
     "generate-maps": "node scripts/generate-maps-data.js",
-    "analyze-maps": "node scripts/analyze-maps-data.js",
-    "fix-skill-duplicates": "node scripts/fix-skill-duplicates.js"
+    "analyze-maps": "node scripts/analyze-maps-data.js"
   },
   "dependencies": {
     "@ant-design/colors": "^7.2.1",

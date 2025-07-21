@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Row, Col, Typography, Space } from 'antd';
-import { ShoppingOutlined, UserOutlined, BugOutlined, TeamOutlined, SearchOutlined } from '@ant-design/icons';
+import { ShoppingOutlined, UserOutlined, BugOutlined, SearchOutlined } from '@ant-design/icons';
 import { MainLayout } from '@/components/layout/main-layout';
 import { useRouter } from 'next/navigation';
 import { FlipCard } from '@/components/home/flip-card';
@@ -27,9 +27,9 @@ export default function Home() {
           </Paragraph>
         </div>
 
-        <Row gutter={[16, 16]} style={{ width: '100%', margin: 0 }}>
-          <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <div style={{ height: '240px' }}>
+        <Row gutter={[24, 24]} justify="center" style={{ width: '100%', margin: 0 }}>
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <div style={{ height: '280px' }}>
               <FlipCard
                 title="아이템 정보"
                 description="다양한 아이템의 상세 정보와 이미지를 확인할 수 있습니다."
@@ -41,8 +41,8 @@ export default function Home() {
             </div>
           </Col>
           
-          <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <div style={{ height: '240px' }}>
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <div style={{ height: '280px' }}>
               <FlipCard
                 title="NPC 정보"
                 description="게임 내 모든 NPC의 정보와 위치를 검색할 수 있습니다."
@@ -54,8 +54,8 @@ export default function Home() {
             </div>
           </Col>
           
-          <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <div style={{ height: '240px' }}>
+          <Col xs={24} sm={24} md={8} lg={8} xl={8}>
+            <div style={{ height: '280px' }}>
               <FlipCard
                 title="몬스터 정보"
                 description="몬스터의 능력치와 드롭 아이템 정보를 확인하세요."
@@ -66,27 +66,14 @@ export default function Home() {
               />
             </div>
           </Col>
-          
-          <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-            <div style={{ height: '240px' }}>
-              <FlipCard
-                title="직업 & 스킬"
-                description="모든 직업의 스킬 트리와 상세 정보를 살펴보세요."
-                icon={<TeamOutlined />}
-                color="#1890ff"
-                onClick={() => router.push('/jobs')}
-                type="job"
-              />
-            </div>
-          </Col>
         </Row>
 
-        <Row gutter={[16, 16]} className="mt-8" style={{ width: '100%', margin: '32px 0 0 0' }}>
-          <Col xs={24} md={24} lg={8} xl={8}>
+        <Row gutter={[24, 24]} className="mt-8" style={{ width: '100%', margin: '48px 0 0 0' }}>
+          <Col xs={24} md={12} lg={8} xl={8}>
             <FavoritesList maxItems={5} />
           </Col>
           
-          <Col xs={24} md={24} lg={8} xl={8}>
+          <Col xs={24} md={12} lg={8} xl={8}>
             <Card title="최근 업데이트" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>
@@ -105,7 +92,7 @@ export default function Home() {
             </Card>
           </Col>
           
-          <Col xs={24} md={24} lg={8} xl={8}>
+          <Col xs={24} md={12} lg={8} xl={8}>
             <Card title="빠른 시작" className="h-full">
               <Space direction="vertical" size="middle" className="w-full">
                 <div>
