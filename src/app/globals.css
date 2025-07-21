@@ -492,6 +492,10 @@ body.modal-open {
 
 /* 모달 기본 영역은 회색/흰색 계열 */
 .ant-modal .ant-typography {
+  color: #374151;
+}
+
+.dark .ant-modal .ant-typography {
   color: #ffffffd9;
 }
 
