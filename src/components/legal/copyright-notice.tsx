@@ -18,7 +18,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
       title={
         <Space>
           <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-          <span>저작권 안내 및 이용약관</span>
+          <span style={{ color: '#374151' }}>저작권 안내 및 이용약관</span>
         </Space>
       }
       open={isVisible}
@@ -43,7 +43,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={4} className="text-red-500 dark:text-red-400">
               <CopyrightOutlined /> 중요한 저작권 안내
             </Title>
-            <Paragraph className="text-gray-700 dark:text-gray-300">
+            <Paragraph style={{ color: '#374151' }}>
               이 웹사이트 이용 시 다음 내용을 숙지해주시기 바랍니다.
             </Paragraph>
           </div>
@@ -52,7 +52,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={5} className="text-red-600 dark:text-red-400" style={{ margin: '0 0 8px 0' }}>
               📋 서비스 정보 및 저작권 안내
             </Title>
-            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }} className="dark:text-gray-300">
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }}>
               <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비공식 서비스</strong>: 이 사이트는 넥슨코리아와 무관한 개인이 운영하는 비공식 서비스입니다.</li>
               <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>저작권 소유</strong>: 모든 메이플스토리 관련 데이터, 이미지, 아이콘의 저작권은 넥슨코리아에 있습니다.</li>
               <li style={{ color: 'inherit', marginBottom: '4px' }}><strong>비상업적 이용</strong>: 이 서비스는 비상업적 목적으로만 제공되며, 어떠한 수익도 창출하지 않습니다.</li>
@@ -65,7 +65,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={5} className="text-green-600 dark:text-green-400" style={{ margin: '0 0 8px 0' }}>
               ℹ️ 이용 시 참고사항
             </Title>
-            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }} className="dark:text-gray-300">
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#374151' }}>
               <li style={{ color: 'inherit', marginBottom: '4px' }}>본 사이트는 게임 데이터 조회를 위한 도구입니다.</li>
               <li style={{ color: 'inherit', marginBottom: '4px' }}>넥슨코리아의 지적재산권을 존중하며 운영됩니다.</li>
               <li style={{ color: 'inherit', marginBottom: '4px' }}>공식 서비스가 아닌 개인 운영 서비스임을 안내드립니다.</li>
@@ -77,7 +77,7 @@ export function CopyrightNotice({ isVisible, onClose }: CopyrightNoticeProps) {
             <Title level={5} className="text-blue-600 dark:text-blue-400" style={{ margin: '0 0 8px 0' }}>
               📞 문의 및 신고
             </Title>
-            <Paragraph className="text-gray-700 dark:text-gray-300" style={{ margin: 0 }}>
+            <Paragraph style={{ margin: 0, color: '#374151' }}>
               저작권 문제나 기타 문의사항이 있으시면 GitHub Issues를 통해 연락해주세요.
               <br />
               문제가 되는 내용은 즉시 제거하겠습니다.

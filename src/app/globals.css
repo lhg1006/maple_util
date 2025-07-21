@@ -477,12 +477,16 @@ body.modal-open {
 }
 
 /* 저작권 모달 다크모드 텍스트 가시성 강화 */
-.dark .ant-modal ul li {
-  color: #d1d5db !important;
+.ant-modal ul li {
+  color: #374151 !important;
 }
 
-.dark .ant-modal .ant-typography {
-  color: #d1d5db !important;
+.ant-modal .ant-typography {
+  color: #374151 !important;
+}
+
+.ant-modal span {
+  color: #374151 !important;
 }
 
 /* 모바일 페이지네이션 최적화 */
