@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { MapleMob } from '@/types/maplestory';
 
+interface ExtendedMob extends MapleMob {
+  boss?: boolean;
+  isBodyAttack?: boolean;
+  [key: string]: any;
+}
+
 interface MobMapleTooltipProps {
-  mob: MapleMob;
+  mob: ExtendedMob;
   onClose?: () => void;
 }
 
@@ -58,10 +64,10 @@ export const MobMapleTooltip: React.FC<MobMapleTooltipProps> = ({ mob, onClose }
   const getMobTypeTags = () => {
     const tags = [];
     if (mob.boss) tags.push({ label: '보스 몬스터', color: 'stat-legendary' });
-    if (mob.isBodyAttack !== undefined) {
+    if (mob.meta?.isBodyAttack !== undefined) {
       tags.push({ 
-        label: mob.isBodyAttack ? '근접공격' : '원거리공격', 
-        color: mob.isBodyAttack ? 'stat-negative' : 'stat-special' 
+        label: mob.meta.isBodyAttack ? '근접공격' : '원거리공격', 
+        color: mob.meta.isBodyAttack ? 'stat-negative' : 'stat-special' 
       });
     }
     return tags;
@@ -193,12 +199,12 @@ export const MobMapleTooltip: React.FC<MobMapleTooltipProps> = ({ mob, onClose }
           <div className="maple-tooltip-description">
             <div className="maple-tooltip-set-title">출현 위치</div>
             <div style={{ marginTop: '8px', fontSize: '12px' }}>
-              {mob.foundAt.slice(0, 5).map((mapId, index) => (
+              {mob.foundAt?.slice(0, 5).map((mapId, index) => (
                 <span key={index} style={{ color: '#00ffff' }}>
-                  맵 {mapId}{index < Math.min(4, mob.foundAt.length - 1) ? ', ' : ''}
+                  맵 {mapId}{index < Math.min(4, mob.foundAt!.length - 1) ? ', ' : ''}
                 </span>
               ))}
-              {mob.foundAt.length > 5 && (
+              {mob.foundAt && mob.foundAt.length > 5 && (
                 <span style={{ color: '#cccccc' }}>
                   {' '}외 {mob.foundAt.length - 5}개 맵
                 </span>
