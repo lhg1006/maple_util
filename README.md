@@ -4,6 +4,18 @@
 
 메이플스토리의 아이템, NPC, 몬스터, 직업, 스킬 등 다양한 게임 정보를 편리하게 조회할 수 있는 웹 도구입니다. [maplestory.io](https://maplestory.io) API를 활용하여 실시간 데이터를 제공합니다.
 
+## 🌐 라이브 데모
+
+**👉 [https://maple-data-viewer.vercel.app/](https://maple-data-viewer.vercel.app/)**
+
+실제 동작하는 데모를 확인하실 수 있습니다. 모든 기능이 구현되어 있으며, 반응형 디자인을 직접 체험해보세요!
+<table>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/lhg1006/portfolio-images/f043cd42721ed3f6ed943e0c20920392ec022443/images/project/mdv-3.gif" width="100%" alt="아이템정보"></td>
+    <td><img src="https://raw.githubusercontent.com/lhg1006/portfolio-images/f043cd42721ed3f6ed943e0c20920392ec022443/images/project/mdv-2.gif" width="100%" alt="몬스터정보"></td>
+  </tr>
+</table>
+
 ## ✨ 주요 기능
 
 - **🔍 통합 검색**: 아이템, NPC, 몬스터를 한 번에 검색
