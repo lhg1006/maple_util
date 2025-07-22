@@ -81,7 +81,9 @@
       "Bash(npm uninstall:*)",
       "Bash(npm audit:*)",
       "Bash(npm run test:*)",
-      "Bash(PORT=3000 npm run dev)"
+      "Bash(PORT=3000 npm run dev)",
+      "WebFetch(domain:www.nexon.com)",
+      "WebFetch(domain:m.nexon.com)"
     ],
     "deny": []
   }
